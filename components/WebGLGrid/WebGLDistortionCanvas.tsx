@@ -58,10 +58,10 @@ export default function WebGLDistortionCanvas() {
       });
     };
 
-    const resizeObserver = new ResizeObserver(updateCache);
-    resizeObserver.observe(document.body);
-    // Initial cache
+    // Initial cache - wait for layout to settle (e.g., fonts)
     setTimeout(updateCache, 100);
+    setTimeout(updateCache, 500);
+    setTimeout(updateCache, 2000);
 
     const handleResize = () => {
       const width = window.innerWidth;
