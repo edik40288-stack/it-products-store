@@ -1,10 +1,11 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Message } from '@/types';
 import { CHAT_GREETING_EN, CHAT_GREETING_RU } from '@/data/constants';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 export function useAIChat() {
   const locale = useLocale();
+  const t = useTranslations('chat');
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -28,7 +29,7 @@ export function useAIChat() {
       setIsOpen(true);
       if (detail?.context) {
         setTimeout(() => {
-          addMessage('assistant', `Great choice! Let me help you explore the **${detail.context}** service. What's your current situation?`);
+          addMessage('assistant', t('contextGreeting', { context: detail.context }));
         }, 500);
       }
     };
@@ -84,7 +85,7 @@ export function useAIChat() {
       if (data.leadCollected) setLeadCollected(true);
     } catch {
       setIsTyping(false);
-      addMessage('assistant', "I'm having a connectivity issue. Please email us directly at newbusiness@mindcore.studio 🙏");
+      addMessage('assistant', t('error'));
     }
   };
 

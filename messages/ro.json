@@ -141,9 +141,11 @@
       "task": "Înțeles. Este vorba despre construire de la zero, adăugare de agenți AI sau automatizarea proceselor existente?",
       "stage": "În ce etapă se află proiectul? Concept timpuriu, produs existent sau pregătit pentru scalare?",
       "budget": "Care este orizontul și bugetul aproximativ? (Totul e flexibil, doar orientativ)",
-      "contact": "Excelent! Permit-mi să te conectez cu echipa. Cum te numești și cum este mai bine să te contactăm — Telegram sau email?"
+      "contact": "Excelent! Permiteți-mi să vă conectez cu echipa noastră. Cum vă numiți și cum vă putem contacta (Telegram sau email)?"
     },
-    "success": "Cererea ta a fost trimisă echipei MINDCORE. Vom răspunde în termen de 2 ore lucrătoare. 🚀"
+    "success": "Cererea dumneavoastră a fost trimisă echipei MINDCORE. Vă vom contacta în decurs de 2 ore lucrătoare. 🚀",
+    "error": "Am probleme de conectivitate. Vă rugăm să ne trimiteți un email direct la newbusiness@mindcore.studio 🙏",
+    "contextGreeting": "Alegere excelentă! Permiteți-mi să vă ajut să explorați serviciul **{context}**. Care este situația dumneavoastră actuală?"
   },
   "footer": {
     "slogan": "A booster rocket for digital product teams",

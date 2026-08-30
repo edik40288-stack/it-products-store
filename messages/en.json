@@ -143,7 +143,9 @@
       "budget": "What's your rough timeline and budget range? (No worries if it's flexible)",
       "contact": "Excellent! Let me connect you with our team. What's your name and best way to reach you (Telegram or email)?"
     },
-    "success": "Your request has been sent to the MINDCORE team. We'll be in touch within 2 business hours. 🚀"
+    "success": "Your request has been sent to the MINDCORE team. We'll be in touch within 2 business hours. 🚀",
+    "error": "I'm having a connectivity issue. Please email us directly at newbusiness@mindcore.studio 🙏",
+    "contextGreeting": "Great choice! Let me help you explore the **{context}** service. What's your current situation?"
   },
   "footer": {
     "slogan": "A booster rocket for digital product teams",

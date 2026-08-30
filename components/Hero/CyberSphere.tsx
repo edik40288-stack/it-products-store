@@ -213,8 +213,8 @@ export default function CyberSphere({
         const deltaX = e.clientX - previousMousePosition.x;
         const deltaY = e.clientY - previousMousePosition.y;
         
-        dragVelocityX = deltaX * 0.015;
-        dragVelocityY = deltaY * 0.015;
+        dragVelocityX = deltaX * 0.03;
+        dragVelocityY = deltaY * 0.03;
         
         previousMousePosition = { x: e.clientX, y: e.clientY };
       }
@@ -300,13 +300,13 @@ export default function CyberSphere({
         targetRotY = 0;
       } else {
         // Инвертированное слежение: сфера "смотрит" за курсором + вращение от драга
-        targetRotY = -mouseX * 0.5 + dragRotY; 
-        targetRotX = mouseY * 0.4 + dragRotX;
+        targetRotY = -mouseX * 1.2 + dragRotY; 
+        targetRotX = mouseY * 1.0 + dragRotX;
       }
 
-      // Отзывчивость мыши (было 0.04, стало 0.08 для большей живости)
-      currentRotY += (targetRotY - currentRotY) * 0.08;
-      currentRotX += (targetRotX - currentRotX) * 0.08;
+      // Отзывчивость мыши
+      currentRotY += (targetRotY - currentRotY) * 0.15;
+      currentRotX += (targetRotX - currentRotX) * 0.15;
 
       // Idle float (only if not focused)
       const levitation = props.isFocused ? 0 : Math.sin(time * 1.5) * 0.1;

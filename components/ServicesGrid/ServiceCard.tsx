@@ -42,9 +42,8 @@ export default function ServiceCard({ item, onClick }: ServiceCardProps) {
   const handleClick = useCallback(() => onClick(item), [item, onClick]);
 
   return (
-    <article
-      ref={cardRef}
-      className={`${styles.card} ${isHovered ? styles.cardHovered : ''}`}
+    <div 
+      className={styles.cardWrapper}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onMouseMove={handleMouseMove}
@@ -54,7 +53,11 @@ export default function ServiceCard({ item, onClick }: ServiceCardProps) {
       aria-label={`View ${item.title} service details`}
       onKeyDown={(e) => e.key === 'Enter' && handleClick()}
     >
-      <div className={styles.overlay} />
+      <article
+        ref={cardRef}
+        className={`${styles.card} ${isHovered ? styles.cardHovered : ''}`}
+      >
+        <div className={styles.overlay} />
       
       {/* Content */}
       <div className={styles.content}>
@@ -70,6 +73,7 @@ export default function ServiceCard({ item, onClick }: ServiceCardProps) {
           <span className={styles.cta}>Explore →</span>
         </div>
       </div>
-    </article>
+      </article>
+    </div>
   );
 }

@@ -5,8 +5,10 @@ import { siteConfig } from '@/config/site';
 import styles from './AIChat.module.css';
 
 import { useAIChat } from '@/hooks/useAIChat';
+import { useTranslations } from 'next-intl';
 
 export default function AIChat() {
+  const t = useTranslations('chat');
   const {
     isOpen,
     setIsOpen,
@@ -57,7 +59,7 @@ export default function AIChat() {
           <div className={styles.headerInfo}>
             <span className={styles.headerName}>MINDCORE AI</span>
             <span className={styles.headerStatus}>
-              {isTyping ? 'typing...' : 'Online · powered by OX Alpha'}
+              {isTyping ? t('typing') : 'Online · powered by OX Alpha'}
             </span>
           </div>
         </div>
@@ -84,7 +86,7 @@ export default function AIChat() {
 
           {leadCollected && (
             <div className={styles.successBanner}>
-              ✅ Your info has been sent to the MINDCORE team. We'll be in touch within 2 hours!
+              {t('success')}
             </div>
           )}
 
@@ -97,7 +99,7 @@ export default function AIChat() {
             ref={inputRef}
             type="text"
             className={styles.input}
-            placeholder="Tell me about your project..."
+            placeholder={t('placeholder')}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}

@@ -140,43 +140,44 @@ const TOPIC_COLORS = ['#C9A84C', '#00F0FF', '#B534FF'];
           ))}
         </p>
 
+        {/* Act 3: Analysis Input - Positioned below text */}
+        <div className={styles.analyzeFormWrapper}>
+          <form onSubmit={handleAnalyzeSubmit} className={styles.analyzeForm}>
+            <div className={`${styles.inputWrapper} ${isInputFocused ? styles.inputWrapperFocused : ''}`}>
+              {isScanning ? (
+                <div className={styles.logContainer}>
+                  {logMessages.map((msg, idx) => (
+                    <div key={idx} className={styles.logMessage}>{msg}</div>
+                  ))}
+                </div>
+              ) : (
+                <input
+                  ref={inputRef}
+                  type="text"
+                  placeholder={t('placeholder')}
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onFocus={() => setIsInputFocused(true)}
+                  onBlur={() => setIsInputFocused(false)}
+                  className={styles.analyzeInput}
+                  disabled={isScanning}
+                />
+              )}
+              {!isScanning && (
+                <button 
+                  type="submit" 
+                  className={`${styles.analyzeBtn} ${inputValue.trim() ? styles.analyzeBtnActive : ''}`}
+                  disabled={!inputValue.trim()}
+                >
+                  {t('analyzeBtn')}
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
       </div>
 
-      {/* Act 3: Analysis Input - Positioned at bottom */}
-      <div className={`${styles.analyzeFormWrapper} ${hasStarted ? styles.contentVisible : ''}`}>
-        <form onSubmit={handleAnalyzeSubmit} className={styles.analyzeForm}>
-          <div className={`${styles.inputWrapper} ${isInputFocused ? styles.inputWrapperFocused : ''}`}>
-            {isScanning ? (
-              <div className={styles.logContainer}>
-                {logMessages.map((msg, idx) => (
-                  <div key={idx} className={styles.logMessage}>{msg}</div>
-                ))}
-              </div>
-            ) : (
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder={t('placeholder')}
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onFocus={() => setIsInputFocused(true)}
-                onBlur={() => setIsInputFocused(false)}
-                className={styles.analyzeInput}
-                disabled={isScanning}
-              />
-            )}
-            {!isScanning && (
-              <button 
-                type="submit" 
-                className={`${styles.analyzeBtn} ${inputValue.trim() ? styles.analyzeBtnActive : ''}`}
-                disabled={!inputValue.trim()}
-              >
-                {t('analyzeBtn')}
-              </button>
-            )}
-          </div>
-        </form>
-      </div>
+
 
       {/* Scroll indicator */}
       <div className={`${styles.scrollHint} ${hasStarted ? styles.contentVisible : ''}`} aria-hidden="true">

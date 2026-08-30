@@ -119,8 +119,9 @@
   border: none;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
+  will-change: transform;
 }
-.ctaPrimary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(201,168,76,0.3); }
+.ctaPrimary:hover { transform: translateY(-2px) translateZ(0); box-shadow: 0 12px 32px rgba(201,168,76,0.3); }
 .ctaSecondary {
   padding: 0.85rem 1.5rem;
   color: var(--color-text-muted);

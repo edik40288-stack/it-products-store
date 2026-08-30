@@ -75,6 +75,10 @@ export async function POST(request: NextRequest) {
     // Check if lead is collected
     const leadCollected = detectLeadCollected(messages, reply);
 
+    if (leadCollected) {
+      await sendToTelegram(messages, reply);
+    }
+
     return NextResponse.json({ reply, leadCollected });
 
   } catch (error) {
@@ -122,6 +126,11 @@ function scriptedResponse(messages: Array<{ role: string; content: string }>) {
 
   const leadCollected = step >= 3;
 
+  if (leadCollected) {
+    // We don't await this because we want to respond quickly
+    sendToTelegram(messages, reply);
+  }
+
   return NextResponse.json({ reply, leadCollected, mode: 'scripted' });
 }
 
@@ -142,4 +151,35 @@ function detectLeadCollected(
   const confirmWords = ['send', 'отправлен', 'trimis', 'team', 'команд', 'echipă', '🚀', '✅'];
   const hasConfirm = confirmWords.some((w) => lastReply.toLowerCase().includes(w));
   return userMsgCount >= 3 && hasConfirm;
+}
+
+async function sendToTelegram(messages: Array<{ role: string; content: string }>, lastReply: string) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  
+  if (!token || !chatId) {
+    console.warn('Telegram integration is not configured. Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID.');
+    return;
+  }
+
+  const transcript = messages
+    .filter(m => m.role !== 'system')
+    .map(m => `${m.role === 'user' ? '👤 CLIENT' : '🤖 AI'}:\n${m.content}`)
+    .join('\n\n');
+
+  const text = `🚨 <b>NEW LEAD FROM MINDCORE</b> 🚨\n\n${transcript}\n\n🤖 AI:\n${lastReply}`;
+
+  try {
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        chat_id: chatId, 
+        text: text,
+        parse_mode: 'HTML'
+      }),
+    });
+  } catch (err) {
+    console.error('Error sending lead to Telegram:', err);
+  }
 }
