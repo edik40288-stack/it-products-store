@@ -140,7 +140,10 @@ const TOPIC_COLORS = ['#C9A84C', '#00F0FF', '#B534FF'];
           ))}
         </p>
 
-        {/* Act 3: Analysis Input */}
+      </div>
+
+      {/* Act 3: Analysis Input - Positioned at bottom */}
+      <div className={`${styles.analyzeFormWrapper} ${hasStarted ? styles.contentVisible : ''}`}>
         <form onSubmit={handleAnalyzeSubmit} className={styles.analyzeForm}>
           <div className={`${styles.inputWrapper} ${isInputFocused ? styles.inputWrapperFocused : ''}`}>
             {isScanning ? (

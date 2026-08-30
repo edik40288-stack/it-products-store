@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 import { ServiceItem } from '@/types';
 import styles from './ServiceDetail.module.css';
 import PriceCalculator from './PriceCalculator';
@@ -12,6 +13,7 @@ interface ServiceDetailProps {
 
 export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations('serviceDetail');
 
   useEffect(() => {
     // Entrance animation
@@ -70,22 +72,22 @@ export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
               <div className={styles.prop}>
                 <span className={styles.propIcon}>⚡</span>
                 <div>
-                  <strong>Fast delivery</strong>
-                  <p>We ship MVPs in weeks, not months. Agile sprints with daily updates.</p>
+                  <strong>{t('fastDelivery')}</strong>
+                  <p>{t('fastDeliveryDesc')}</p>
                 </div>
               </div>
               <div className={styles.prop}>
                 <span className={styles.propIcon}>🎯</span>
                 <div>
-                  <strong>Business-first approach</strong>
-                  <p>Every feature tied to a conversion or efficiency metric.</p>
+                  <strong>{t('businessFirst')}</strong>
+                  <p>{t('businessFirstDesc')}</p>
                 </div>
               </div>
               <div className={styles.prop}>
                 <span className={styles.propIcon}>🔧</span>
                 <div>
-                  <strong>Full ownership transfer</strong>
-                  <p>Clean code, documentation, and zero vendor lock-in.</p>
+                  <strong>{t('fullOwnership')}</strong>
+                  <p>{t('fullOwnershipDesc')}</p>
                 </div>
               </div>
             </div>
@@ -107,11 +109,11 @@ export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
                   }, 400);
                 }}
               >
-                Discuss this project →
+                {t('discussProject')}
               </button>
               <a href={`mailto:newbusiness@mindcore.studio?subject=${encodeURIComponent(item.title)}`}
                 className={styles.ctaSecondary}>
-                Send email directly
+                {t('sendEmail')}
               </a>
             </div>
           </div>

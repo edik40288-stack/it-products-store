@@ -213,8 +213,8 @@ export default function CyberSphere({
         const deltaX = e.clientX - previousMousePosition.x;
         const deltaY = e.clientY - previousMousePosition.y;
         
-        dragVelocityX = deltaX * 0.008;
-        dragVelocityY = deltaY * 0.008;
+        dragVelocityX = deltaX * 0.015;
+        dragVelocityY = deltaY * 0.015;
         
         previousMousePosition = { x: e.clientX, y: e.clientY };
       }
@@ -222,10 +222,15 @@ export default function CyberSphere({
     window.addEventListener('mousemove', handleMouseMove);
 
     const handleMouseDown = (e: MouseEvent) => {
+      // Don't drag if clicking an input or button
+      if ((e.target as HTMLElement).tagName.toLowerCase() === 'input' || 
+          (e.target as HTMLElement).tagName.toLowerCase() === 'button') {
+        return;
+      }
       isDragging = true;
       previousMousePosition = { x: e.clientX, y: e.clientY };
     };
-    container.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mousedown', handleMouseDown);
 
     const handleMouseUp = () => {
       isDragging = false;
@@ -349,7 +354,7 @@ export default function CyberSphere({
       // Particle speed (x3 when focused/scanning, x5+ when dragging)
       let targetSpeedMulti = 1.0;
       if (props.isFocused || props.isScanning) targetSpeedMulti = 3.0;
-      if (isSpinning) targetSpeedMulti = Math.max(targetSpeedMulti, 2.0 + dragSpeed * 100.0);
+      if (isSpinning) targetSpeedMulti = Math.max(targetSpeedMulti, 2.0 + dragSpeed * 150.0);
 
       pMat.uniforms.u_speedMulti.value = THREE.MathUtils.lerp(pMat.uniforms.u_speedMulti.value, targetSpeedMulti, 0.05);
       pMat.uniforms.u_time.value = time;
@@ -370,7 +375,7 @@ export default function CyberSphere({
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
-      container.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(rafId);

@@ -65,6 +65,7 @@
   letter-spacing: -0.02em;
   color: var(--color-text);
   margin-bottom: 1rem;
+  min-height: 3.3em;
 }
 
 .headingStatic {
@@ -104,6 +105,20 @@
 }
 
 /* Act 3: Analyze Form */
+.analyzeFormWrapper {
+  position: absolute;
+  bottom: 2rem;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 0 1.5rem;
+  z-index: 10;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1.5s ease 0.5s, transform 1.5s ease 0.5s;
+}
+
 .analyzeForm {
   width: 100%;
   max-width: 480px;
@@ -189,16 +204,7 @@
 
 /* Scroll indicator */
 .scrollHint {
-  position: absolute;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  opacity: 0;
-  transition: opacity 1.5s ease 1.5s;
+  display: none;
 }
 
 .scrollLine {

@@ -160,5 +160,38 @@
   },
   "Contact": {
     "label": "Contact"
+  },
+  "serviceDetail": {
+    "fastDelivery": "Fast delivery",
+    "fastDeliveryDesc": "We ship MVPs in weeks, not months. Agile sprints with daily updates.",
+    "businessFirst": "Business-first approach",
+    "businessFirstDesc": "Every feature tied to a conversion or efficiency metric.",
+    "fullOwnership": "Full ownership transfer",
+    "fullOwnershipDesc": "Clean code, documentation, and zero vendor lock-in.",
+    "discussProject": "Discuss this project →",
+    "sendEmail": "Send email directly"
+  },
+  "priceCalculator": {
+    "title": "💰 Estimate your budget",
+    "projectScope": "Project scope",
+    "includeSupport": "Include ongoing support (+15%)",
+    "estimatedRange": "Estimated range",
+    "note": "Final pricing depends on exact scope. Get a free detailed estimate via our AI consultant.",
+    "options": {
+      "landingPage": "Landing page",
+      "webApp": "Web application",
+      "mobileApp": "Mobile app",
+      "enterprise": "Enterprise platform",
+      "simpleFaq": "Simple FAQ bot",
+      "leadQualifier": "Lead qualifier",
+      "fullNegotiator": "Full AI negotiator",
+      "llmPipeline": "Custom LLM pipeline",
+      "basicCrm": "Basic CRM",
+      "crmAuto": "CRM + automation",
+      "fullErp": "Full ERP",
+      "basic": "Basic",
+      "standard": "Standard",
+      "premium": "Premium"
+    }
   }
 }

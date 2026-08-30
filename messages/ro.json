@@ -30,7 +30,12 @@
         "id": "development",
         "title": "Dezvoltare full-cycle",
         "subtitle": "De la 0 la lansare și suport",
-        "tags": ["React", "Next.js", "Node.js", "AWS"],
+        "tags": [
+          "React",
+          "Next.js",
+          "Node.js",
+          "AWS"
+        ],
         "duration": "4–16 săptămâni",
         "description": "Proiectăm, construim și lansăm produse fullstack — de la MVP la platforme enterprise. Arhitectură, cod, CI/CD și suport incluse."
       },
@@ -38,7 +43,12 @@
         "id": "ai-agents",
         "title": "Negociatori AI & Chatboți",
         "subtitle": "Angajament inteligent cu clienții 24/7",
-        "tags": ["GPT-4o", "NLP", "Telegram", "WhatsApp"],
+        "tags": [
+          "GPT-4o",
+          "NLP",
+          "Telegram",
+          "WhatsApp"
+        ],
         "duration": "2–6 săptămâni",
         "description": "Agenți AI care califică lead-uri, răspund la întrebări și încheie tranzacții — non-stop. Integrați cu CRM-ul și canalele de mesagerie."
       },
@@ -46,7 +56,12 @@
         "id": "crm",
         "title": "CRM personalizat & Digitizare",
         "subtitle": "Logica ta de business, automatizată",
-        "tags": ["CRM", "ERP", "Automatizare", "Analitics"],
+        "tags": [
+          "CRM",
+          "ERP",
+          "Automatizare",
+          "Analitics"
+        ],
         "duration": "6–20 săptămâni",
         "description": "Construim sisteme CRM și de management al afacerilor adaptate logicii tale exacte — nu SaaS generic care te forțează să te adaptezi."
       },
@@ -54,7 +69,12 @@
         "id": "llm-integrations",
         "title": "Integrări LLM & API Connect",
         "subtitle": "Conectăm AI la stack-ul tău",
-        "tags": ["OpenAI", "Claude", "Gemini", "APIs"],
+        "tags": [
+          "OpenAI",
+          "Claude",
+          "Gemini",
+          "APIs"
+        ],
         "duration": "1–4 săptămâni",
         "description": "Conectăm cele mai puternice LLM-uri la instrumentele și fluxurile tale existente — fără a reconstrui infrastructura."
       },
@@ -62,7 +82,12 @@
         "id": "automation",
         "title": "Automatizarea proceselor",
         "subtitle": "Înlocuim munca manuală cu fluxuri inteligente",
-        "tags": ["n8n", "Zapier", "Python", "Webhooks"],
+        "tags": [
+          "n8n",
+          "Zapier",
+          "Python",
+          "Webhooks"
+        ],
         "duration": "1–6 săptămâni",
         "description": "De la fluxuri de email la pipeline-uri complexe — automatizăm rutina, astfel încât echipa ta să se concentreze pe ce contează."
       },
@@ -70,7 +95,12 @@
         "id": "analytics",
         "title": "Audit, analitics & CPA",
         "subtitle": "Transformăm datele în decizii",
-        "tags": ["GA4", "Metrica", "SQL", "BI"],
+        "tags": [
+          "GA4",
+          "Metrica",
+          "SQL",
+          "BI"
+        ],
         "duration": "1–3 săptămâni",
         "description": "Audit profund al conversiilor, analiza pâlniei și dashboard-uri de performanță. Găsim unde pierzi bani și remediem."
       },
@@ -78,7 +108,12 @@
         "id": "redesign",
         "title": "Redesign site-uri & aplicații",
         "subtitle": "Înainte → premium După",
-        "tags": ["Figma", "Motion", "React", "A/B"],
+        "tags": [
+          "Figma",
+          "Motion",
+          "React",
+          "A/B"
+        ],
         "duration": "3–10 săptămâni",
         "description": "Transformăm interfețele învechite în experiențe digitale premium care convertesc mai bine și impresionează utilizatorii."
       },
@@ -86,7 +121,12 @@
         "id": "security",
         "title": "Audit de securitate",
         "subtitle": "Găsim vulnerabilitățile înainte de atacatori",
-        "tags": ["OWASP", "Pentest", "GDPR", "SSL"],
+        "tags": [
+          "OWASP",
+          "Pentest",
+          "GDPR",
+          "SSL"
+        ],
         "duration": "1–2 săptămâni",
         "description": "Evaluare completă a securității aplicațiilor web. Identificăm vulnerabilități critice și oferim un plan prioritizat de remediere."
       }
@@ -120,5 +160,38 @@
   },
   "Contact": {
     "label": "Contact"
+  },
+  "serviceDetail": {
+    "fastDelivery": "Livrare rapidă",
+    "fastDeliveryDesc": "Livrăm MVP-uri în săptămâni, nu luni. Sprinturi Agile cu actualizări zilnice.",
+    "businessFirst": "Abordare orientată spre afaceri",
+    "businessFirstDesc": "Fiecare funcție este legată de o metrică de conversie sau eficiență.",
+    "fullOwnership": "Transfer complet al proprietății",
+    "fullOwnershipDesc": "Cod curat, documentație și independență față de furnizor.",
+    "discussProject": "Discută proiectul →",
+    "sendEmail": "Trimite email direct"
+  },
+  "priceCalculator": {
+    "title": "💰 Estimați bugetul",
+    "projectScope": "Amploarea proiectului",
+    "includeSupport": "Include suport continuu (+15%)",
+    "estimatedRange": "Interval estimat",
+    "note": "Prețul final depinde de cerințele exacte. Obțineți o estimare gratuită detaliată prin consultantul nostru AI.",
+    "options": {
+      "landingPage": "Pagină de aterizare",
+      "webApp": "Aplicație web",
+      "mobileApp": "Aplicație mobilă",
+      "enterprise": "Platformă Enterprise",
+      "simpleFaq": "Bot FAQ simplu",
+      "leadQualifier": "Calificator de lead-uri",
+      "fullNegotiator": "Negociator AI complet",
+      "llmPipeline": "Pipeline LLM personalizat",
+      "basicCrm": "CRM de bază",
+      "crmAuto": "CRM + automatizare",
+      "fullErp": "ERP complet",
+      "basic": "De bază",
+      "standard": "Standard",
+      "premium": "Premium"
+    }
   }
 }

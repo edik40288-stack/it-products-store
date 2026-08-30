@@ -93,6 +93,29 @@ export default function WebGLDistortionCanvas() {
 
       const cards = getCards();
 
+      // Fast layout shift detection (detects font loads, hero jumping, etc.)
+      let needsCacheUpdate = false;
+      if (cards.size > 0) {
+        const firstCardId = cards.keys().next().value;
+        if (firstCardId) {
+          const card = cards.get(firstCardId);
+          const cached = rectCache.get(firstCardId);
+          if (card && cached) {
+            const rect = card.element.getBoundingClientRect();
+            if (
+              Math.abs((rect.top + currentScrollY) - cached.absoluteTop) > 1 || 
+              Math.abs(rect.height - cached.height) > 1
+            ) {
+              needsCacheUpdate = true;
+            }
+          }
+        }
+      }
+
+      if (needsCacheUpdate) {
+        updateCache();
+      }
+
       // Sync DOM to WebGL
       cards.forEach((card, id) => {
         let mesh = meshes.get(id);

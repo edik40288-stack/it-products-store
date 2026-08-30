@@ -160,5 +160,38 @@
   },
   "Contact": {
     "label": "Контакты"
+  },
+  "serviceDetail": {
+    "fastDelivery": "Быстрая доставка",
+    "fastDeliveryDesc": "Выпускаем MVP за недели, а не месяцы. Agile-спринты с ежедневными обновлениями.",
+    "businessFirst": "Бизнес-ориентированный подход",
+    "businessFirstDesc": "Каждая фича привязана к метрике конверсии или эффективности.",
+    "fullOwnership": "Полная передача прав",
+    "fullOwnershipDesc": "Чистый код, документация и отсутствие привязки к вендору.",
+    "discussProject": "Обсудить проект →",
+    "sendEmail": "Написать на email"
+  },
+  "priceCalculator": {
+    "title": "💰 Оценка бюджета",
+    "projectScope": "Объем проекта",
+    "includeSupport": "Включая поддержку (+15%)",
+    "estimatedRange": "Примерный диапазон",
+    "note": "Окончательная цена зависит от точных требований. Получите точную оценку у нашего ИИ-консультанта.",
+    "options": {
+      "landingPage": "Лендинг",
+      "webApp": "Веб-приложение",
+      "mobileApp": "Мобильное приложение",
+      "enterprise": "Корпоративная платформа",
+      "simpleFaq": "Простой FAQ бот",
+      "leadQualifier": "Квалификатор лидов",
+      "fullNegotiator": "ИИ-переговорщик",
+      "llmPipeline": "Кастомный LLM пайплайн",
+      "basicCrm": "Базовая CRM",
+      "crmAuto": "CRM + автоматизация",
+      "fullErp": "Полноценная ERP",
+      "basic": "Базовый",
+      "standard": "Стандартный",
+      "premium": "Премиум"
+    }
   }
 }
