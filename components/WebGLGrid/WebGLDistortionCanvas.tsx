@@ -118,6 +118,10 @@ export default function WebGLDistortionCanvas() {
           // Easing for hover state (smooth transition in and out)
           const targetHover = card.isHovered ? 1.0 : 0.0;
           material.uniforms.u_hoverState.value += (targetHover - material.uniforms.u_hoverState.value) * 0.1;
+
+          if (material.uniforms.u_cardSize) {
+             material.uniforms.u_cardSize.value.set(rect.width, rect.height);
+          }
           
           // Smooth out mouse tracking so it doesn't instantly snap
           const currentMouseX = material.uniforms.u_mouse.value.x;

@@ -11,7 +11,6 @@ varying vec2 vUv;
 void main() {
   vUv = uv;
   vec3 pos = position;
-  // NO vertex distortion! The mesh stays a perfect rectangle matching the DOM exactly.
   gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
 }
 `;
@@ -22,12 +21,13 @@ uniform vec3 u_color1;
 uniform vec3 u_color2;
 uniform float u_hoverState;
 uniform vec2 u_mouse;
+uniform vec2 u_cardSize; // Dimensions of the card in pixels
 
 varying vec2 vUv;
 
-// Helper for rounded rectangle distance field
+// Distance field for rounded rectangle in pixels
 float sdRoundRect(vec2 p, vec2 b, float r) {
-  vec2 d = abs(p - 0.5) * 2.0 - b + vec2(r);
+  vec2 d = abs(p - b * 0.5) - b * 0.5 + vec2(r);
   return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - r;
 }
 
@@ -62,69 +62,64 @@ float snoise(vec2 v){
 
 void main() {
   vec2 uv = vUv;
-  
-  // u_mouse is 0 to 1 top-left to bottom-right.
   vec2 mousePos = u_mouse;
   
-  // Distance from current pixel to mouse
-  float dist = distance(uv, mousePos);
-  
   // ─── LIQUID LENS DISTORTION ───
-  // We warp the UV coordinates slightly around the mouse, scaling with hover state
-  float lensRadius = 0.45;
-  float lensStrength = 0.12 * u_hoverState;
+  // Distance from current pixel to mouse, scaled by aspect ratio for circular lens
+  vec2 aspect = vec2(u_cardSize.x / u_cardSize.y, 1.0);
+  float dist = distance(uv * aspect, mousePos * aspect);
   
-  // Smoothly attenuate the distortion based on distance
+  float lensRadius = 0.5;
+  float lensStrength = 0.15 * u_hoverState;
+  
   float distortionFactor = smoothstep(lensRadius, 0.0, dist);
-  
-  // Displace the UVs away from the mouse to create a magnifying liquid bubble effect
-  vec2 dir = normalize(uv - mousePos);
-  // Prevent zero division
+  vec2 dir = normalize((uv * aspect) - (mousePos * aspect));
   if (dist < 0.001) dir = vec2(0.0);
   
-  vec2 distortedUv = uv - dir * (distortionFactor * lensStrength) * sin(dist * 15.0 - u_time * 2.0);
+  vec2 distortedUv = uv - dir * (distortionFactor * lensStrength) * sin(dist * 12.0 - u_time * 3.0);
 
   // ─── PROCEDURAL LIQUID BACKGROUND ───
-  // Add some slow moving noise to the background
   float noiseVal = snoise(distortedUv * 2.0 + u_time * 0.2);
   float noiseVal2 = snoise(distortedUv * 3.0 - u_time * 0.15);
   
-  // Base glassmorphism dark color
-  vec4 baseColor = vec4(0.05, 0.05, 0.07, 0.85); // Very dark, highly opaque base
+  // Bright, visible glassmorphism base
+  vec4 baseColor = vec4(1.0, 1.0, 1.0, 0.03); 
   
-  // Animated color blobs moving organically
   vec2 b1Center = vec2(0.3 + sin(u_time * 0.4)*0.2, 0.3 + cos(u_time * 0.3)*0.2);
   vec2 b2Center = vec2(0.7 + cos(u_time * 0.5)*0.2, 0.7 + sin(u_time * 0.6)*0.2);
   
   float b1 = smoothstep(0.6, 0.0, distance(distortedUv, b1Center));
   float b2 = smoothstep(0.7, 0.0, distance(distortedUv, b2Center));
   
-  // Mix colors based on blobs and noise
   vec3 colorMix = mix(u_color1, u_color2, (noiseVal + 1.0) * 0.5);
-  vec3 rgb = baseColor.rgb + (colorMix * (b1 * 0.5 + b2 * 0.5 + noiseVal2 * 0.1));
+  vec3 rgb = baseColor.rgb + (colorMix * (b1 * 0.8 + b2 * 0.8 + noiseVal2 * 0.1));
   
-  // Mouse hover highlight (glow)
-  float glow = smoothstep(0.5, 0.0, dist) * u_hoverState * 0.8;
-  rgb += vec3(0.7, 0.85, 1.0) * glow;
+  // Base alpha is distinctly visible
+  float alpha = 0.06 + (b1 * 0.15) + (b2 * 0.15);
   
-  // ─── ALPHA & MASKING ───
-  // Base alpha is quite high, increases with hover/glow
-  float alpha = baseColor.a + (glow * 0.3);
+  // Mouse hover glow
+  float glow = smoothstep(0.6, 0.0, dist) * u_hoverState;
+  rgb += vec3(0.7, 0.85, 1.0) * glow * 0.8;
+  alpha += glow * 0.3;
   
-  // Crisp Rounded Rectangle Mask
-  // DistBox: negative inside, positive outside
-  float distBox = sdRoundRect(vUv, vec2(0.98), 0.05);
+  // ─── CRISP PIXEL-PERFECT BORDERS ───
+  // Calculate distance in pixels
+  vec2 pixelPos = vUv * u_cardSize;
+  float cornerRadius = 20.0; // matches CSS border-radius
   
-  // Anti-aliased mask for the shape
-  float mask = 1.0 - smoothstep(0.0, 0.005, distBox);
+  // distBox is negative inside the card, 0 at the edge, positive outside
+  float distBox = sdRoundRect(pixelPos, u_cardSize, cornerRadius);
   
-  // Sharp inner border
-  float borderIntensity = mask * (1.0 - smoothstep(-0.015, -0.005, distBox)); 
+  // Crisp anti-aliased mask (1px fade)
+  float mask = 1.0 - smoothstep(-0.5, 0.5, distBox);
   
-  // Base border color is faint white, gets brighter on hover/glow
-  vec3 borderColor = mix(vec3(1.0), u_color1, 0.5) * (0.15 + glow * 0.8);
+  // Sharp inner border (1px wide)
+  float borderIntensity = mask * (1.0 - smoothstep(-1.5, -0.5, distBox));
+  
+  // Distinct border color
+  vec3 borderColor = mix(vec3(1.0), u_color1, 0.3) * (0.15 + glow * 0.6);
   rgb = mix(rgb, borderColor, borderIntensity);
-  alpha = max(alpha, borderIntensity); 
+  alpha = max(alpha, borderIntensity * 0.5); 
 
   gl_FragColor = vec4(rgb, alpha * mask);
 }
@@ -139,6 +134,7 @@ export function createCardShaderMaterial() {
       u_mouse: { value: new THREE.Vector2(0.5, 0.5) },
       u_hoverState: { value: 0 },
       u_resolution: { value: new THREE.Vector2(1, 1) },
+      u_cardSize: { value: new THREE.Vector2(400, 300) },
       u_color1: { value: new THREE.Color('#3b82f6') },
       u_color2: { value: new THREE.Color('#8b5cf6') },
     },
