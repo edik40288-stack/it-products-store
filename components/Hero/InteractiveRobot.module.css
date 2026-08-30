@@ -4,165 +4,22 @@
   top: 50%;
   transform: translateY(-50%);
   width: clamp(250px, 35vw, 450px);
+  aspect-ratio: 1;
   z-index: 10;
-  cursor: pointer;
-  /* Slight floating effect */
-  animation: float 6s ease-in-out infinite;
+  pointer-events: none; /* Mouse events handled by window listener */
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(-50%) translateY(0); }
-  50% { transform: translateY(-50%) translateY(-15px); }
-}
-
-.robot {
+.canvas {
   width: 100%;
-  height: auto;
-  filter: drop-shadow(0 0 20px rgba(107, 91, 239, 0.2));
-  transition: filter 0.3s ease;
-}
-
-.robotHovered {
-  filter: drop-shadow(0 0 40px rgba(201, 168, 76, 0.3));
-}
-
-/* Base Head */
-.headGroup {
-  transform-origin: 150px 105px;
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.robotIdle .headGroup {
-  animation: headBob 4s ease-in-out infinite;
-}
-
-.robotHovered .headGroup {
-  /* Look down at the laptop */
-  transform: rotate(-5deg) translateY(5px);
-}
-
-@keyframes headBob {
-  0%, 100% { transform: rotate(0deg); }
-  30% { transform: rotate(3deg); }
-  70% { transform: rotate(-2deg); }
-}
-
-/* Antenna */
-.antennaIdle {
-  animation: blink 2s infinite;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; fill: #C9A84C; filter: drop-shadow(0 0 5px #C9A84C); }
-  50% { opacity: 0.5; fill: #6B5BEF; filter: drop-shadow(0 0 2px #6B5BEF); }
-}
-
-.robotHovered .antennaIdle {
-  animation: rapidBlink 0.3s infinite;
-}
-
-@keyframes rapidBlink {
-  0%, 100% { opacity: 1; fill: #C9A84C; }
-  50% { opacity: 0.8; fill: #fff; }
-}
-
-/* Loading Spinner */
-.loadingSpinner {
-  transform-origin: 150px 185px;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.robotIdle .loadingSpinner {
-  opacity: 1;
-  animation: spin 2s linear infinite;
-}
-
-.robotHovered .loadingSpinner {
-  opacity: 0;
-  transform: scale(0.5);
-}
-
-@keyframes spin {
-  100% { transform: rotate(360deg); }
-}
-
-/* Arms */
-.armsIdle {
-  opacity: 1;
-  transition: opacity 0.2s ease;
-}
-
-.robotHovered .armsIdle {
-  opacity: 0;
-}
-
-.armsTyping {
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.robotHovered .armsTyping {
-  opacity: 1;
-}
-
-.robotHovered .armLeft {
-  animation: typeLeft 0.15s ease-in-out infinite alternate;
-}
-
-.robotHovered .armRight {
-  animation: typeRight 0.18s ease-in-out infinite alternate;
-}
-
-@keyframes typeLeft {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-4px); }
-}
-
-@keyframes typeRight {
-  0% { transform: translateY(-2px); }
-  100% { transform: translateY(3px); }
-}
-
-/* Laptop */
-.laptopGroup {
-  opacity: 0;
-  transform: translateY(20px) scale(0.9);
-  transform-origin: 150px 250px;
-  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.robotHovered .laptopGroup {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-/* Code Lines on Screen */
-.codeLines rect {
-  opacity: 0;
-}
-
-.robotHovered .codeLines rect {
-  animation: typeCode 2s steps(4, end) infinite;
-}
-
-.robotHovered .code1 { animation-delay: 0s; }
-.robotHovered .code2 { animation-delay: 0.2s; }
-.robotHovered .code3 { animation-delay: 0.4s; }
-.robotHovered .code4 { animation-delay: 0.6s; }
-.robotHovered .code5 { animation-delay: 0.8s; }
-
-@keyframes typeCode {
-  0%, 10% { opacity: 0; transform: scaleX(0); transform-origin: left; }
-  15%, 80% { opacity: 1; transform: scaleX(1); transform-origin: left; }
-  90%, 100% { opacity: 0; transform: scaleX(1); transform-origin: left; }
+  height: 100%;
+  display: block;
 }
 
 @media (max-width: 900px) {
   .container {
     right: 50%;
     transform: translate(50%, -10%);
-    width: clamp(200px, 50vw, 300px);
-    opacity: 0.6;
-    pointer-events: none;
+    width: clamp(180px, 45vw, 280px);
+    opacity: 0.5;
   }
 }
