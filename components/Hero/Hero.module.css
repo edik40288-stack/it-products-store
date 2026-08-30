@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8rem 2.5rem 5rem;
+  padding: 6rem 2.5rem 4rem;
   overflow: hidden;
 }
 
@@ -64,7 +64,7 @@
   line-height: 1.1;
   letter-spacing: -0.02em;
   color: var(--color-text);
-  margin-bottom: 1.8rem;
+  margin-bottom: 1.5rem;
 }
 
 .headingStatic {
@@ -99,7 +99,7 @@
   font-size: 1.05rem;
   line-height: 1.7;
   color: var(--color-text-muted);
-  margin-bottom: 3rem;
+  margin-bottom: 1.5rem;
   max-width: 500px;
 }
 

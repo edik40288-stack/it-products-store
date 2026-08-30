@@ -5,14 +5,16 @@ import { useTranslations } from 'next-intl';
 import styles from './Hero.module.css';
 import CyberSphere from './CyberSphere';
 
-const TOPICS = [
-  { text: 'AI Agents', color: '#C9A84C' },     // Gold
-  { text: 'Custom CRM', color: '#00F0FF' },    // Neon Blue
-  { text: 'Automation', color: '#B534FF' }     // Purple
-];
+// Topics structure will be generated inside the component to use translations
+const TOPIC_COLORS = ['#C9A84C', '#00F0FF', '#B534FF'];
 
-export default function Hero() {
   const t = useTranslations('hero');
+  const TOPICS = [
+    { text: t('topic0'), color: TOPIC_COLORS[0] },
+    { text: t('topic1'), color: TOPIC_COLORS[1] },
+    { text: t('topic2'), color: TOPIC_COLORS[2] }
+  ];
+  
   const [topicIndex, setTopicIndex] = useState(0);
   const [typedText, setTypedText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
@@ -69,14 +71,14 @@ export default function Hero() {
     inputRef.current?.blur();
     
     // Sequence of simulated logs
-    setLogMessages(['> Анализ структуры и воронки...']);
+    setLogMessages([t('log1')]);
     
     setTimeout(() => {
-      setLogMessages(prev => [...prev, '> Поиск точек потери трафика...']);
+      setLogMessages(prev => [...prev, t('log2')]);
     }, 800);
     
     setTimeout(() => {
-      setLogMessages(prev => [...prev, '> Подключение AI-архитектора...']);
+      setLogMessages(prev => [...prev, t('log3')]);
     }, 1600);
 
     // Finally, open chat
@@ -110,13 +112,13 @@ export default function Hero() {
         <div className={styles.eyebrow}>
           <span>MINDCORE</span>
           <span>//</span>
-          <span>System Online</span>
+          <span>{t('systemOnline')}</span>
         </div>
 
         <h1 className={styles.heading}>
           {t('title').split(' ')[0]} {/* e.g. "Ракета-носитель" / "A booster" */}
           <br />
-          <span className={styles.headingStatic}>для команд </span>
+          <span className={styles.headingStatic}>{t('forTeams')}</span>
           <br className={styles.mobileBreak} />
           <span className={styles.typewriterWrap}>
             <span 
@@ -151,7 +153,7 @@ export default function Hero() {
               <input
                 ref={inputRef}
                 type="text"
-                placeholder="Вставьте ссылку на ваш сайт или нишу..."
+                placeholder={t('placeholder')}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onFocus={() => setIsInputFocused(true)}
@@ -166,7 +168,7 @@ export default function Hero() {
                 className={`${styles.analyzeBtn} ${inputValue.trim() ? styles.analyzeBtnActive : ''}`}
                 disabled={!inputValue.trim()}
               >
-                Анализ
+                {t('analyzeBtn')}
               </button>
             )}
           </div>

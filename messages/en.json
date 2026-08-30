@@ -2,6 +2,16 @@
   "hero": {
     "title": "A booster rocket for digital product teams",
     "subtitle": "Full-cycle AI-powered development studio.\nWe ship products that scale, convert, and impress.",
+    "systemOnline": "System Online",
+    "forTeams": "for teams ",
+    "topic0": "AI Agents",
+    "topic1": "Custom CRM",
+    "topic2": "Automation",
+    "placeholder": "Paste a link to your site or niche...",
+    "analyzeBtn": "Analyze",
+    "log1": "> Analyzing structure and funnel...",
+    "log2": "> Searching for traffic drop-off points...",
+    "log3": "> Connecting AI Architect...",
     "cta": "Start a project",
     "ctaSecondary": "See our work"
   },

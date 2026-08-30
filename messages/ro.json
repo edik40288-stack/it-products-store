@@ -1,8 +1,17 @@
 {
   "hero": {
-    "prefix": "Creăm produse digitale",
-    "suffix": "(și inteligente)",
-    "words": ["Agenți AI", "Dezvoltare Custom", "Automatizare", "Analitics"],
+    "title": "O rachetă purtătoare pentru echipele de produse digitale",
+    "subtitle": "Studio de dezvoltare full-cycle bazat pe AI.\nCreăm produse care scalează, convertesc și impresionează.",
+    "systemOnline": "Sistem Online",
+    "forTeams": "pentru echipe ",
+    "topic0": "Agenți AI",
+    "topic1": "CRM Personalizat",
+    "topic2": "Automatizare",
+    "placeholder": "Introduceți link-ul site-ului dvs. sau nișa...",
+    "analyzeBtn": "Analiză",
+    "log1": "> Analizând structura și pâlnia...",
+    "log2": "> Căutând puncte de pierdere a traficului...",
+    "log3": "> Conectând Arhitectul AI...",
     "cta": "Începe un proiect",
     "ctaSecondary": "Vezi lucrările"
   },
