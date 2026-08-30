@@ -33,7 +33,6 @@ export default function WebGLDistortionCanvas() {
     // 64x64 segments to give high resolution for vertex distortion
     const geometry = new THREE.PlaneGeometry(1, 1, 64, 64);
     const meshes = new Map<string, THREE.Mesh>();
-    let lastScrollY = window.scrollY;
 
     // --- LAYOUT THRASHING FIX ---
     // Cache absolute positions of cards so we don't call getBoundingClientRect() every frame
@@ -135,7 +134,7 @@ export default function WebGLDistortionCanvas() {
         }
 
         // DOM Sync (Cached!)
-        let cached = rectCache.get(id);
+        const cached = rectCache.get(id);
         if (!cached) return; // Should not happen
 
         const top = cached.absoluteTop - currentScrollY;
