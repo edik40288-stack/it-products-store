@@ -19,29 +19,29 @@ void main() {
   // Distance from this vertex to the mouse
   float dist = distance(pos.xy, localMouse);
 
-  // Smooth falloff — affects vertices within radius 0.6
-  float influence = smoothstep(0.6, 0.0, dist) * u_hoverState;
+  // Smooth falloff — affects vertices within radius 0.8
+  float influence = smoothstep(0.8, 0.0, dist) * u_hoverState;
 
-  // --- SUBTLE organic ripple along edges ---
-  // Gentle sine wave that propagates outward from cursor
-  float ripple = sin(dist * 18.0 - u_time * 3.0) * 0.008 * influence;
+  // --- Organic ripple along edges ---
+  // Sine wave propagating outward from cursor
+  float ripple = sin(dist * 14.0 - u_time * 2.5) * 0.025 * influence;
 
-  // --- Pull vertices gently toward cursor ---
-  // Very subtle: max ~3% displacement so shape stays recognizable
+  // --- Pull vertices toward cursor ---
+  // ~12% displacement for clearly visible warping
   vec2 toMouse = localMouse - pos.xy;
-  float pullStrength = 0.03 * influence;
+  float pullStrength = 0.12 * influence;
 
   pos.xy += toMouse * pullStrength;
 
-  // Add the ripple as Z-depth (subtle 3D bulge)
-  pos.z += influence * 0.02 + ripple;
+  // Z-depth bulge
+  pos.z += influence * 0.05 + ripple;
 
-  // Also add tiny ripple to X/Y for organic border wobble
+  // Perpendicular ripple for organic border wobble
   vec2 perpendicular = vec2(-toMouse.y, toMouse.x);
   if (length(perpendicular) > 0.001) {
     perpendicular = normalize(perpendicular);
   }
-  pos.xy += perpendicular * ripple * 2.0;
+  pos.xy += perpendicular * ripple * 3.0;
 
   vDistortion = influence;
 
