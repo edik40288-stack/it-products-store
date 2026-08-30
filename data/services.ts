@@ -25,7 +25,16 @@ export const SERVICES_RU: ServiceData[] = [
   { id: 'security', title: 'Аудит безопасности', subtitle: 'Найдите уязвимости до атакующих', tags: ['OWASP', 'Pentest', 'GDPR', 'SSL'], duration: '1–2 недели', description: 'Комплексная оценка безопасности веб-приложений. Выявляем критические уязвимости и даём приоритетный план устранения.' },
 ];
 
-export const SERVICES_RO: ServiceData[] = SERVICES_EN; // fallback to EN for Romanian for now
+export const SERVICES_RO: ServiceData[] = [
+  { id: 'development', title: 'Dezvoltare Completă', subtitle: 'De la 0 la lansare și suport', tags: ['React', 'Next.js', 'Node.js', 'AWS'], duration: '4–16 săptămâni', description: 'Proiectăm, construim și lansăm produse digitale full-stack — de la MVP la platforme enterprise. Arhitectură, cod, CI/CD și suport continuu incluse.' },
+  { id: 'ai-agents', title: 'Agenți AI și Chatboți', subtitle: 'Implicare inteligentă 24/7', tags: ['GPT-4o', 'NLP', 'Telegram', 'WhatsApp'], duration: '2–6 săptămâni', description: 'Agenți AI personalizați care califică clienții potențiali, răspund la întrebări și închid oferte — non-stop. Integrare cu CRM-ul tău și canalele de mesagerie.' },
+  { id: 'crm', title: 'CRM Personalizat & Digitalizare', subtitle: 'Logica afacerii tale, automatizată', tags: ['CRM', 'ERP', 'Automatizare', 'Analytics'], duration: '6–20 săptămâni', description: 'Construim sisteme CRM și de management adaptate exact fluxului tău de lucru — nu un SaaS generic care te forțează să te adaptezi.' },
+  { id: 'llm-integrations', title: 'Integrări LLM & Conectare API', subtitle: 'Conectează AI la stack-ul tău', tags: ['OpenAI', 'Claude', 'Gemini', 'API-uri'], duration: '1–4 săptămâni', description: 'Conectăm cele mai puternice modele lingvistice la instrumentele și fluxurile tale existente, deblocând capabilități AI fără a reconstrui infrastructura.' },
+  { id: 'automation', title: 'Automatizarea Proceselor', subtitle: 'Înlocuiește munca manuală cu fluxuri inteligente', tags: ['n8n', 'Zapier', 'Python', 'Webhooks'], duration: '1–6 săptămâni', description: 'De la fluxuri de email la conducte complexe cu pași multipli — automatizăm procesele repetitive pentru ca echipa ta să se concentreze pe ce contează.' },
+  { id: 'analytics', title: 'Audit, Analytics & CPA', subtitle: 'Transformă datele în decizii', tags: ['GA4', 'Metrika', 'SQL', 'BI'], duration: '1–3 săptămâni', description: 'Audituri profunde de conversie, analiza pâlniei și panouri de performanță. Găsim unde pierzi bani și reparăm.' },
+  { id: 'redesign', title: 'Redesign & UI/UX', subtitle: 'Înainte → După premium', tags: ['Figma', 'Motion', 'React', 'A/B'], duration: '3–10 săptămâni', description: 'Transformăm interfețele învechite în experiențe digitale premium care convertesc mai bine și se simt extraordinar la utilizare.' },
+  { id: 'security', title: 'Audit de Securitate', subtitle: 'Găsește vulnerabilitățile înaintea atacatorilor', tags: ['OWASP', 'Pentest', 'GDPR', 'SSL'], duration: '1–2 săptămâni', description: 'Evaluare completă a securității aplicațiilor tale web. Identificăm vulnerabilitățile critice și oferim un plan de remediere prioritizat.' },
+];
 
 export function getServices(locale: string): ServiceData[] {
   if (locale === 'ru') return SERVICES_RU;

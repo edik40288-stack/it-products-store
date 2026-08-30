@@ -19,7 +19,8 @@ export default function WebGLDistortionCanvas() {
       powerPreference: 'high-performance',
     });
     
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Clamp pixel ratio to 1.5 to prevent massive GPU bottleneck on retina displays
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 
     const scene = new THREE.Scene();
     
@@ -30,8 +31,8 @@ export default function WebGLDistortionCanvas() {
     camera.position.z = 100;
 
     // 2. Mesh pool management
-    // 64x64 segments to give high resolution for vertex distortion
-    const geometry = new THREE.PlaneGeometry(1, 1, 64, 64);
+    // 32x32 segments is enough for smooth vertex distortion and much faster
+    const geometry = new THREE.PlaneGeometry(1, 1, 32, 32);
     const meshes = new Map<string, THREE.Mesh>();
 
     // --- LAYOUT THRASHING FIX ---

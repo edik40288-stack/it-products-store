@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import ServiceCard from './ServiceCard';
 import ServiceDetail from '../ServiceDetail/ServiceDetail';
 import { useAppState } from '@/context/AppStateContext';
@@ -29,17 +29,17 @@ export default function ServicesGrid() {
 
   const servicesWithIndex = items.map((item, index) => ({ ...item, index }));
 
+  const t = useTranslations('services');
+
   return (
     <section className={styles.section} id="services">
       <div className={styles.header}>
-        <p className={styles.sectionLabel}>What we build</p>
+        <p className={styles.sectionLabel}>{t('title')}</p>
         <h2 className={styles.title}>
-          {locale === 'ru' ? 'Что мы создаём' : 'Services & Products'}
+          {t('title')}
         </h2>
         <p className={styles.subtitle}>
-          {locale === 'ru'
-            ? 'Цифровые продукты на базе ИИ — полный цикл'
-            : 'End-to-end digital products powered by AI'}
+          {t('subtitle')}
         </p>
       </div>
 

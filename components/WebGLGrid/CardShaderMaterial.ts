@@ -14,7 +14,8 @@ void main() {
   vec3 pos = position;
 
   // Mouse in local geometry space (-0.5 to 0.5)
-  vec2 localMouse = vec2(u_mouse.x - 0.5, u_mouse.y - 0.5);
+  // Invert u_mouse.y because the orthographic camera's Y-axis points down (top=0, bottom=height)
+  vec2 localMouse = vec2(u_mouse.x - 0.5, (1.0 - u_mouse.y) - 0.5);
 
   // Distance from this vertex to the mouse
   float dist = distance(pos.xy, localMouse);
@@ -94,10 +95,9 @@ float sdRoundRect(vec2 p, vec2 b, float r) {
 void main() {
   vec2 uv = vUv;
 
-  // Noise for organic color movement
+  // Use a single noise calculation to save GPU cycles
   float n1 = snoise(uv * 2.5 + u_time * 0.15);
-  float n2 = snoise(uv * 3.5 - u_time * 0.12);
-
+  
   // Animated color blobs
   vec2 b1 = vec2(0.3 + sin(u_time * 0.4)*0.2, 0.3 + cos(u_time * 0.3)*0.2);
   vec2 b2 = vec2(0.7 + cos(u_time * 0.5)*0.2, 0.7 + sin(u_time * 0.6)*0.2);
@@ -107,7 +107,8 @@ void main() {
   // Base glass color — subtle tint, not opaque
   vec3 baseRgb = vec3(0.08, 0.08, 0.12);
   vec3 colorMix = mix(u_color1, u_color2, (n1 + 1.0) * 0.5);
-  vec3 rgb = baseRgb + colorMix * (blob1 * 0.35 + blob2 * 0.35 + n2 * 0.05);
+  // Reuse n1 for the second noise term by scaling it, instead of calling snoise again
+  vec3 rgb = baseRgb + colorMix * (blob1 * 0.35 + blob2 * 0.35 + (n1 * 0.5 + 0.5) * 0.05);
 
   // Hover glow from distortion
   float glow = vDistortion * 0.9;

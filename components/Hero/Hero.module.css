@@ -1,11 +1,11 @@
 .hero {
   position: relative;
   width: 100%;
-  min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6rem 2.5rem 4rem;
+  padding: 5rem 2.5rem 2rem;
   overflow: hidden;
 }
 
@@ -48,7 +48,7 @@
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--color-text-muted);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -59,12 +59,12 @@
 }
 
 .heading {
-  font-size: clamp(2.4rem, 5vw, 4.5rem);
+  font-size: clamp(2.4rem, 4.5vw, 4.5rem);
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.02em;
   color: var(--color-text);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .headingStatic {
@@ -97,7 +97,7 @@
 /* Subtext */
 .subtext {
   font-size: 1.05rem;
-  line-height: 1.7;
+  line-height: 1.6;
   color: var(--color-text-muted);
   margin-bottom: 1.5rem;
   max-width: 500px;
@@ -120,7 +120,7 @@
   backdrop-filter: blur(10px);
   transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  min-height: 60px;
+  min-height: 54px;
 }
 
 .inputWrapperFocused {
@@ -190,7 +190,7 @@
 /* Scroll indicator */
 .scrollHint {
   position: absolute;
-  bottom: 2.5rem;
+  bottom: 1.5rem;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -203,7 +203,7 @@
 
 .scrollLine {
   width: 1px;
-  height: 40px;
+  height: 30px;
   background: linear-gradient(to bottom, transparent, var(--color-text));
   animation: scrollAnim 2s ease-in-out infinite;
 }
@@ -226,7 +226,7 @@
 @media (max-width: 900px) {
   .hero {
     justify-content: flex-start;
-    padding: 6rem 1.5rem 4rem;
+    padding: 6rem 1.5rem 2rem;
   }
 
   .content {
