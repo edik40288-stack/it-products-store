@@ -35,6 +35,35 @@ export default function WebGLDistortionCanvas() {
     const meshes = new Map<string, THREE.Mesh>();
     let lastScrollY = window.scrollY;
 
+    // --- LAYOUT THRASHING FIX ---
+    // Cache absolute positions of cards so we don't call getBoundingClientRect() every frame
+    interface CachedRect {
+      width: number;
+      height: number;
+      left: number;
+      absoluteTop: number;
+    }
+    const rectCache = new Map<string, CachedRect>();
+    
+    const updateCache = () => {
+      const currentScrollY = window.scrollY;
+      const cards = getCards();
+      cards.forEach((card, id) => {
+        const rect = card.element.getBoundingClientRect();
+        rectCache.set(id, {
+          width: rect.width,
+          height: rect.height,
+          left: rect.left,
+          absoluteTop: rect.top + currentScrollY
+        });
+      });
+    };
+
+    const resizeObserver = new ResizeObserver(updateCache);
+    resizeObserver.observe(document.body);
+    // Initial cache
+    setTimeout(updateCache, 100);
+
     const handleResize = () => {
       const width = window.innerWidth;
       const height = window.innerHeight;
@@ -45,6 +74,8 @@ export default function WebGLDistortionCanvas() {
       camera.top = 0;
       camera.bottom = height;
       camera.updateProjectionMatrix();
+      
+      updateCache();
     };
 
     window.addEventListener('resize', handleResize);
@@ -59,8 +90,6 @@ export default function WebGLDistortionCanvas() {
       const time = clock.getElapsedTime();
       
       const currentScrollY = window.scrollY;
-      const scrollVelocity = currentScrollY - lastScrollY;
-      lastScrollY = currentScrollY;
 
       const cards = getCards();
 
@@ -94,20 +123,33 @@ export default function WebGLDistortionCanvas() {
           mesh.frustumCulled = false;
           scene.add(mesh);
           meshes.set(id, mesh);
+          
+          // Force cache update for new mesh
+          const rect = card.element.getBoundingClientRect();
+          rectCache.set(id, {
+            width: rect.width,
+            height: rect.height,
+            left: rect.left,
+            absoluteTop: rect.top + currentScrollY
+          });
         }
 
-        // DOM Sync
-        const rect = card.element.getBoundingClientRect();
+        // DOM Sync (Cached!)
+        let cached = rectCache.get(id);
+        if (!cached) return; // Should not happen
+
+        const top = cached.absoluteTop - currentScrollY;
+        const bottom = top + cached.height;
         
         // Frustum Culling manually (extreme optimization)
-        const isVisible = (rect.bottom > 0 && rect.top < window.innerHeight);
+        const isVisible = (bottom > 0 && top < window.innerHeight);
         mesh.visible = isVisible;
 
         if (isVisible) {
-          mesh.scale.set(rect.width, rect.height, 1);
+          mesh.scale.set(cached.width, cached.height, 1);
           mesh.position.set(
-            rect.left + rect.width / 2,
-            rect.top + rect.height / 2,
+            cached.left + cached.width / 2,
+            top + cached.height / 2,
             0
           );
 
@@ -120,7 +162,7 @@ export default function WebGLDistortionCanvas() {
           material.uniforms.u_hoverState.value += (targetHover - material.uniforms.u_hoverState.value) * 0.1;
 
           if (material.uniforms.u_cardSize) {
-             material.uniforms.u_cardSize.value.set(rect.width, rect.height);
+             material.uniforms.u_cardSize.value.set(cached.width, cached.height);
           }
           
           // Smooth out mouse tracking so it doesn't instantly snap

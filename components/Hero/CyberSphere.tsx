@@ -194,6 +194,8 @@ export default function CyberSphere({
     let formationSpeed = 0;
 
     // ─── EVENT LISTENERS ───
+    let heroHeight = window.innerHeight;
+
     const handleMouseMove = (e: MouseEvent) => {
       mouseX = (e.clientX / window.innerWidth) * 2 - 1;
       mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
@@ -201,7 +203,6 @@ export default function CyberSphere({
     window.addEventListener('mousemove', handleMouseMove);
 
     const handleScroll = () => {
-      const heroHeight = container.parentElement?.offsetHeight || window.innerHeight;
       scrollProgress = Math.min(window.scrollY / (heroHeight * 0.6), 1);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -212,6 +213,7 @@ export default function CyberSphere({
       renderer.setSize(size, size);
       camera.aspect = 1;
       camera.updateProjectionMatrix();
+      heroHeight = container.parentElement?.offsetHeight || window.innerHeight;
     };
     window.addEventListener('resize', handleResize);
     handleResize();
