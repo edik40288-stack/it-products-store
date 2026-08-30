@@ -139,9 +139,6 @@ export default function WebGLDistortionCanvas() {
                currentMouseY + (0.5 - currentMouseY) * 0.05
              );
           }
-
-          // Smooth scroll velocity
-          material.uniforms.u_scrollVelocity.value += (scrollVelocity - material.uniforms.u_scrollVelocity.value) * 0.1;
         }
       });
 
