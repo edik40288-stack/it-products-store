@@ -35,14 +35,6 @@ export default function WebGLDistortionCanvas() {
     const meshes = new Map<string, THREE.Mesh>();
     let lastScrollY = window.scrollY;
 
-    // DEBUG: Add a giant red plane in the center of the screen
-    const debugGeo = new THREE.PlaneGeometry(1, 1);
-    const debugMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-    const debugMesh = new THREE.Mesh(debugGeo, debugMat);
-    debugMesh.position.set(window.innerWidth / 2, window.innerHeight / 2, -10);
-    debugMesh.scale.set(300, 300, 1);
-    scene.add(debugMesh);
-
     const handleResize = () => {
       const width = window.innerWidth;
       const height = window.innerHeight;
@@ -187,7 +179,7 @@ export default function WebGLDistortionCanvas() {
         width: '100vw',
         height: '100vh',
         pointerEvents: 'none',
-        zIndex: 9999, 
+        zIndex: 0, 
       }}
     />
   );

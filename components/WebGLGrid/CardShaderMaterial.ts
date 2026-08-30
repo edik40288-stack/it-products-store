@@ -123,8 +123,7 @@ void main() {
   rgb = mix(rgb, borderColor, borderIntensity * mask);
   alpha = max(alpha, borderIntensity * 0.5); // Ensure border is visible
 
-  // DEBUG: Force solid red output to verify geometry and rendering
-  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+  gl_FragColor = vec4(rgb, alpha * mask);
 }
 `;
 
@@ -143,5 +142,6 @@ export function createCardShaderMaterial() {
     },
     transparent: true,
     depthWrite: false, // Prevent z-fighting if multiple cards overlap slightly
+    side: THREE.DoubleSide, // FIX: Orthographic camera flips Y, which flips winding order!
   });
 }
