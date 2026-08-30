@@ -6,7 +6,12 @@
   width: clamp(300px, 45vw, 600px);
   aspect-ratio: 1;
   z-index: 5;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: grab;
+}
+
+.container:active {
+  cursor: grabbing;
 }
 
 .canvas {

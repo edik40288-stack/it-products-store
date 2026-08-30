@@ -194,14 +194,43 @@ export default function CyberSphere({
     let formationPhase = 0;
     let formationSpeed = 0;
 
+    // ─── DRAG STATE ───
+    let isDragging = false;
+    let previousMousePosition = { x: 0, y: 0 };
+    let dragVelocityX = 0;
+    let dragVelocityY = 0;
+    let dragRotX = 0;
+    let dragRotY = 0;
+
     // ─── EVENT LISTENERS ───
     let heroHeight = window.innerHeight;
 
     const handleMouseMove = (e: MouseEvent) => {
       mouseX = (e.clientX / window.innerWidth) * 2 - 1;
       mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+
+      if (isDragging) {
+        const deltaX = e.clientX - previousMousePosition.x;
+        const deltaY = e.clientY - previousMousePosition.y;
+        
+        dragVelocityX = deltaX * 0.008;
+        dragVelocityY = deltaY * 0.008;
+        
+        previousMousePosition = { x: e.clientX, y: e.clientY };
+      }
     };
     window.addEventListener('mousemove', handleMouseMove);
+
+    const handleMouseDown = (e: MouseEvent) => {
+      isDragging = true;
+      previousMousePosition = { x: e.clientX, y: e.clientY };
+    };
+    container.addEventListener('mousedown', handleMouseDown);
+
+    const handleMouseUp = () => {
+      isDragging = false;
+    };
+    window.addEventListener('mouseup', handleMouseUp);
 
     const handleScroll = () => {
       scrollProgress = Math.min(window.scrollY / (heroHeight * 0.6), 1);
@@ -251,15 +280,23 @@ export default function CyberSphere({
         coreGroup.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
       }
 
-      // 2. Mouse Tracking & Act 3 Focus
+      // 2. Mouse Tracking & Act 3 Focus & Dragging
+      // Drag physics (inertia)
+      dragRotY += dragVelocityX;
+      dragRotX += dragVelocityY;
+      
+      // Apply damping to drag velocity
+      dragVelocityX *= 0.92;
+      dragVelocityY *= 0.92;
+
       if (props.isFocused) {
         // Look down at input
         targetRotX = 0.6;
         targetRotY = 0;
       } else {
-        // Инвертированное слежение: сфера "смотрит" за курсором
-        targetRotY = -mouseX * 0.5; 
-        targetRotX = mouseY * 0.4;
+        // Инвертированное слежение: сфера "смотрит" за курсором + вращение от драга
+        targetRotY = -mouseX * 0.5 + dragRotY; 
+        targetRotX = mouseY * 0.4 + dragRotX;
       }
 
       // Отзывчивость мыши (было 0.04, стало 0.08 для большей живости)
@@ -288,7 +325,10 @@ export default function CyberSphere({
         currentPulse = THREE.MathUtils.lerp(currentPulse, 0.0, 0.05);
       }
 
-      // 4. Act 3: Scanning Pulsations
+      // 4. Act 3: Scanning Pulsations + Drag Boost
+      const dragSpeed = Math.sqrt(dragVelocityX * dragVelocityX + dragVelocityY * dragVelocityY);
+      const isSpinning = dragSpeed > 0.005 || isDragging;
+
       if (props.isScanning) {
         scanPhase += 0.2; // Fast pulse
         currentPulse = Math.abs(Math.sin(scanPhase)) * 1.5;
@@ -297,12 +337,20 @@ export default function CyberSphere({
       } else {
         scanPhase = 0;
         coreGroup.position.z = THREE.MathUtils.lerp(coreGroup.position.z, 0, 0.1);
+        
+        // Add glowing pulse when spinning manually
+        if (isSpinning && !props.isTopicChanging) {
+          currentPulse = Math.min(currentPulse + dragSpeed * 5.0, 1.2);
+        }
       }
 
       wireframeMat.uniforms.u_pulse.value = currentPulse;
 
-      // Particle speed (x3 when focused/scanning)
-      const targetSpeedMulti = (props.isFocused || props.isScanning) ? 3.0 : 1.0;
+      // Particle speed (x3 when focused/scanning, x5+ when dragging)
+      let targetSpeedMulti = 1.0;
+      if (props.isFocused || props.isScanning) targetSpeedMulti = 3.0;
+      if (isSpinning) targetSpeedMulti = Math.max(targetSpeedMulti, 2.0 + dragSpeed * 100.0);
+
       pMat.uniforms.u_speedMulti.value = THREE.MathUtils.lerp(pMat.uniforms.u_speedMulti.value, targetSpeedMulti, 0.05);
       pMat.uniforms.u_time.value = time;
 
@@ -321,6 +369,8 @@ export default function CyberSphere({
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      container.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(rafId);
