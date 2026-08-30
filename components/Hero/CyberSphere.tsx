@@ -75,8 +75,9 @@ export default function CyberSphere({
         uniform vec3 u_color;
         uniform float u_pulse;
         void main() {
-          vec3 finalColor = mix(u_color, vec3(1.0), u_pulse * 0.5); // Whiten on pulse
-          gl_FragColor = vec4(finalColor, 0.8 + u_pulse * 0.2);
+          // Очень мягкое осветление при пульсации (чтобы не выглядело как глитч/обновление)
+          vec3 finalColor = mix(u_color, vec3(1.0), u_pulse * 0.15); 
+          gl_FragColor = vec4(finalColor, 0.5 + u_pulse * 0.2);
         }
       `,
       transparent: true,
@@ -253,16 +254,17 @@ export default function CyberSphere({
       // 2. Mouse Tracking & Act 3 Focus
       if (props.isFocused) {
         // Look down at input
-        targetRotX = -0.6;
+        targetRotX = 0.6;
         targetRotY = 0;
       } else {
-        targetRotY = mouseX * 0.6; // Heavy rotation
-        targetRotX = -mouseY * 0.4;
+        // Инвертированное слежение: сфера "смотрит" за курсором
+        targetRotY = -mouseX * 0.5; 
+        targetRotX = mouseY * 0.4;
       }
 
-      // Heavy inertia (Lerp 0.04 instead of 0.08)
-      currentRotY += (targetRotY - currentRotY) * 0.04;
-      currentRotX += (targetRotX - currentRotX) * 0.04;
+      // Отзывчивость мыши (было 0.04, стало 0.08 для большей живости)
+      currentRotY += (targetRotY - currentRotY) * 0.08;
+      currentRotX += (targetRotX - currentRotX) * 0.08;
 
       // Idle float (only if not focused)
       const levitation = props.isFocused ? 0 : Math.sin(time * 1.5) * 0.1;
@@ -279,11 +281,11 @@ export default function CyberSphere({
       pMat.uniforms.u_color.value = currentColor;
       innerMat.color = currentColor;
 
-      // Pulse on topic change
+      // Pulse on topic change (сделаем его более плавным и долгим)
       if (props.isTopicChanging) {
-        currentPulse = THREE.MathUtils.lerp(currentPulse, 1.0, 0.2);
+        currentPulse = THREE.MathUtils.lerp(currentPulse, 1.0, 0.1);
       } else {
-        currentPulse = THREE.MathUtils.lerp(currentPulse, 0.0, 0.1);
+        currentPulse = THREE.MathUtils.lerp(currentPulse, 0.0, 0.05);
       }
 
       // 4. Act 3: Scanning Pulsations
