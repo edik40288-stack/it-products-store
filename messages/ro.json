@@ -101,5 +101,15 @@
     "email": "newbusiness@mindcore.studio",
     "locations": "New York · Copenhagen · Chisinau",
     "rights": "© 2024 MINDCORE Studio. Toate drepturile rezervate."
+  },
+  "Cases": {
+    "label": "Lucrări Selectate",
+    "title": "Portofoliu"
+  },
+  "About": {
+    "label": "Studio"
+  },
+  "Contact": {
+    "label": "Contact"
   }
 }

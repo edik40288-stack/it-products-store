@@ -60,13 +60,6 @@ export default function Header({ locale }: HeaderProps) {
         </Link>
 
         <div className={styles.right}>
-          {/* Status badge */}
-          <div className={styles.statusBadge}>
-            <span className={styles.statusDot} />
-            <span className={styles.statusText}>
-              {siteConfig.slots.available} slots · {siteConfig.slots.period}
-            </span>
-          </div>
 
           {/* Language switcher */}
           <div className={styles.langSwitcher}>

@@ -1,0 +1,2 @@
+export const CHAT_GREETING_EN = "Hey! I'm the MINDCORE AI assistant. I can help you estimate the cost of AI implementation or run a free conversion audit of your site. What challenge does your business face?";
+export const CHAT_GREETING_RU = "Привет! Я ИИ-ассистент MINDCORE. Помогу рассчитать стоимость внедрения ИИ-агентов или провести бесплатный аудит конверсии сайта. Какая задача стоит перед бизнесом?";

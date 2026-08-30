@@ -1,0 +1,73 @@
+.calculator {
+  background: rgba(201,168,76,0.04);
+  border: 1px solid rgba(201,168,76,0.15);
+  border-radius: 14px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.calcTitle { font-size: 1rem; font-weight: 700; color: var(--color-text); margin-bottom: 1.25rem; }
+
+.optionGroup { margin-bottom: 1.25rem; }
+.optionLabel {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.options { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.option {
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: transparent;
+  color: var(--color-text-muted);
+  transition: all 0.2s;
+  font-family: var(--font-family);
+}
+.option:hover { border-color: rgba(201,168,76,0.3); color: var(--color-text); }
+.optionActive {
+  border-color: var(--color-gold) !important;
+  color: var(--color-gold) !important;
+  background: rgba(201,168,76,0.08) !important;
+}
+
+.checkWrap { margin-bottom: 1.5rem; }
+.check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+.check input { accent-color: var(--color-gold); }
+
+.result {
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.resultLabel {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+.resultPrice {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-gold);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+.resultNote {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin: 0;
+}

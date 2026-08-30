@@ -3,95 +3,13 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import styles from './WebGLBackground.module.css';
-
-const vertexShader = `
-  varying vec2 vUv;
-  void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
-
-const fragmentShader = `
-  uniform float uTime;
-  uniform vec2 uMouse;
-  uniform vec2 uResolution;
-  varying vec2 vUv;
-
-  // Smooth noise function
-  float hash(vec2 p) {
-    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-  }
-
-  float noise(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    f = f * f * (3.0 - 2.0 * f);
-    float a = hash(i);
-    float b = hash(i + vec2(1.0, 0.0));
-    float c = hash(i + vec2(0.0, 1.0));
-    float d = hash(i + vec2(1.0, 1.0));
-    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
-  }
-
-  float fbm(vec2 p) {
-    float value = 0.0;
-    float amplitude = 0.5;
-    float frequency = 1.0;
-    for (int i = 0; i < 5; i++) {
-      value += amplitude * noise(p * frequency);
-      amplitude *= 0.5;
-      frequency *= 2.0;
-    }
-    return value;
-  }
-
-  void main() {
-    vec2 uv = vUv;
-    vec2 mouseInfluence = uMouse * 0.3;
-
-    // Deep charcoal base
-    vec3 baseColor = vec3(0.039, 0.039, 0.047); // #0A0A0C
-
-    // Gold accent blob — follows mouse
-    float goldDist = length(uv - vec2(0.5 + mouseInfluence.x * 0.4, 0.3 + mouseInfluence.y * 0.3));
-    float goldBlob = smoothstep(0.6, 0.0, goldDist) * 0.18;
-    vec3 goldColor = vec3(0.788, 0.659, 0.298); // #C9A84C
-
-    // Blue-violet blob — opposite side
-    float violetDist = length(uv - vec2(0.7 - mouseInfluence.x * 0.3, 0.7 - mouseInfluence.y * 0.2));
-    float violetBlob = smoothstep(0.55, 0.0, violetDist) * 0.14;
-    vec3 violetColor = vec3(0.42, 0.36, 0.94); // #6B5BEF
-
-    // Deep blue distant blob
-    float blueDist = length(uv - vec2(0.15 + mouseInfluence.x * 0.15, 0.6));
-    float blueBlob = smoothstep(0.5, 0.0, blueDist) * 0.1;
-    vec3 blueColor = vec3(0.06, 0.22, 0.58);
-
-    // Animated FBM noise for organic movement
-    float t = uTime * 0.08;
-    float noiseVal = fbm(uv * 2.5 + vec2(t, t * 0.7));
-    goldBlob *= (0.7 + 0.3 * noiseVal);
-    violetBlob *= (0.6 + 0.4 * fbm(uv * 2.0 - vec2(t * 0.5, t)));
-
-    // Compose
-    vec3 color = baseColor;
-    color = mix(color, color + goldColor, goldBlob);
-    color = mix(color, color + violetColor, violetBlob);
-    color = mix(color, color + blueColor, blueBlob);
-
-    // Film grain
-    float grain = hash(uv * uResolution * 0.5 + uTime * 100.0) * 0.04 - 0.02;
-    color += grain;
-
-    gl_FragColor = vec4(color, 1.0);
-  }
-`;
+import { vertexShader, fragmentShader } from './shaders';
 
 export default function WebGLBackground() {
   const mountRef = useRef<HTMLDivElement>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
   const targetMouseRef = useRef({ x: 0, y: 0 });
+  const isVisible = useRef(true);
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -99,8 +17,11 @@ export default function WebGLBackground() {
     // Scene setup
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-    const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: "high-performance" });
+    
+    // Crucial performance fix: hardcap pixel ratio at a lower value to fix lag
+    // Using 0.5 or 0.25 drastically reduces fragment shader load on full screen
+    renderer.setPixelRatio(0.35); 
     renderer.setSize(window.innerWidth, window.innerHeight);
     mountRef.current.appendChild(renderer.domElement);
 
@@ -126,14 +47,24 @@ export default function WebGLBackground() {
       targetMouseRef.current.x = (e.clientX / window.innerWidth) * 2 - 1;
       targetMouseRef.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
     };
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
 
-    // Resize handler
+    // Resize handler with debouncing
+    let resizeTimeout: ReturnType<typeof setTimeout>;
     const handleResize = () => {
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
+      }, 100);
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
+
+    // Intersection observer to pause rendering when scrolled past hero
+    const observer = new IntersectionObserver((entries) => {
+      isVisible.current = entries[0].isIntersecting;
+    });
+    observer.observe(mountRef.current);
 
     // Animation loop
     let frameId: number;
@@ -141,11 +72,14 @@ export default function WebGLBackground() {
 
     const animate = () => {
       frameId = requestAnimationFrame(animate);
+      
+      if (!isVisible.current) return;
+
       uniforms.uTime.value = (Date.now() - startTime) / 1000;
 
       // Lerp mouse for inertia
-      mouseRef.current.x += (targetMouseRef.current.x - mouseRef.current.x) * 0.04;
-      mouseRef.current.y += (targetMouseRef.current.y - mouseRef.current.y) * 0.04;
+      mouseRef.current.x += (targetMouseRef.current.x - mouseRef.current.x) * 0.05;
+      mouseRef.current.y += (targetMouseRef.current.y - mouseRef.current.y) * 0.05;
       uniforms.uMouse.value.set(mouseRef.current.x, mouseRef.current.y);
 
       renderer.render(scene, camera);
@@ -154,6 +88,7 @@ export default function WebGLBackground() {
 
     return () => {
       cancelAnimationFrame(frameId);
+      observer.disconnect();
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('resize', handleResize);
       renderer.dispose();
