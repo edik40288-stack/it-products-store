@@ -1,45 +1,144 @@
 'use client';
-import styles from '../CardVisual.module.css';
+
+import { useEffect, useRef } from 'react';
+import * as THREE from 'three';
 
 export default function GearsVisual({ hovered }: { hovered: boolean }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const hoveredRef = useRef(hovered);
+
+  useEffect(() => {
+    hoveredRef.current = hovered;
+  }, [hovered]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      alpha: true,
+      antialias: true,
+      powerPreference: 'high-performance',
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setClearColor(0x000000, 0);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+    camera.position.set(0, 0, 5.2);
+
+    const group = new THREE.Group();
+    scene.add(group);
+
+    // 1. Large Outer Golden Gyroscope Ring
+    const ringGeo1 = new THREE.TorusGeometry(1.6, 0.05, 16, 64);
+    const ringMat1 = new THREE.MeshBasicMaterial({
+      color: 0xC9A84C,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.65,
+    });
+    const ring1 = new THREE.Mesh(ringGeo1, ringMat1);
+    group.add(ring1);
+
+    // 2. Middle Violet Gyroscope Ring
+    const ringGeo2 = new THREE.TorusGeometry(1.2, 0.04, 16, 64);
+    const ringMat2 = new THREE.MeshBasicMaterial({
+      color: 0x3b82f6,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.75,
+    });
+    const ring2 = new THREE.Mesh(ringGeo2, ringMat2);
+    group.add(ring2);
+
+    // 3. Inner Cyan Gyroscope Ring
+    const ringGeo3 = new THREE.TorusGeometry(0.8, 0.035, 16, 64);
+    const ringMat3 = new THREE.MeshBasicMaterial({
+      color: 0x00F0FF,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.85,
+    });
+    const ring3 = new THREE.Mesh(ringGeo3, ringMat3);
+    group.add(ring3);
+
+    // 4. Central Kinetic Energy Octahedron
+    const coreGeo = new THREE.OctahedronGeometry(0.35, 0);
+    const coreMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      wireframe: true,
+    });
+    const core = new THREE.Mesh(coreGeo, coreMat);
+    group.add(core);
+
+    let rafId: number;
+
+    const resize = () => {
+      const parent = canvas.parentElement;
+      if (!parent) return;
+      const w = parent.clientWidth;
+      const h = parent.clientHeight;
+      if (w === 0 || h === 0) return;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    };
+
+    const resizeObs = new ResizeObserver(resize);
+    resizeObs.observe(canvas.parentElement || canvas);
+    resize();
+
+    const animate = () => {
+      rafId = requestAnimationFrame(animate);
+
+      const multiplier = hoveredRef.current ? 3.5 : 1.0;
+      const base = 0.01 * multiplier;
+
+      ring1.rotation.x += base * 1.2;
+      ring1.rotation.y += base * 0.8;
+
+      ring2.rotation.y -= base * 1.5;
+      ring2.rotation.z += base * 1.1;
+
+      ring3.rotation.z += base * 2.0;
+      ring3.rotation.x -= base * 1.4;
+
+      core.rotation.x += base * 2.5;
+      core.rotation.y += base * 2.5;
+
+      ringMat1.opacity = hoveredRef.current ? 0.95 : 0.55;
+      ringMat2.opacity = hoveredRef.current ? 0.95 : 0.65;
+      ringMat3.opacity = hoveredRef.current ? 1.0 : 0.75;
+
+      const targetScale = hoveredRef.current ? 1.15 : 0.95;
+      group.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.08);
+
+      renderer.render(scene, camera);
+    };
+
+    animate();
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      resizeObs.disconnect();
+      renderer.dispose();
+      ringGeo1.dispose();
+      ringMat1.dispose();
+      ringGeo2.dispose();
+      ringMat2.dispose();
+      ringGeo3.dispose();
+      ringMat3.dispose();
+      coreGeo.dispose();
+      coreMat.dispose();
+    };
+  }, []);
+
   return (
-    <svg className={styles.gearsSvg} viewBox="0 0 220 160" fill="none">
-      {/* Large gear */}
-      <g className={hovered ? styles.gearRotateCW : ''} style={{ transformOrigin: '80px 80px' }}>
-        <circle cx="80" cy="80" r="35" stroke="rgba(201,168,76,0.5)" strokeWidth="1.5" fill="rgba(201,168,76,0.04)" />
-        <circle cx="80" cy="80" r="22" stroke="rgba(201,168,76,0.3)" strokeWidth="1" fill="none" />
-        <circle cx="80" cy="80" r="8" fill="rgba(201,168,76,0.2)" stroke="rgba(201,168,76,0.6)" strokeWidth="1" />
-        {/* Teeth */}
-        {Array.from({ length: 10 }).map((_, i) => {
-          const a = (i / 10) * Math.PI * 2;
-          const x1 = 80 + Math.cos(a) * 35;
-          const y1 = 80 + Math.sin(a) * 35;
-          const x2 = 80 + Math.cos(a) * 45;
-          const y2 = 80 + Math.sin(a) * 45;
-          return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(201,168,76,0.6)" strokeWidth="4" strokeLinecap="round" />;
-        })}
-      </g>
-
-      {/* Small gear */}
-      <g className={hovered ? styles.gearRotateCCW : ''} style={{ transformOrigin: '148px 60px' }}>
-        <circle cx="148" cy="60" r="20" stroke="rgba(107,91,239,0.6)" strokeWidth="1.2" fill="rgba(107,91,239,0.05)" />
-        <circle cx="148" cy="60" r="8" fill="rgba(107,91,239,0.15)" stroke="rgba(107,91,239,0.5)" strokeWidth="1" />
-        <circle cx="148" cy="60" r="3" fill="rgba(107,91,239,0.5)" />
-        {Array.from({ length: 7 }).map((_, i) => {
-          const a = (i / 7) * Math.PI * 2;
-          const x1 = 148 + Math.cos(a) * 20;
-          const y1 = 60 + Math.sin(a) * 20;
-          const x2 = 148 + Math.cos(a) * 28;
-          const y2 = 60 + Math.sin(a) * 28;
-          return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(107,91,239,0.7)" strokeWidth="3" strokeLinecap="round" />;
-        })}
-      </g>
-
-      {/* Flow arrows */}
-      <path d="M 30 130 Q 80 110 130 130 Q 170 150 200 130" stroke="rgba(201,168,76,0.3)" strokeWidth="1.5" strokeDasharray="4 4" fill="none"
-        className={hovered ? styles.flowAnim : ''} />
-      <text x="30" y="148" fontSize="7" fill="rgba(201,168,76,0.5)" fontFamily="monospace">INPUT</text>
-      <text x="172" y="122" fontSize="7" fill="rgba(201,168,76,0.5)" fontFamily="monospace">OUTPUT</text>
-    </svg>
+    <canvas 
+      ref={canvasRef} 
+      style={{ width: '100%', height: '100%', display: 'block' }} 
+    />
   );
 }

@@ -1,86 +1,155 @@
 'use client';
+
 import { useEffect, useRef } from 'react';
-import styles from '../CardVisual.module.css';
+import * as THREE from 'three';
 
 export default function DashboardVisual({ hovered }: { hovered: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const rafRef = useRef<number>(0);
-  const pointsRef = useRef<number[]>([40, 55, 45, 70, 60, 80, 72, 65, 85, 90]);
+  const hoveredRef = useRef(hovered);
+
+  useEffect(() => {
+    hoveredRef.current = hovered;
+  }, [hovered]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
 
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const pts = pointsRef.current;
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      alpha: true,
+      antialias: true,
+      powerPreference: 'high-performance',
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setClearColor(0x000000, 0);
 
-      if (hovered) {
-        pts.forEach((_, i) => {
-          pts[i] = Math.max(20, Math.min(95, pts[i] + (Math.random() - 0.45) * 5));
-        });
-      }
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+    camera.position.set(3.5, 3.2, 4.5);
+    camera.lookAt(0, 0, 0);
 
-      // Grid lines
-      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-      ctx.lineWidth = 1;
-      for (let i = 0; i <= 4; i++) {
-        ctx.beginPath();
-        ctx.moveTo(0, (canvas.height / 4) * i);
-        ctx.lineTo(canvas.width, (canvas.height / 4) * i);
-        ctx.stroke();
-      }
+    const group = new THREE.Group();
+    scene.add(group);
 
-      // Main line chart
-      const stepX = canvas.width / (pts.length - 1);
-      ctx.beginPath();
-      pts.forEach((p, i) => {
-        const x = i * stepX;
-        const y = canvas.height - (p / 100) * canvas.height;
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-      });
-      ctx.strokeStyle = 'rgba(201,168,76,0.8)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
+    // 1. Isometric Base Grid
+    const gridGeo = new THREE.PlaneGeometry(2.5, 2.5, 4, 4);
+    const gridEdges = new THREE.EdgesGeometry(gridGeo);
+    const gridMat = new THREE.LineBasicMaterial({
+      color: 0x6b5bef,
+      transparent: true,
+      opacity: 0.35,
+    });
+    const gridMesh = new THREE.LineSegments(gridEdges, gridMat);
+    gridMesh.rotation.x = -Math.PI / 2;
+    gridMesh.position.y = -0.6;
+    group.add(gridMesh);
 
-      // Fill
-      ctx.lineTo(canvas.width, canvas.height);
-      ctx.lineTo(0, canvas.height);
-      ctx.closePath();
-      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      grad.addColorStop(0, 'rgba(201,168,76,0.25)');
-      grad.addColorStop(1, 'rgba(201,168,76,0)');
-      ctx.fillStyle = grad;
-      ctx.fill();
+    // 2. 3D Bar Columns
+    const barCount = 4;
+    const bars: THREE.Mesh[] = [];
+    const barTops: THREE.Mesh[] = [];
+    const heights = [0.6, 1.1, 1.5, 2.1];
+    const targetHeights = [...heights];
 
-      // Violet secondary line
-      ctx.beginPath();
-      pts.forEach((p, i) => {
-        const x = i * stepX;
-        const y = canvas.height - ((p * 0.6 + 10) / 100) * canvas.height;
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-      });
-      ctx.strokeStyle = 'rgba(107,91,239,0.6)';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
+    const boxGeo = new THREE.BoxGeometry(0.35, 1, 0.35);
+    const barMat = new THREE.MeshBasicMaterial({
+      color: 0xC9A84C,
+      transparent: true,
+      opacity: 0.6,
+      wireframe: true,
+    });
 
-      rafRef.current = requestAnimationFrame(draw);
+    const topGeo = new THREE.BoxGeometry(0.37, 0.04, 0.37);
+    const topMat = new THREE.MeshBasicMaterial({
+      color: 0xffe082,
+    });
+
+    for (let i = 0; i < barCount; i++) {
+      const bar = new THREE.Mesh(boxGeo, barMat);
+      const x = (i - 1.5) * 0.55;
+      const z = (i - 1.5) * 0.15;
+      bar.position.set(x, heights[i] / 2 - 0.6, z);
+      bar.scale.set(1, heights[i], 1);
+      group.add(bar);
+      bars.push(bar);
+
+      const top = new THREE.Mesh(topGeo, topMat);
+      top.position.set(x, heights[i] - 0.6, z);
+      group.add(top);
+      barTops.push(top);
+    }
+
+    // 3. Floating 3D Spline Growth Curve Line
+    const curvePoints = bars.map((b, i) => new THREE.Vector3(b.position.x, heights[i] - 0.45, b.position.z));
+    const curve = new THREE.CatmullRomCurve3(curvePoints);
+    const curveGeo = new THREE.BufferGeometry().setFromPoints(curve.getPoints(30));
+    const curveMat = new THREE.LineBasicMaterial({ color: 0x38bdf8, linewidth: 2 });
+    const curveLine = new THREE.Line(curveGeo, curveMat);
+    group.add(curveLine);
+
+    let rafId: number;
+    let time = 0;
+
+    const resize = () => {
+      const parent = canvas.parentElement;
+      if (!parent) return;
+      const w = parent.clientWidth;
+      const h = parent.clientHeight;
+      if (w === 0 || h === 0) return;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
     };
-    draw();
 
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-  }, [hovered]);
+    const resizeObs = new ResizeObserver(resize);
+    resizeObs.observe(canvas.parentElement || canvas);
+    resize();
+
+    const animate = () => {
+      rafId = requestAnimationFrame(animate);
+      time += 0.03;
+
+      group.rotation.y = Math.sin(time * 0.4) * 0.15;
+
+      bars.forEach((bar, i) => {
+        const bounce = hoveredRef.current ? Math.sin(time * 2 + i * 0.8) * 0.25 : 0;
+        const currentH = targetHeights[i] + bounce;
+        bar.scale.y = THREE.MathUtils.lerp(bar.scale.y, currentH, 0.1);
+        bar.position.y = bar.scale.y / 2 - 0.6;
+        barTops[i].position.y = bar.scale.y - 0.6;
+      });
+
+      barMat.opacity = hoveredRef.current ? 0.95 : 0.55;
+
+      const targetScale = hoveredRef.current ? 1.15 : 0.95;
+      group.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.08);
+
+      renderer.render(scene, camera);
+    };
+
+    animate();
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      resizeObs.disconnect();
+      renderer.dispose();
+      gridGeo.dispose();
+      gridEdges.dispose();
+      gridMat.dispose();
+      boxGeo.dispose();
+      barMat.dispose();
+      topGeo.dispose();
+      topMat.dispose();
+      curveGeo.dispose();
+      curveMat.dispose();
+    };
+  }, []);
 
   return (
-    <div className={styles.dashWrap}>
-      <canvas ref={canvasRef} width={280} height={130} className={styles.dashCanvas} />
-      <div className={styles.dashStats}>
-        <span className={styles.stat}><b>+34%</b> CVR</span>
-        <span className={styles.stat}><b>2.4x</b> ROI</span>
-        <span className={styles.stat}><b>-41%</b> CPA</span>
-      </div>
-    </div>
+    <canvas 
+      ref={canvasRef} 
+      style={{ width: '100%', height: '100%', display: 'block' }} 
+    />
   );
 }

@@ -175,3 +175,10 @@
   opacity: 1;
   transform: translateX(0) translateZ(0);
 }
+
+@media (max-width: 768px) {
+  .visualWrap {
+    width: 50%;
+    opacity: 0.25;
+  }
+}

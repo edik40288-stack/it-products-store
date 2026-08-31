@@ -1,91 +1,144 @@
 'use client';
-import { useEffect, useRef } from 'react';
-import styles from '../CardVisual.module.css';
 
-const METRICS = ['CVR', 'CPA', 'ROAS', 'LTV', 'CTR', 'NPS'];
+import { useEffect, useRef } from 'react';
+import * as THREE from 'three';
 
 export default function RadarVisual({ hovered }: { hovered: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const valuesRef = useRef([0.7, 0.5, 0.8, 0.6, 0.9, 0.65]);
-  const rafRef = useRef<number>(0);
+  const hoveredRef = useRef(hovered);
+
+  useEffect(() => {
+    hoveredRef.current = hovered;
+  }, [hovered]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    const cx = canvas.width / 2, cy = canvas.height / 2;
-    const r = Math.min(cx, cy) - 20;
-    const n = METRICS.length;
 
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      alpha: true,
+      antialias: true,
+      powerPreference: 'high-performance',
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setClearColor(0x000000, 0);
 
-      if (hovered) {
-        valuesRef.current = valuesRef.current.map(v =>
-          Math.max(0.3, Math.min(0.98, v + (Math.random() - 0.45) * 0.06))
-        );
-      }
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+    camera.position.set(0, 3.2, 4.8);
+    camera.lookAt(0, 0, 0);
 
-      // Spider web rings
-      for (let ring = 1; ring <= 4; ring++) {
-        ctx.beginPath();
-        for (let i = 0; i < n; i++) {
-          const a = (i / n) * Math.PI * 2 - Math.PI / 2;
-          const rr = (ring / 4) * r;
-          i === 0 ? ctx.moveTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr)
-                   : ctx.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr);
-        }
-        ctx.closePath();
-        ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
+    const group = new THREE.Group();
+    scene.add(group);
 
-      // Axes + labels
-      for (let i = 0; i < n; i++) {
-        const a = (i / n) * Math.PI * 2 - Math.PI / 2;
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
-        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-        ctx.stroke();
-        const lx = cx + Math.cos(a) * (r + 14);
-        const ly = cy + Math.sin(a) * (r + 14);
-        ctx.fillStyle = 'rgba(240,240,240,0.5)';
-        ctx.font = '7px monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText(METRICS[i], lx, ly + 3);
-      }
-
-      // Data polygon
-      ctx.beginPath();
-      valuesRef.current.forEach((v, i) => {
-        const a = (i / n) * Math.PI * 2 - Math.PI / 2;
-        i === 0 ? ctx.moveTo(cx + Math.cos(a) * r * v, cy + Math.sin(a) * r * v)
-                 : ctx.lineTo(cx + Math.cos(a) * r * v, cy + Math.sin(a) * r * v);
+    // 1. Concentric Radar Target Circles
+    for (let r = 0.5; r <= 1.8; r += 0.45) {
+      const ringGeo = new THREE.RingGeometry(r, r + 0.015, 64);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: 0xf59e0b,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.35,
       });
-      ctx.closePath();
-      ctx.fillStyle = 'rgba(201,168,76,0.12)';
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(201,168,76,0.8)';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = -Math.PI / 2;
+      group.add(ring);
+    }
 
-      // Data points
-      valuesRef.current.forEach((v, i) => {
-        const a = (i / n) * Math.PI * 2 - Math.PI / 2;
-        ctx.beginPath();
-        ctx.arc(cx + Math.cos(a) * r * v, cy + Math.sin(a) * r * v, 3, 0, Math.PI * 2);
-        ctx.fillStyle = '#C9A84C';
-        ctx.fill();
-      });
+    // 2. Crosshair Grid Lines
+    const lineMat = new THREE.LineBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.3 });
+    const crossGeo = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-1.8, 0, 0), new THREE.Vector3(1.8, 0, 0),
+      new THREE.Vector3(0, 0, -1.8), new THREE.Vector3(0, 0, 1.8),
+    ]);
+    const crossLines = new THREE.LineSegments(crossGeo, lineMat);
+    group.add(crossLines);
 
-      rafRef.current = requestAnimationFrame(draw);
+    // 3. Rotating 3D Holographic Radar Sweep Beam
+    const sweepGeo = new THREE.ConeGeometry(1.8, 0.01, 32, 1, false, 0, Math.PI / 3);
+    const sweepMat = new THREE.MeshBasicMaterial({
+      color: 0xf59e0b,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.25,
+    });
+    const sweep = new THREE.Mesh(sweepGeo, sweepMat);
+    sweep.rotation.x = -Math.PI / 2;
+    group.add(sweep);
+
+    // 4. Detected Conversion Target Blips (Spheres)
+    const blipCount = 6;
+    const blips: THREE.Mesh[] = [];
+    const blipGeo = new THREE.SphereGeometry(0.06, 8, 8);
+    const blipMat = new THREE.MeshBasicMaterial({ color: 0x22c55e });
+
+    for (let i = 0; i < blipCount; i++) {
+      const blip = new THREE.Mesh(blipGeo, blipMat);
+      const angle = (i / blipCount) * Math.PI * 2 + 0.3;
+      const dist = 0.6 + (i % 3) * 0.45;
+      blip.position.set(Math.cos(angle) * dist, 0.05, Math.sin(angle) * dist);
+      group.add(blip);
+      blips.push(blip);
+    }
+
+    let rafId: number;
+    let sweepAngle = 0;
+
+    const resize = () => {
+      const parent = canvas.parentElement;
+      if (!parent) return;
+      const w = parent.clientWidth;
+      const h = parent.clientHeight;
+      if (w === 0 || h === 0) return;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
     };
-    draw();
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-  }, [hovered]);
 
-  return <canvas ref={canvasRef} width={220} height={160} className={styles.radarCanvas} />;
+    const resizeObs = new ResizeObserver(resize);
+    resizeObs.observe(canvas.parentElement || canvas);
+    resize();
+
+    const animate = () => {
+      rafId = requestAnimationFrame(animate);
+
+      const speed = hoveredRef.current ? 0.05 : 0.015;
+      sweepAngle += speed;
+      sweep.rotation.z = sweepAngle;
+
+      blips.forEach((blip, i) => {
+        const pulse = Math.sin(Date.now() * 0.005 + i) * 0.5 + 0.5;
+        blip.scale.setScalar(1 + pulse * (hoveredRef.current ? 0.6 : 0.2));
+      });
+
+      sweepMat.opacity = hoveredRef.current ? 0.45 : 0.2;
+
+      const targetScale = hoveredRef.current ? 1.15 : 0.95;
+      group.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.08);
+
+      renderer.render(scene, camera);
+    };
+
+    animate();
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      resizeObs.disconnect();
+      renderer.dispose();
+      sweepGeo.dispose();
+      sweepMat.dispose();
+      crossGeo.dispose();
+      lineMat.dispose();
+      blipGeo.dispose();
+      blipMat.dispose();
+    };
+  }, []);
+
+  return (
+    <canvas 
+      ref={canvasRef} 
+      style={{ width: '100%', height: '100%', display: 'block' }} 
+    />
+  );
 }

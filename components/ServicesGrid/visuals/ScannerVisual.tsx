@@ -1,72 +1,132 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
-import styles from '../CardVisual.module.css';
+
+import { useEffect, useRef } from 'react';
+import * as THREE from 'three';
 
 export default function ScannerVisual({ hovered }: { hovered: boolean }) {
-  const [scanY, setScanY] = useState(0);
-  const [findings, setFindings] = useState<number[]>([]);
-  const rafRef = useRef<number>(0);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const hoveredRef = useRef(hovered);
 
   useEffect(() => {
-    if (!hovered) { setScanY(0); setFindings([]); return; }
-    let y = 0;
-    const animate = () => {
-      y = (y + (hovered ? 1.5 : 0.5)) % 140;
-      setScanY(y);
-      // Random "findings" appear as scan passes
-      if (Math.random() < 0.03) {
-        setFindings(prev => [...prev.slice(-6), Math.floor(Math.random() * 130)]);
-      }
-      rafRef.current = requestAnimationFrame(animate);
-    };
-    rafRef.current = requestAnimationFrame(animate);
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+    hoveredRef.current = hovered;
   }, [hovered]);
 
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      alpha: true,
+      antialias: true,
+      powerPreference: 'high-performance',
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setClearColor(0x000000, 0);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+    camera.position.set(0, 0, 5.2);
+
+    const group = new THREE.Group();
+    scene.add(group);
+
+    // 1. 3D Faceted Shield Geodesic Dome (Security Forcefield)
+    const shieldGeo = new THREE.IcosahedronGeometry(1.4, 1);
+    const shieldEdges = new THREE.EdgesGeometry(shieldGeo);
+    const shieldMat = new THREE.LineBasicMaterial({
+      color: 0x10b981,
+      transparent: true,
+      opacity: 0.65,
+    });
+    const shieldWireframe = new THREE.LineSegments(shieldEdges, shieldMat);
+    group.add(shieldWireframe);
+
+    // 2. Inner Security Lock Octahedron
+    const lockGeo = new THREE.OctahedronGeometry(0.65, 0);
+    const lockMat = new THREE.MeshBasicMaterial({
+      color: 0x34d399,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.5,
+    });
+    const lockMesh = new THREE.Mesh(lockGeo, lockMat);
+    group.add(lockMesh);
+
+    // 3. Sweeping Laser Scan Line Ring
+    const scanRingGeo = new THREE.TorusGeometry(1.42, 0.02, 16, 64);
+    const scanRingMat = new THREE.MeshBasicMaterial({
+      color: 0x4ade80,
+      transparent: true,
+      opacity: 0.8,
+    });
+    const scanRing = new THREE.Mesh(scanRingGeo, scanRingMat);
+    scanRing.rotation.x = Math.PI / 2;
+    group.add(scanRing);
+
+    let rafId: number;
+    let scanY = 0;
+    let scanDir = 1;
+
+    const resize = () => {
+      const parent = canvas.parentElement;
+      if (!parent) return;
+      const w = parent.clientWidth;
+      const h = parent.clientHeight;
+      if (w === 0 || h === 0) return;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    };
+
+    const resizeObs = new ResizeObserver(resize);
+    resizeObs.observe(canvas.parentElement || canvas);
+    resize();
+
+    const animate = () => {
+      rafId = requestAnimationFrame(animate);
+
+      const speed = hoveredRef.current ? 0.025 : 0.008;
+      group.rotation.y += speed;
+      group.rotation.x = Math.sin(Date.now() * 0.002) * 0.15;
+      lockMesh.rotation.y -= speed * 1.5;
+
+      // Laser scan sweep
+      const scanSpeed = hoveredRef.current ? 0.05 : 0.02;
+      scanY += scanDir * scanSpeed;
+      if (scanY > 1.2) scanDir = -1;
+      if (scanY < -1.2) scanDir = 1;
+      scanRing.position.y = scanY;
+
+      shieldMat.opacity = hoveredRef.current ? 0.95 : 0.5;
+      scanRingMat.opacity = hoveredRef.current ? 0.95 : 0.4;
+
+      const targetScale = hoveredRef.current ? 1.15 : 0.95;
+      group.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.08);
+
+      renderer.render(scene, camera);
+    };
+
+    animate();
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      resizeObs.disconnect();
+      renderer.dispose();
+      shieldGeo.dispose();
+      shieldEdges.dispose();
+      shieldMat.dispose();
+      lockGeo.dispose();
+      lockMat.dispose();
+      scanRingGeo.dispose();
+      scanRingMat.dispose();
+    };
+  }, []);
+
   return (
-    <div className={styles.scannerWrap}>
-      <svg viewBox="0 0 200 140" fill="none" className={styles.scannerSvg}>
-        {/* Background grid */}
-        {Array.from({ length: 8 }).map((_, i) => (
-          <line key={`h${i}`} x1="0" y1={i * 20} x2="200" y2={i * 20} stroke="rgba(0,255,100,0.06)" strokeWidth="0.5" />
-        ))}
-        {Array.from({ length: 10 }).map((_, i) => (
-          <line key={`v${i}`} x1={i * 22} y1="0" x2={i * 22} y2="140" stroke="rgba(0,255,100,0.06)" strokeWidth="0.5" />
-        ))}
-
-        {/* Corner brackets */}
-        {[[10,10],[190,10],[10,130],[190,130]].map(([bx, by], i) => (
-          <g key={i}>
-            <path d={`M ${bx} ${by + (by < 70 ? 15 : -15)} L ${bx} ${by} L ${bx + (bx < 100 ? 15 : -15)} ${by}`}
-              stroke="rgba(0,255,100,0.5)" strokeWidth="1.5" fill="none" />
-          </g>
-        ))}
-
-        {/* Check marks for found items */}
-        {findings.map((fy, i) => (
-          <g key={i} opacity={hovered ? 0.9 : 0.5}>
-            <circle cx={20 + (i * 25) % 160} cy={fy} r="6" fill="none" stroke="rgba(0,255,100,0.4)" strokeWidth="1" />
-            <path d={`M ${14 + (i * 25) % 160} ${fy} l 4 4 l 7 -7`}
-              stroke="rgba(0,255,100,0.9)" strokeWidth="1.2" strokeLinecap="round" fill="none" />
-          </g>
-        ))}
-
-        {/* Laser scan line */}
-        <line x1="0" y1={scanY} x2="200" y2={scanY} stroke="rgba(0,255,100,0.7)" strokeWidth="1.5" />
-        <rect x="0" y={scanY - 15} width="200" height="15" fill="url(#scanGrad)" />
-        <defs>
-          <linearGradient id="scanGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="rgba(0,255,100,0)" />
-            <stop offset="100%" stopColor="rgba(0,255,100,0.08)" />
-          </linearGradient>
-        </defs>
-      </svg>
-
-      {/* Status */}
-      <div className={styles.scanStatus}>
-        <span className={styles.scanDot} />
-        <span>{hovered ? `Scanning... ${findings.length} items found` : 'System ready'}</span>
-      </div>
-    </div>
+    <canvas 
+      ref={canvasRef} 
+      style={{ width: '100%', height: '100%', display: 'block' }} 
+    />
   );
 }
