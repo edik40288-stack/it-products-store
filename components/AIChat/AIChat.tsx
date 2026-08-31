@@ -29,14 +29,14 @@ export default function AIChat() {
   const [promptStep, setPromptStep] = useState<number>(0);
   const [emotionState, setEmotionState] = useState<EmotionType>('idle');
   const [isBubbleDismissed, setIsBubbleDismissed] = useState(false);
+  const lifecycleCompletedRef = useRef(false);
 
-  // Exact step timing:
-  // 1. Starts 3 seconds after site load
-  // 2. Second message after 4 seconds (7s total)
-  // 3. Third message after 4 seconds (11s total)
-  // 4. Closes after 4 seconds (15s total) and stays permanently closed & static
+  // Exact step timing: runs ONCE on initial site load only
   useEffect(() => {
+    if (lifecycleCompletedRef.current) return;
+
     if (isOpen || isBubbleDismissed) {
+      lifecycleCompletedRef.current = true;
       setPromptStep(0);
       setEmotionState('finished');
       return;
@@ -44,24 +44,31 @@ export default function AIChat() {
 
     // T = 3.0s: Step 1 (Greeting)
     const timer1 = setTimeout(() => {
-      setPromptStep(1);
-      setEmotionState('happy');
+      if (!lifecycleCompletedRef.current) {
+        setPromptStep(1);
+        setEmotionState('happy');
+      }
     }, 3000);
 
     // T = 7.0s (3s + 4s): Step 2 (Diplomat / Business)
     const timer2 = setTimeout(() => {
-      setPromptStep(2);
-      setEmotionState('diplomat');
+      if (!lifecycleCompletedRef.current) {
+        setPromptStep(2);
+        setEmotionState('diplomat');
+      }
     }, 7000);
 
     // T = 11.0s (7s + 4s): Step 3 (Sad / Regret 🥺)
     const timer3 = setTimeout(() => {
-      setPromptStep(3);
-      setEmotionState('pout');
+      if (!lifecycleCompletedRef.current) {
+        setPromptStep(3);
+        setEmotionState('pout');
+      }
     }, 11000);
 
-    // T = 15.0s (11s + 4s): Close bubble & freeze avatar static on smiling robot
+    // T = 15.0s: Permanently complete lifecycle and freeze avatar static
     const timer4 = setTimeout(() => {
+      lifecycleCompletedRef.current = true;
       setPromptStep(0);
       setEmotionState('finished');
     }, 15000);
@@ -79,13 +86,15 @@ export default function AIChat() {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (detail?.context === 'audit') {
-        setEmotionState('diplomat');
+        lifecycleCompletedRef.current = true;
         setPromptStep(0);
+        setEmotionState('diplomat');
+        setIsOpen(true);
       }
     };
     document.addEventListener('open-ai-chat', handler);
     return () => document.removeEventListener('open-ai-chat', handler);
-  }, []);
+  }, [setIsOpen]);
 
   // Prompt messages
   const getPromptText = () => {
@@ -106,6 +115,7 @@ export default function AIChat() {
   };
 
   const handleOpenChat = () => {
+    lifecycleCompletedRef.current = true;
     setIsOpen(true);
     setPromptStep(0);
     setEmotionState('finished');
@@ -113,6 +123,7 @@ export default function AIChat() {
 
   const handleDismissBubble = (e: React.MouseEvent) => {
     e.stopPropagation();
+    lifecycleCompletedRef.current = true;
     setIsBubbleDismissed(true);
     setPromptStep(0);
     setEmotionState('finished');

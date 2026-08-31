@@ -22,33 +22,36 @@ export function useAIChat() {
 
   const greeting = locale === 'ru' ? CHAT_GREETING_RU : CHAT_GREETING_EN;
 
+  const hasEventOpenedRef = useRef(false);
+
   // Open chat via event
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
+      hasEventOpenedRef.current = true;
       setIsOpen(true);
       if (detail?.context === 'audit') {
         setTimeout(() => {
           addMessage('assistant', t('auditGreeting'));
-        }, 400);
+        }, 100);
       } else if (detail?.context) {
         setTimeout(() => {
           addMessage('assistant', t('contextGreeting', { context: detail.context }));
-        }, 500);
+        }, 100);
       }
     };
     document.addEventListener('open-ai-chat', handler);
     return () => document.removeEventListener('open-ai-chat', handler);
   }, [addMessage, t]);
 
-  // Initial greeting
+  // Initial greeting (only when opened manually by clicking the floating avatar, not by event)
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
+    if (isOpen && messages.length === 0 && !hasEventOpenedRef.current) {
       setIsTyping(true);
       setTimeout(() => {
         setIsTyping(false);
         addMessage('assistant', greeting);
-      }, 800);
+      }, 500);
     }
   }, [isOpen, messages.length, addMessage, greeting]);
 

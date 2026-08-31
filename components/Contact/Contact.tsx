@@ -32,7 +32,7 @@ export default function Contact() {
           <div className={styles.channelsGrid}>
             {/* Telegram */}
             <a 
-              href="https://t.me/mindcore_studio" 
+              href="https://t.me/kraeved111" 
               target="_blank" 
               rel="noopener noreferrer" 
               className={`${styles.channelCard} ${styles.channelTelegram}`}
@@ -44,14 +44,14 @@ export default function Contact() {
               </div>
               <div className={styles.channelInfo}>
                 <span className={styles.channelName}>Telegram</span>
-                <span className={styles.channelDetail}>@mindcore_studio</span>
+                <span className={styles.channelDetail}>{isRu ? 'Написать в Telegram' : 'Open Telegram'}</span>
               </div>
               <span className={styles.channelArrow}>→</span>
             </a>
 
             {/* WhatsApp */}
             <a 
-              href="https://wa.me/" 
+              href="https://wa.me/4207278671129" 
               target="_blank" 
               rel="noopener noreferrer" 
               className={`${styles.channelCard} ${styles.channelWhatsapp}`}
@@ -63,14 +63,14 @@ export default function Contact() {
               </div>
               <div className={styles.channelInfo}>
                 <span className={styles.channelName}>WhatsApp</span>
-                <span className={styles.channelDetail}>{isRu ? 'Написать в WhatsApp' : 'Chat in WhatsApp'}</span>
+                <span className={styles.channelDetail}>{isRu ? 'Написать в WhatsApp' : 'Open WhatsApp'}</span>
               </div>
               <span className={styles.channelArrow}>→</span>
             </a>
 
             {/* Email */}
             <a 
-              href="mailto:newbusiness@mindcore.studio" 
+              href="mailto:edik40288@gmail.com" 
               className={`${styles.channelCard} ${styles.channelEmail}`}
             >
               <div className={styles.channelIcon}>
@@ -81,14 +81,14 @@ export default function Contact() {
               </div>
               <div className={styles.channelInfo}>
                 <span className={styles.channelName}>{isRu ? 'Почта' : 'Email'}</span>
-                <span className={styles.channelDetail}>newbusiness@mindcore.studio</span>
+                <span className={styles.channelDetail}>{isRu ? 'Отправить письмо' : 'Send an Email'}</span>
               </div>
               <span className={styles.channelArrow}>→</span>
             </a>
 
             {/* Viber */}
             <a 
-              href="viber://chat?number=" 
+              href="viber://chat?number=%2B4207278671129" 
               className={`${styles.channelCard} ${styles.channelViber}`}
             >
               <div className={styles.channelIcon}>
@@ -98,7 +98,7 @@ export default function Contact() {
               </div>
               <div className={styles.channelInfo}>
                 <span className={styles.channelName}>Viber</span>
-                <span className={styles.channelDetail}>{isRu ? 'Написать в Viber' : 'Chat in Viber'}</span>
+                <span className={styles.channelDetail}>{isRu ? 'Написать в Viber' : 'Open Viber'}</span>
               </div>
               <span className={styles.channelArrow}>→</span>
             </a>
