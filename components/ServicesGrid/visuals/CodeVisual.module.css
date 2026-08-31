@@ -5,57 +5,58 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding-right: 1.5rem;
   overflow: hidden;
   user-select: none;
+  border-radius: 16px;
 }
 
-.sceneSvg {
+.videoWrapper {
+  position: relative;
   width: 100%;
   height: 100%;
-  max-width: 250px;
-  max-height: 190px;
-  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 14px;
 }
 
-/* Micro-animations */
-.developer {
-  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+.videoElement {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+  opacity: 0.85;
+  transition: opacity 0.35s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+  pointer-events: none;
 }
 
-.chair {
-  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+.videoHovered {
+  opacity: 1;
+  transform: scale(1.03);
 }
 
-.drinkCan {
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
-}
-
-.laptopLid {
-  transform-origin: 110px 105px;
-  transition: transform 0.5s cubic-bezier(0.34, 1.25, 0.64, 1);
-}
-
-.screenGlow {
-  transition: opacity 0.4s ease;
-}
-
-.codeLine {
-  transition: opacity 0.25s ease;
+.videoOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to right, rgba(12, 14, 20, 0.95) 0%, rgba(12, 14, 20, 0.2) 25%, transparent 60%);
+  border-radius: 12px;
 }
 
 /* Glass Status Badge */
 .statusBadge {
   position: absolute;
-  top: 14px;
-  right: 16px;
+  top: 12px;
+  right: 14px;
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
   border-radius: 20px;
   background: rgba(13, 16, 25, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.4);
   font-family: 'JetBrains Mono', Consolas, monospace;
   font-size: 8px;
   font-weight: 600;
@@ -71,36 +72,9 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #3b82f6;
-  box-shadow: 0 0 6px #3b82f6;
-}
-
-.statusDotBuilding {
-  background: #f59e0b;
-  box-shadow: 0 0 8px #f59e0b;
-  animation: pulseDot 0.8s infinite alternate;
-}
-
-.statusDotSuccess {
   background: #22c55e;
-  box-shadow: 0 0 10px #22c55e;
-}
-
-.statusDotDeploying {
-  background: #a855f7;
-  box-shadow: 0 0 8px #a855f7;
-  animation: pulseDot 0.6s infinite alternate;
-}
-
-.statusDotLive {
-  background: #22c55e;
-  box-shadow: 0 0 10px #22c55e;
+  box-shadow: 0 0 8px #22c55e;
   animation: liveBeacon 2s infinite;
-}
-
-@keyframes pulseDot {
-  0% { opacity: 0.4; transform: scale(0.85); }
-  100% { opacity: 1; transform: scale(1.15); }
 }
 
 @keyframes liveBeacon {
@@ -110,7 +84,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .developer, .chair, .drinkCan, .laptopLid, .screenGlow, .statusBadge {
+  .videoElement, .statusBadge {
     transition: none !important;
     animation: none !important;
   }
