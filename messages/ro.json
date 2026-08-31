@@ -8,7 +8,7 @@
     "topic1": "CRM Personalizat",
     "topic2": "Automatizare",
     "placeholder": "Introduceți link-ul site-ului dvs. sau nișa...",
-    "analyzeBtn": "Analiză",
+    "analyzeBtn": "Audit gratuit de afaceri",
     "log1": "> Analizând structura și pâlnia...",
     "log2": "> Căutând puncte de pierdere a traficului...",
     "log3": "> Conectând Arhitectul AI...",
@@ -145,7 +145,8 @@
     },
     "success": "Cererea dumneavoastră a fost trimisă echipei MINDCORE. Vă vom contacta în decurs de 2 ore lucrătoare. 🚀",
     "error": "Am probleme de conectivitate. Vă rugăm să ne trimiteți un email direct la newbusiness@mindcore.studio 🙏",
-    "contextGreeting": "Alegere excelentă! Permiteți-mi să vă ajut să explorați serviciul **{context}**. Care este situația dumneavoastră actuală?"
+    "contextGreeting": "Alegere excelentă! Permiteți-mi să vă ajut să explorați serviciul **{context}**. Care este situația dumneavoastră actuală?",
+    "auditGreeting": "Hei, vino aici! Deja analizez afacerea ta 👔 Unde și în ce format doriți să trimit raportul (Telegram, WhatsApp sau Email)?"
   },
   "footer": {
     "slogan": "A booster rocket for digital product teams",

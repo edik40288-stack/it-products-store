@@ -8,7 +8,7 @@
     "topic1": "Custom CRM",
     "topic2": "Automation",
     "placeholder": "Paste a link to your site or niche...",
-    "analyzeBtn": "Analyze",
+    "analyzeBtn": "Free business audit",
     "log1": "> Analyzing structure and funnel...",
     "log2": "> Searching for traffic drop-off points...",
     "log3": "> Connecting AI Architect...",
@@ -144,8 +144,9 @@
       "contact": "Excellent! Let me connect you with our team. What's your name and best way to reach you (Telegram or email)?"
     },
     "success": "Your request has been sent to the MINDCORE team. We'll be in touch within 2 business hours. 🚀",
-    "error": "I'm having a connectivity issue. Please email us directly at newbusiness@mindcore.studio 🙏",
-    "contextGreeting": "Great choice! Let me help you explore the **{context}** service. What's your current situation?"
+    "error": "Connection issue. Please email us at newbusiness@mindcore.studio 🙏",
+    "contextGreeting": "Great choice! Let's discuss **{context}**. What's your current situation?",
+    "auditGreeting": "Hey, over here! I'm already analyzing your business 👔 Where and in what format should I send the report (Telegram, WhatsApp or Email)?"
   },
   "footer": {
     "slogan": "A booster rocket for digital product teams",

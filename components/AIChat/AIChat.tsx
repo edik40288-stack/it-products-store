@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import styles from './AIChat.module.css';
@@ -73,6 +73,19 @@ export default function AIChat() {
       clearTimeout(timer4);
     };
   }, [isOpen, isBubbleDismissed]);
+
+  // Listen for external trigger (e.g. Hero audit button)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.context === 'audit') {
+        setEmotionState('diplomat');
+        setPromptStep(0);
+      }
+    };
+    document.addEventListener('open-ai-chat', handler);
+    return () => document.removeEventListener('open-ai-chat', handler);
+  }, []);
 
   // Prompt messages
   const getPromptText = () => {

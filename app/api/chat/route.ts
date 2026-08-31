@@ -32,7 +32,29 @@ The studio is based in New York, Copenhagen, and Chisinau. Email: newbusiness@mi
 
 export async function POST(request: NextRequest) {
   try {
-    const { messages, mode } = await request.json();
+    const body = await request.json();
+    const { messages, mode, type, urlOrNiche } = body;
+
+    // Handle instant audit lead submission to Telegram
+    if (type === 'audit_request') {
+      const token = process.env.TELEGRAM_BOT_TOKEN;
+      const chatId = process.env.TELEGRAM_CHAT_ID;
+      const timeStr = new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' });
+      const text = `⚡️ <b>НОВАЯ ЗАЯВКА: БЕСПЛАТНЫЙ АУДИТ БИЗНЕСА</b> ⚡️\n\n🔗 <b>Ссылка / Ниша:</b> ${urlOrNiche || 'Не указано'}\n⏱ <b>Время:</b> ${timeStr}`;
+
+      if (token && chatId) {
+        try {
+          await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' }),
+          });
+        } catch (e) {
+          console.error('Error sending audit request to Telegram:', e);
+        }
+      }
+      return NextResponse.json({ success: true });
+    }
 
     // Scripted fallback mode (no API key needed for MVP demo)
     if (mode === 'scripted' || !process.env.OPENROUTER_API_KEY) {

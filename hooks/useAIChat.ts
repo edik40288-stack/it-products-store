@@ -27,7 +27,11 @@ export function useAIChat() {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       setIsOpen(true);
-      if (detail?.context) {
+      if (detail?.context === 'audit') {
+        setTimeout(() => {
+          addMessage('assistant', t('auditGreeting'));
+        }, 400);
+      } else if (detail?.context) {
         setTimeout(() => {
           addMessage('assistant', t('contextGreeting', { context: detail.context }));
         }, 500);
@@ -35,7 +39,7 @@ export function useAIChat() {
     };
     document.addEventListener('open-ai-chat', handler);
     return () => document.removeEventListener('open-ai-chat', handler);
-  }, [addMessage]);
+  }, [addMessage, t]);
 
   // Initial greeting
   useEffect(() => {

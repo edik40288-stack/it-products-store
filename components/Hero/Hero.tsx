@@ -71,10 +71,21 @@ export default function Hero() {
   // Act 3: Form Submit & AIChat Trigger
   const handleAnalyzeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputValue.trim() || isScanning) return;
+    const query = inputValue.trim();
+    if (!query || isScanning) return;
 
     setIsScanning(true);
     inputRef.current?.blur();
+    
+    // 1. Send instant lead notification to Telegram
+    fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'audit_request',
+        urlOrNiche: query
+      })
+    }).catch(err => console.error('Audit lead error:', err));
     
     setLogMessages([t('log1')]);
     
@@ -88,7 +99,10 @@ export default function Hero() {
 
     const t3 = setTimeout(() => {
       const event = new CustomEvent('open-ai-chat', {
-        detail: { context: `Analyze link: ${inputValue}` }
+        detail: { 
+          context: 'audit',
+          value: query
+        }
       });
       document.dispatchEvent(event);
       setIsScanning(false);
