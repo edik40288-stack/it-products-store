@@ -31,8 +31,8 @@ export default function WebGLDistortionCanvas() {
     camera.position.z = 100;
 
     // 2. Mesh pool management
-    // 32x32 segments is enough for smooth vertex distortion and much faster
-    const geometry = new THREE.PlaneGeometry(1, 1, 32, 32);
+    // 48x48 segments gives ultra-smooth organic bending resolution
+    const geometry = new THREE.PlaneGeometry(1, 1, 48, 48);
     const meshes = new Map<string, THREE.Mesh>();
 
     // --- LAYOUT THRASHING FIX ---

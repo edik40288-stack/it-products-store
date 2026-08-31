@@ -21,15 +21,15 @@ void main() {
   // Distance from vertex to mouse
   float dist = distance(pos.xy, localMouse);
 
-  // Smooth Gaussian bell-curve influence for natural flexible elasticity
-  float influence = exp(-dist * dist * 3.0) * u_hoverState;
+  // Smooth bell-curve influence across vertices for visible elastic flex
+  float influence = smoothstep(0.85, 0.0, dist) * u_hoverState;
 
-  // Smooth 3D depth dome toward viewer (gentle flex)
-  pos.z += influence * 12.0;
+  // Noticeable 3D depth dome toward viewer
+  pos.z += influence * 25.0;
 
-  // Soft magnetic flex toward cursor without edge wobble
+  // Elastic magnetic pull toward cursor - side/border visibly bends towards mouse
   vec2 toMouse = localMouse - pos.xy;
-  pos.xy += toMouse * (influence * 0.04);
+  pos.xy += toMouse * (influence * 0.18);
 
   vDistortion = influence;
 
@@ -58,38 +58,37 @@ float sdRoundRect(vec2 p, vec2 b, float r) {
 void main() {
   vec2 uv = vUv;
 
-  // Fluid smooth gradient mesh
+  // Localized subtle hover aura
   vec2 mouseNorm = vec2(u_mouse.x, 1.0 - u_mouse.y);
   float mouseDist = distance(uv, mouseNorm);
-  float spotGlow = exp(-mouseDist * mouseDist * 4.5) * u_hoverState;
+  float spotGlow = exp(-mouseDist * mouseDist * 6.0) * u_hoverState;
 
-  // Ambient fluid color motion
-  float wave = sin(uv.x * 2.5 + u_time * 0.4) * cos(uv.y * 2.5 + u_time * 0.3) * 0.5 + 0.5;
-  vec3 gradientCol = mix(u_color1, u_color2, wave * 0.7 + uv.y * 0.3);
+  // Deep dark obsidian glass base (maintains high contrast for white text)
+  vec3 baseGlass = vec3(0.045, 0.045, 0.065);
+  
+  // Subtle ambient tint from theme colors
+  vec3 accentGlow = mix(u_color1, u_color2, uv.x * 0.7 + uv.y * 0.3);
+  vec3 rgb = mix(baseGlass, accentGlow, 0.08 + spotGlow * 0.15);
 
-  // Deep dark glass base
-  vec3 baseGlass = vec3(0.06, 0.06, 0.09);
-  vec3 rgb = mix(baseGlass, gradientCol, 0.15 + spotGlow * 0.35);
-
-  // Specular spot under cursor
-  rgb += mix(u_color1, vec3(1.0), 0.6) * spotGlow * 0.45;
+  // Soft specular highlight, keeping dark luxury tone without blinding whiteout
+  rgb += u_color1 * (spotGlow * 0.15);
 
   // Alpha
-  float alpha = 0.55 + spotGlow * 0.3;
+  float alpha = 0.85 + spotGlow * 0.1;
 
   // Pixel-perfect rounded rect mask
   vec2 px = vUv * u_cardSize;
   float d = sdRoundRect(px, u_cardSize, 20.0);
   float mask = 1.0 - smoothstep(-0.5, 0.5, d);
 
-  // 1px luxury neon border with cursor spotlight
+  // 1px luxury neon border with glowing highlight near cursor
   float border = mask * (1.0 - smoothstep(-1.5, -0.5, d));
-  float borderGlow = exp(-mouseDist * mouseDist * 3.0) * u_hoverState;
-  vec3 borderCol = mix(vec3(0.3, 0.3, 0.4), mix(u_color1, u_color2, uv.x), 0.5 + borderGlow * 0.5);
-  borderCol += vec3(1.0) * borderGlow * 0.7;
+  float borderGlow = exp(-mouseDist * mouseDist * 3.5) * u_hoverState;
+  vec3 borderCol = mix(vec3(0.2, 0.22, 0.3), mix(u_color1, u_color2, uv.x), 0.4 + borderGlow * 0.6);
+  borderCol += vec3(0.7) * (borderGlow * 0.5);
 
   rgb = mix(rgb, borderCol, border);
-  alpha = max(alpha, border * (0.4 + borderGlow * 0.6));
+  alpha = max(alpha, border * (0.5 + borderGlow * 0.5));
 
   gl_FragColor = vec4(rgb, alpha * mask);
 }
