@@ -14,26 +14,26 @@ import RadarVisual from './visuals/RadarVisual';
 import SplitVisual from './visuals/SplitVisual';
 import ScannerVisual from './visuals/ScannerVisual';
 
-function renderServiceVisual(id: string, isHovered: boolean) {
+function renderServiceVisual(id: string, isHovered: boolean, mouseX: number, mouseY: number) {
   switch (id) {
     case 'development':
-      return <CodeVisual hovered={isHovered} />;
+      return <CodeVisual hovered={isHovered} mouseX={mouseX} mouseY={mouseY} />;
     case 'ai-agents':
-      return <ChatVisual hovered={isHovered} />;
+      return <ChatVisual hovered={isHovered} mouseX={mouseX} mouseY={mouseY} />;
     case 'crm':
-      return <DashboardVisual hovered={isHovered} />;
+      return <DashboardVisual hovered={isHovered} mouseX={mouseX} mouseY={mouseY} />;
     case 'llm-integrations':
-      return <LLMVisual hovered={isHovered} />;
+      return <LLMVisual hovered={isHovered} mouseX={mouseX} mouseY={mouseY} />;
     case 'automation':
-      return <GearsVisual hovered={isHovered} />;
+      return <GearsVisual hovered={isHovered} mouseX={mouseX} mouseY={mouseY} />;
     case 'analytics':
-      return <RadarVisual hovered={isHovered} />;
+      return <RadarVisual hovered={isHovered} mouseX={mouseX} mouseY={mouseY} />;
     case 'redesign':
-      return <SplitVisual hovered={isHovered} />;
+      return <SplitVisual hovered={isHovered} mouseX={mouseX} mouseY={mouseY} />;
     case 'security':
-      return <ScannerVisual hovered={isHovered} />;
+      return <ScannerVisual hovered={isHovered} mouseX={mouseX} mouseY={mouseY} />;
     default:
-      return <CodeVisual hovered={isHovered} />;
+      return <CodeVisual hovered={isHovered} mouseX={mouseX} mouseY={mouseY} />;
   }
 }
 
@@ -44,6 +44,7 @@ interface ServiceCardProps {
 
 export default function ServiceCard({ item, onClick }: ServiceCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
   const cardRef = useRef<HTMLElement>(null);
   const { registerCard, unregisterCard, updateCardMouse, setCardHover } = useWebGL();
 
@@ -66,11 +67,15 @@ export default function ServiceCard({ item, onClick }: ServiceCardProps) {
     // Normalized coordinates from 0 to 1
     const relX = (e.clientX - rect.left) / rect.width;
     const relY = (e.clientY - rect.top) / rect.height;
+    setMousePos({ x: relX, y: relY });
     updateCardMouse(item.id, relX, relY, e.clientX, e.clientY);
   }, [item.id, updateCardMouse]);
 
   const handleMouseEnter = useCallback(() => setIsHovered(true), []);
-  const handleMouseLeave = useCallback(() => setIsHovered(false), []);
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+    setMousePos({ x: 0.5, y: 0.5 });
+  }, []);
   const handleClick = useCallback(() => onClick(item), [item, onClick]);
 
   return (
@@ -91,7 +96,7 @@ export default function ServiceCard({ item, onClick }: ServiceCardProps) {
       >
         {/* Holographic 3D Visual */}
         <div className={styles.visualWrap}>
-          {renderServiceVisual(item.id, isHovered)}
+          {renderServiceVisual(item.id, isHovered, mousePos.x, mousePos.y)}
         </div>
 
         <div className={styles.overlay} />
