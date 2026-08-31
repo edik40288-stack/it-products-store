@@ -4,8 +4,8 @@
 export const siteConfig = {
   name: 'MINDCORE',
   tagline: 'A booster rocket for digital product teams',
-  email: 'newbusiness@mindcore.studio',
-  telegram: 'https://t.me/mindcore_studio',
+  email: 'edik40288@gmail.com',
+  telegram: 'https://t.me/kraeved111',
 
   // Header status badge — update slots here
   slots: {
@@ -15,9 +15,7 @@ export const siteConfig = {
 
   // Office locations shown in footer
   offices: [
-    { city: 'New York', country: 'USA', timezone: 'UTC-5' },
-    { city: 'Copenhagen', country: 'Denmark', timezone: 'UTC+2' },
-    { city: 'Chisinau', country: 'Moldova', timezone: 'UTC+3' },
+    { city: 'Worldwide', country: 'Remote', timezone: 'Global' },
   ],
 
   // Hero typewriter words
@@ -25,7 +23,7 @@ export const siteConfig = {
 
   // Social links
   social: {
-    telegram: 'https://t.me/mindcore_studio',
+    telegram: 'https://t.me/kraeved111',
     github: 'https://github.com/mindcore-studio',
   },
 

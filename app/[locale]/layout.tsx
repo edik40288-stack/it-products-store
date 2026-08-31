@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       default: `${siteConfig.name} — AI Development Studio`,
       template: `%s | ${siteConfig.name}`,
     },
-    description: `${siteConfig.tagline}. We build AI agents, custom software, automation systems, and premium digital products. Based in ${siteConfig.offices.map(o => o.city).join(', ')}.`,
+    description: `${siteConfig.tagline}. We build AI agents, custom software, automation systems, and premium digital products worldwide & remote.`,
     keywords: ['AI development', 'chatbots', 'automation', 'LLM integration', 'web development', 'MINDCORE'],
     openGraph: {
       type: 'website',

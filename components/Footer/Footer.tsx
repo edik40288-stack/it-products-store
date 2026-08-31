@@ -1,16 +1,17 @@
 'use client';
-import { siteConfig } from '@/config/site';
+import { useLocale } from 'next-intl';
 import styles from './Footer.module.css';
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const locale = useLocale();
+  const isRu = locale === 'ru';
 
   return (
     <footer className={styles.footer}>
       {/* Background video */}
       <div className={styles.videoBg} aria-hidden="true">
         <div className={styles.videoOverlay} />
-        {/* Placeholder for video — replace src with real backstage footage */}
         <video
           className={styles.video}
           autoPlay
@@ -26,9 +27,13 @@ export default function Footer() {
       <div className={styles.content}>
         {/* Main slogan */}
         <div className={styles.sloganWrap}>
-          <h2 className={styles.slogan}>{siteConfig.tagline}</h2>
-          <a href={`mailto:${siteConfig.email}`} className={styles.emailCta}>
-            {siteConfig.email} →
+          <h2 className={styles.slogan}>
+            {isRu 
+              ? 'Ракета-носитель для команд цифровых продуктов' 
+              : 'A booster rocket for digital product teams'}
+          </h2>
+          <a href="#contact" className={styles.emailCta}>
+            {isRu ? 'Обсудить проект →' : 'Discuss a project →'}
           </a>
         </div>
 
@@ -40,21 +45,10 @@ export default function Footer() {
           </div>
 
           <div className={styles.offices}>
-            {siteConfig.offices.map((office) => (
-              <div key={office.city} className={styles.office}>
-                <span className={styles.officeCity}>{office.city}</span>
-                <span className={styles.officeCountry}>{office.country}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className={styles.links}>
-            <a href={siteConfig.telegram} className={styles.link} target="_blank" rel="noopener noreferrer">
-              Telegram
-            </a>
-            <a href={`mailto:${siteConfig.email}`} className={styles.link}>
-              Email
-            </a>
+            <div className={styles.office}>
+              <span className={styles.officeCity}>{isRu ? 'Весь мир' : 'Worldwide'}</span>
+              <span className={styles.officeCountry}>{isRu ? 'Удаленно' : 'Remote'}</span>
+            </div>
           </div>
         </div>
       </div>
