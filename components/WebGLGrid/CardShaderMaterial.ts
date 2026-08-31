@@ -2,34 +2,46 @@ import * as THREE from 'three';
 
 export const vertexShader = `
 uniform float u_time;
-uniform vec2 u_mouse;       // 0..1 normalized mouse position within card
-uniform float u_hoverState;  // 0..1 eased hover
-uniform vec2 u_cardSize;     // card dimensions in pixels
+uniform vec2 u_mouse;      // 0..1 normalized mouse position within card
+uniform float u_hoverState; // 0..1 eased hover
+uniform vec2 u_cardSize;    // card dimensions in pixels
 
 varying vec2 vUv;
 varying float vDistortion;
-varying vec2 vLocalMouse;
 
 void main() {
   vUv = uv;
   vec3 pos = position;
 
-  // Local mouse in coordinates (-0.5 to 0.5)
-  vec2 localMouse = vec2(u_mouse.x - 0.5, (1.0 - u_mouse.y) - 0.5);
-  vLocalMouse = localMouse;
+  // Mouse in local geometry space (-0.5 to 0.5)
+  vec2 localMouse = vec2(u_mouse.x - 0.5, u_mouse.y - 0.5);
 
-  // Distance from vertex to mouse
+  // Distance from this vertex to the mouse
   float dist = distance(pos.xy, localMouse);
 
-  // Smooth bell-curve influence across vertices for visible elastic flex
-  float influence = smoothstep(0.85, 0.0, dist) * u_hoverState;
+  // Smooth falloff — affects vertices within radius 0.8
+  float influence = smoothstep(0.8, 0.0, dist) * u_hoverState;
 
-  // Noticeable 3D depth dome toward viewer
-  pos.z += influence * 25.0;
+  // --- Organic ripple along edges ---
+  // Sine wave propagating outward from cursor
+  float ripple = sin(dist * 14.0 - u_time * 2.5) * 0.025 * influence;
 
-  // Elastic magnetic pull toward cursor - side/border visibly bends towards mouse
+  // --- Pull vertices toward cursor ---
+  // ~12% displacement for clearly visible warping
   vec2 toMouse = localMouse - pos.xy;
-  pos.xy += toMouse * (influence * 0.18);
+  float pullStrength = 0.12 * influence;
+
+  pos.xy += toMouse * pullStrength;
+
+  // Z-depth bulge
+  pos.z += influence * 0.05 + ripple;
+
+  // Perpendicular ripple for organic border wobble
+  vec2 perpendicular = vec2(-toMouse.y, toMouse.x);
+  if (length(perpendicular) > 0.001) {
+    perpendicular = normalize(perpendicular);
+  }
+  pos.xy += perpendicular * ripple * 3.0;
 
   vDistortion = influence;
 
@@ -47,7 +59,31 @@ uniform vec2 u_cardSize;
 
 varying vec2 vUv;
 varying float vDistortion;
-varying vec2 vLocalMouse;
+
+// Simplex noise
+vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+float snoise(vec2 v){
+  const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+           -0.577350269189626, 0.024390243902439);
+  vec2 i  = floor(v + dot(v, C.yy));
+  vec2 x0 = v - i + dot(i, C.xx);
+  vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+  vec4 x12 = x0.xyxy + C.xxzz;
+  x12.xy -= i1;
+  i = mod(i, 289.0);
+  vec3 p = permute(permute(i.y + vec3(0.0, i1.y, 1.0)) + i.x + vec3(0.0, i1.x, 1.0));
+  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+  m = m*m; m = m*m;
+  vec3 x = 2.0 * fract(p * C.www) - 1.0;
+  vec3 h = abs(x) - 0.5;
+  vec3 ox = floor(x + 0.5);
+  vec3 a0 = x - ox;
+  m *= 1.79284291400159 - 0.85373472095314 * (a0*a0 + h*h);
+  vec3 g;
+  g.x  = a0.x * x0.x + h.x * x0.y;
+  g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+  return 130.0 * dot(m, g);
+}
 
 // Pixel-space rounded rectangle SDF
 float sdRoundRect(vec2 p, vec2 b, float r) {
@@ -58,37 +94,38 @@ float sdRoundRect(vec2 p, vec2 b, float r) {
 void main() {
   vec2 uv = vUv;
 
-  // Localized subtle hover aura
-  vec2 mouseNorm = vec2(u_mouse.x, 1.0 - u_mouse.y);
-  float mouseDist = distance(uv, mouseNorm);
-  float spotGlow = exp(-mouseDist * mouseDist * 6.0) * u_hoverState;
+  // Noise for organic color movement
+  float n1 = snoise(uv * 2.5 + u_time * 0.15);
+  float n2 = snoise(uv * 3.5 - u_time * 0.12);
 
-  // Deep dark luxury obsidian glass base (maintains 100% contrast for typography)
-  vec3 baseGlass = vec3(0.045, 0.05, 0.07);
-  
-  // Subtle ambient tint only on hover, never blowing out into flat purple
-  vec3 accentGlow = mix(u_color1, u_color2, uv.x * 0.7 + uv.y * 0.3);
-  vec3 rgb = mix(baseGlass, accentGlow, 0.015 + spotGlow * 0.06);
+  // Animated color blobs
+  vec2 b1 = vec2(0.3 + sin(u_time * 0.4)*0.2, 0.3 + cos(u_time * 0.3)*0.2);
+  vec2 b2 = vec2(0.7 + cos(u_time * 0.5)*0.2, 0.7 + sin(u_time * 0.6)*0.2);
+  float blob1 = smoothstep(0.55, 0.0, distance(uv, b1));
+  float blob2 = smoothstep(0.65, 0.0, distance(uv, b2));
 
-  // Soft specular highlight
-  rgb += u_color1 * (spotGlow * 0.08);
+  // Base glass color — vibrant blue tint
+  vec3 baseRgb = vec3(0.06, 0.09, 0.18);
+  vec3 colorMix = mix(u_color1, u_color2, (n1 + 1.0) * 0.5);
+  vec3 rgb = baseRgb + colorMix * (blob1 * 0.45 + blob2 * 0.45 + n2 * 0.08);
+
+  // Hover glow from distortion
+  float glow = vDistortion * 0.95;
+  rgb += vec3(0.4, 0.7, 1.0) * glow;
 
   // Alpha
-  float alpha = 0.9 + spotGlow * 0.08;
+  float alpha = 0.75 + blob1 * 0.15 + blob2 * 0.15 + glow * 0.2;
 
   // Pixel-perfect rounded rect mask
   vec2 px = vUv * u_cardSize;
   float d = sdRoundRect(px, u_cardSize, 20.0);
   float mask = 1.0 - smoothstep(-0.5, 0.5, d);
 
-  // 1px luxury neon border with glowing highlight near cursor
+  // 1px inner border
   float border = mask * (1.0 - smoothstep(-1.5, -0.5, d));
-  float borderGlow = exp(-mouseDist * mouseDist * 3.5) * u_hoverState;
-  vec3 borderCol = mix(vec3(0.18, 0.2, 0.28), mix(u_color1, u_color2, uv.x), 0.35 + borderGlow * 0.5);
-  borderCol += vec3(0.6) * (borderGlow * 0.4);
-
+  vec3 borderCol = mix(vec3(0.6, 0.8, 1.0), u_color1, 0.5) * (0.35 + glow * 0.75);
   rgb = mix(rgb, borderCol, border);
-  alpha = max(alpha, border * (0.5 + borderGlow * 0.5));
+  alpha = max(alpha, border * 0.7);
 
   gl_FragColor = vec4(rgb, alpha * mask);
 }
@@ -111,3 +148,4 @@ export function createCardShaderMaterial() {
     side: THREE.DoubleSide,
   });
 }
+
