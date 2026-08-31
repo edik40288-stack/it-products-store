@@ -126,18 +126,19 @@ export default function Hero() {
         </div>
 
         <h1 className={styles.heading}>
-          <span className={styles.titleLine}>{t('title').split(' ')[0]}</span>
-          <br />
-          <span className={styles.headingStatic}>{t('forTeams')}</span>
-          <span className={styles.typewriterWrap}>
-            <span 
-              className={styles.dynamicWord} 
-              style={{ color: TOPICS[topicIndex]?.color || TOPIC_COLORS[0] }}
-            >
-              {typedText || '\u00A0'}
+          <span className={styles.titleLine}>{t('title')}</span>
+          <div className={styles.typewriterRow}>
+            <span className={styles.headingStatic}>{t('forTeams')}</span>
+            <span className={styles.typewriterWrap}>
+              <span 
+                className={styles.dynamicWord} 
+                style={{ color: TOPICS[topicIndex]?.color || TOPIC_COLORS[0] }}
+              >
+                {typedText || '\u00A0'}
+              </span>
+              <span className={styles.cursor}>|</span>
             </span>
-            <span className={styles.cursor}>|</span>
-          </span>
+          </div>
         </h1>
 
         <p className={styles.subtext}>

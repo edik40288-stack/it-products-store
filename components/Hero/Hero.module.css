@@ -60,9 +60,9 @@
 }
 
 .heading {
-  font-size: clamp(2.2rem, 4.2vw, 4.2rem);
+  font-size: clamp(2rem, 3.8vw, 3.8rem);
   font-weight: 800;
-  line-height: 1.15;
+  line-height: 1.18;
   letter-spacing: -0.02em;
   color: var(--color-text);
   margin-bottom: 1rem;
@@ -70,23 +70,33 @@
 
 .titleLine {
   display: block;
+  margin-bottom: 0.15em;
+}
+
+.typewriterRow {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: nowrap;
+  min-height: 1.25em;
+  line-height: 1.2;
 }
 
 .headingStatic {
   color: rgba(255, 255, 255, 0.6);
   font-weight: 400;
   margin-right: 0.35em;
+  flex-shrink: 0;
 }
 
 .typewriterWrap {
   display: inline-flex;
   align-items: baseline;
-  vertical-align: baseline;
+  white-space: nowrap;
 }
 
 .dynamicWord {
   display: inline-block;
-  transition: color 0.4s ease;
+  transition: color 0.3s ease;
   white-space: nowrap;
 }
 
