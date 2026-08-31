@@ -1,5 +1,5 @@
 .section {
-  padding: 8rem 2.5rem 2rem;
+  padding: 6rem 2.5rem 2rem;
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -7,137 +7,192 @@
 .container {
   background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
   border-radius: 32px;
-  border: 1px solid rgba(255,255,255,0.05);
-  padding: 6rem 4rem 2rem;
+  border: 1px solid rgba(255,255,255,0.07);
+  padding: 5rem 3.5rem 4rem;
   display: flex;
   flex-direction: column;
-  min-height: 60vh;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
 
 .container::before {
   content: '';
   position: absolute;
-  top: -50%;
+  top: -40%;
   left: 50%;
   transform: translateX(-50%);
   width: 80%;
-  height: 100%;
-  background: radial-gradient(circle, rgba(107, 91, 239, 0.15) 0%, transparent 70%);
+  height: 80%;
+  background: radial-gradient(circle, rgba(201, 168, 76, 0.12) 0%, rgba(139, 92, 246, 0.08) 50%, transparent 70%);
   pointer-events: none;
 }
 
 .content {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  max-width: 800px;
+  max-width: 860px;
   margin: 0 auto;
   z-index: 1;
 }
 
-.title {
-  font-size: clamp(3rem, 6vw, 5.5rem);
-  font-weight: 700;
-  letter-spacing: -0.03em;
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgba(201, 168, 76, 0.1);
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-gold, #C9A84C);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   margin-bottom: 1.5rem;
-  line-height: 1.1;
+}
+
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00FF64;
+  box-shadow: 0 0 8px #00FF64;
+}
+
+.title {
+  font-size: clamp(2.4rem, 4.5vw, 4.2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 1rem;
+  line-height: 1.15;
+  color: #fff;
 }
 
 .highlight {
-  background: linear-gradient(135deg, var(--color-gold) 0%, #E8C86A 50%, var(--color-violet) 100%);
+  background: linear-gradient(135deg, var(--color-gold, #C9A84C) 0%, #E8C86A 50%, #C084FC 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  font-style: italic;
 }
 
 .subtitle {
-  font-size: 1.2rem;
-  color: var(--color-text-muted);
-  margin-bottom: 3rem;
-  max-width: 600px;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 3.5rem;
+  max-width: 620px;
 }
 
-.actions {
+/* 4 Channels Grid */
+.channelsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 800px;
+}
+
+.channelCard {
   display: flex;
-  gap: 1.5rem;
   align-items: center;
-}
-
-.btnPrimary {
-  padding: 1.2rem 2.5rem;
-  background: var(--color-gold);
-  color: #0A0A0C;
-  border-radius: 50px;
-  font-weight: 600;
-  font-size: 1.1rem;
+  gap: 1.2rem;
+  padding: 1.25rem 1.6rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
   text-decoration: none;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  color: #fff;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.btnPrimary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(201, 168, 76, 0.3);
+.channelCard:hover {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
 }
 
-.btnSecondary {
-  padding: 1.2rem 2.5rem;
+.channelTelegram:hover {
+  border-color: rgba(0, 136, 204, 0.6);
+  box-shadow: 0 12px 35px rgba(0, 136, 204, 0.2);
+}
+
+.channelWhatsapp:hover {
+  border-color: rgba(37, 211, 102, 0.6);
+  box-shadow: 0 12px 35px rgba(37, 211, 102, 0.2);
+}
+
+.channelEmail:hover {
+  border-color: rgba(201, 168, 76, 0.6);
+  box-shadow: 0 12px 35px rgba(201, 168, 76, 0.2);
+}
+
+.channelViber:hover {
+  border-color: rgba(115, 96, 242, 0.6);
+  box-shadow: 0 12px 35px rgba(115, 96, 242, 0.2);
+}
+
+.channelIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.05);
-  color: var(--color-text);
-  border-radius: 50px;
-  font-weight: 500;
-  font-size: 1.1rem;
-  text-decoration: none;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: background 0.3s ease;
-}
-
-.btnSecondary:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.footer {
-  margin-top: 6rem;
-  padding-top: 2rem;
-  border-top: 1px solid rgba(255,255,255,0.1);
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  z-index: 1;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform 0.25s ease;
 }
 
-.branding {
+.channelCard:hover .channelIcon {
+  transform: scale(1.08);
+}
+
+.channelTelegram .channelIcon { color: #29b6f6; background: rgba(0, 136, 204, 0.12); }
+.channelWhatsapp .channelIcon { color: #25d366; background: rgba(37, 211, 102, 0.12); }
+.channelEmail .channelIcon { color: #C9A84C; background: rgba(201, 168, 76, 0.12); }
+.channelViber .channelIcon { color: #a78bfa; background: rgba(115, 96, 242, 0.12); }
+
+.channelInfo {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  align-items: flex-start;
+  flex: 1;
+  text-align: left;
+  gap: 2px;
 }
 
-.logo {
-  font-size: 1.5rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+.channelName {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.01em;
 }
 
-.slogan {
-  font-size: 0.85rem;
-  color: var(--color-gold);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+.channelDetail {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: monospace;
 }
 
-.copyright {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
+.channelArrow {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.3);
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.channelCard:hover .channelArrow {
+  transform: translateX(4px);
+  color: #fff;
 }
 
 @media (max-width: 768px) {
-  .section { padding: 4rem 1rem 1rem; }
-  .container { padding: 4rem 1.5rem 1.5rem; }
-  .actions { flex-direction: column; width: 100%; }
-  .btnPrimary, .btnSecondary { width: 100%; text-align: center; }
-  .footer { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+  .section { padding: 4rem 1.25rem 1.5rem; }
+  .container { padding: 3.5rem 1.5rem 2.5rem; }
+  .channelsGrid { grid-template-columns: 1fr; gap: 1rem; }
 }

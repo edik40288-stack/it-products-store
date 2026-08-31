@@ -1,8 +1,6 @@
 import Header from '@/components/Header/Header';
 import Hero from '@/components/Hero/Hero';
 import ServicesGrid from '@/components/ServicesGrid/ServicesGrid';
-import Cases from '@/components/Cases/Cases';
-import About from '@/components/About/About';
 import Contact from '@/components/Contact/Contact';
 import Footer from '@/components/Footer/Footer';
 
@@ -27,8 +25,6 @@ export default async function HomePage({ params }: PageProps) {
       <main>
         <Hero />
         <ServicesGrid />
-        <Cases />
-        <About />
         <Contact />
       </main>
 
