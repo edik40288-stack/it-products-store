@@ -59,7 +59,7 @@ export default function AIChat() {
           <div className={styles.headerInfo}>
             <span className={styles.headerName}>MINDCORE AI</span>
             <span className={styles.headerStatus}>
-              {isTyping ? t('typing') : 'Online · powered by OX Alpha'}
+              {isTyping ? t('typing') : 'Online · AI Assistant'}
             </span>
           </div>
         </div>

@@ -64,15 +64,25 @@
 
 .visualWrap {
   position: absolute;
-  inset: 0;
-  z-index: 0;
-  opacity: 0.3; /* Fix overlap readability */
-  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
-  transition: opacity 0.4s ease;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 58%;
+  z-index: 1;
+  opacity: 0.35;
+  pointer-events: none;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  mask-image: radial-gradient(circle at 75% 45%, black 45%, transparent 95%);
+  -webkit-mask-image: radial-gradient(circle at 75% 45%, black 45%, transparent 95%);
 }
 
 .cardHovered .visualWrap {
-  opacity: 0.5;
+  opacity: 0.9;
+  transform: scale(1.05);
 }
 
 .overlay {

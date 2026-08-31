@@ -5,6 +5,38 @@ import { ServiceItem } from '@/types';
 import styles from './ServiceCard.module.css';
 import { useWebGL } from '@/context/WebGLContext';
 
+import CodeVisual from './visuals/CodeVisual';
+import ChatVisual from './visuals/ChatVisual';
+import DashboardVisual from './visuals/DashboardVisual';
+import LLMVisual from './visuals/LLMVisual';
+import GearsVisual from './visuals/GearsVisual';
+import RadarVisual from './visuals/RadarVisual';
+import SplitVisual from './visuals/SplitVisual';
+import ScannerVisual from './visuals/ScannerVisual';
+
+function renderServiceVisual(id: string, isHovered: boolean) {
+  switch (id) {
+    case 'development':
+      return <CodeVisual hovered={isHovered} />;
+    case 'ai-agents':
+      return <ChatVisual hovered={isHovered} />;
+    case 'crm':
+      return <DashboardVisual hovered={isHovered} />;
+    case 'llm-integrations':
+      return <LLMVisual hovered={isHovered} />;
+    case 'automation':
+      return <GearsVisual hovered={isHovered} />;
+    case 'analytics':
+      return <RadarVisual hovered={isHovered} />;
+    case 'redesign':
+      return <SplitVisual hovered={isHovered} />;
+    case 'security':
+      return <ScannerVisual hovered={isHovered} />;
+    default:
+      return <CodeVisual hovered={isHovered} />;
+  }
+}
+
 interface ServiceCardProps {
   item: ServiceItem;
   onClick: (item: ServiceItem) => void;
@@ -57,22 +89,27 @@ export default function ServiceCard({ item, onClick }: ServiceCardProps) {
         ref={cardRef}
         className={`${styles.card} ${isHovered ? styles.cardHovered : ''}`}
       >
+        {/* Holographic 3D Visual */}
+        <div className={styles.visualWrap}>
+          {renderServiceVisual(item.id, isHovered)}
+        </div>
+
         <div className={styles.overlay} />
       
-      {/* Content */}
-      <div className={styles.content}>
-        <div className={styles.tags}>
-          {item.tags.slice(0, 3).map((tag: string) => (
-            <span key={tag} className={styles.tag}>{tag}</span>
-          ))}
+        {/* Content */}
+        <div className={styles.content}>
+          <div className={styles.tags}>
+            {item.tags.slice(0, 3).map((tag: string) => (
+              <span key={tag} className={styles.tag}>{tag}</span>
+            ))}
+          </div>
+          <h3 className={styles.title}>{item.title}</h3>
+          <p className={styles.subtitle}>{item.subtitle}</p>
+          <div className={styles.footer}>
+            <span className={styles.duration}>⏱ {item.duration}</span>
+            <span className={styles.cta}>Explore →</span>
+          </div>
         </div>
-        <h3 className={styles.title}>{item.title}</h3>
-        <p className={styles.subtitle}>{item.subtitle}</p>
-        <div className={styles.footer}>
-          <span className={styles.duration}>⏱ {item.duration}</span>
-          <span className={styles.cta}>Explore →</span>
-        </div>
-      </div>
       </article>
     </div>
   );

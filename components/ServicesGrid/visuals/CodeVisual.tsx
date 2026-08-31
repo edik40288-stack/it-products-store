@@ -3,7 +3,7 @@
 import styles from '../CardVisual.module.css';
 
 const CODE_LINES = [
-  'const agent = new AIAgent({ model: "ox-alpha" })',
+  'const agent = new AIAgent({ model: "gpt-4o" })',
   'await agent.qualifyLead(userInput)',
   'function buildProduct(spec: ProjectSpec) {',
   '  const stack = ["Next.js", "Node", "AWS"]',
