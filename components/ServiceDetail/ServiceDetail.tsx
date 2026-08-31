@@ -4,7 +4,6 @@ import { useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { ServiceItem } from '@/types';
 import styles from './ServiceDetail.module.css';
-import PriceCalculator from './PriceCalculator';
 
 interface ServiceDetailProps {
   item: ServiceItem;
@@ -15,6 +14,15 @@ export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const t = useTranslations('serviceDetail');
 
+  // Lock background body scroll when modal is open
+  useEffect(() => {
+    const origOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = origOverflow;
+    };
+  }, []);
+
   useEffect(() => {
     // Entrance animation
     const el = panelRef.current;
@@ -22,7 +30,7 @@ export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
     el.style.opacity = '0';
     el.style.transform = 'scale(0.96) translateY(20px)';
     requestAnimationFrame(() => {
-      el.style.transition = 'opacity 0.5s cubic-bezier(0.4,0,0.2,1), transform 0.5s cubic-bezier(0.4,0,0.2,1)';
+      el.style.transition = 'opacity 0.4s cubic-bezier(0.16,1,0.3,1), transform 0.4s cubic-bezier(0.16,1,0.3,1)';
       el.style.opacity = '1';
       el.style.transform = 'scale(1) translateY(0)';
     });
@@ -31,10 +39,10 @@ export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
   const handleClose = () => {
     const el = panelRef.current;
     if (!el) { onClose(); return; }
-    el.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+    el.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
     el.style.opacity = '0';
     el.style.transform = 'scale(0.97) translateY(16px)';
-    setTimeout(onClose, 350);
+    setTimeout(onClose, 250);
   };
 
   return (
@@ -92,29 +100,33 @@ export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
               </div>
             </div>
 
-            {/* Price calculator */}
-            <PriceCalculator serviceId={item.id} />
-
-            {/* CTA */}
+            {/* CTAs */}
             <div className={styles.ctas}>
               <button
                 className={styles.ctaPrimary}
                 onClick={() => {
                   handleClose();
-                  // Open AI chat after modal closes
                   setTimeout(() => {
                     document.dispatchEvent(new CustomEvent('open-ai-chat', {
                       detail: { context: item.title }
                     }));
-                  }, 400);
+                  }, 300);
                 }}
               >
-                {t('discussProject')}
+                {t('discussProject')} 💬
               </button>
-              <a href={`mailto:newbusiness@mindcore.studio?subject=${encodeURIComponent(item.title)}`}
-                className={styles.ctaSecondary}>
-                {t('sendEmail')}
-              </a>
+
+              <div className={styles.directLinks}>
+                <a href="https://t.me/kraeved111" target="_blank" rel="noopener noreferrer" className={styles.directBtn}>
+                  Telegram
+                </a>
+                <a href="https://wa.me/4207278671129" target="_blank" rel="noopener noreferrer" className={styles.directBtn}>
+                  WhatsApp
+                </a>
+                <a href="mailto:edik40288@gmail.com" className={styles.directBtn}>
+                  Email
+                </a>
+              </div>
             </div>
           </div>
         </div>
