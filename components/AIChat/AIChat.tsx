@@ -1,14 +1,16 @@
-'use client';
+﻿'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { siteConfig } from '@/config/site';
+import { useState, useRef, useEffect } from 'react';
 import styles from './AIChat.module.css';
-
 import { useAIChat } from '@/hooks/useAIChat';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import ChatFace, { EmotionType } from './ChatFace';
 
 export default function AIChat() {
   const t = useTranslations('chat');
+  const locale = useLocale();
+  const isRu = locale === 'ru';
+
   const {
     isOpen,
     setIsOpen,
@@ -17,36 +19,134 @@ export default function AIChat() {
     setInput,
     isTyping,
     leadCollected,
-    isPulsing,
     messagesEndRef,
     inputRef,
     sendMessage,
     handleKeyDown
   } = useAIChat();
 
+  // Proactive calling message step: 0 = hidden, 1 = hello, 2 = business, 3 = pout
+  const [promptStep, setPromptStep] = useState<number>(0);
+  const [emotionState, setEmotionState] = useState<EmotionType>('idle');
+  const [isBubbleDismissed, setIsBubbleDismissed] = useState(false);
+
+  // Exact step timing:
+  // 1. Starts 3 seconds after site load
+  // 2. Second message after 4 seconds (7s total)
+  // 3. Third message after 4 seconds (11s total)
+  // 4. Closes after 4 seconds (15s total) and stays permanently closed & static
+  useEffect(() => {
+    if (isOpen || isBubbleDismissed) {
+      setPromptStep(0);
+      setEmotionState('finished');
+      return;
+    }
+
+    // T = 3.0s: Step 1 (Greeting)
+    const timer1 = setTimeout(() => {
+      setPromptStep(1);
+      setEmotionState('happy');
+    }, 3000);
+
+    // T = 7.0s (3s + 4s): Step 2 (Diplomat / Business)
+    const timer2 = setTimeout(() => {
+      setPromptStep(2);
+      setEmotionState('diplomat');
+    }, 7000);
+
+    // T = 11.0s (7s + 4s): Step 3 (Sad / Regret 🥺)
+    const timer3 = setTimeout(() => {
+      setPromptStep(3);
+      setEmotionState('pout');
+    }, 11000);
+
+    // T = 15.0s (11s + 4s): Close bubble & freeze avatar static on smiling robot
+    const timer4 = setTimeout(() => {
+      setPromptStep(0);
+      setEmotionState('finished');
+    }, 15000);
+
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
+      clearTimeout(timer4);
+    };
+  }, [isOpen, isBubbleDismissed]);
+
+  // Prompt messages
+  const getPromptText = () => {
+    if (promptStep === 1) {
+      return isRu ? 'Приветики! Можем поговорить? 😊' : 'Hey there! Can we chat? 😊';
+    }
+    if (promptStep === 2) {
+      return isRu 
+        ? 'Я помогу тебе с твоим бизнесом, пообщайся со мной! 👔' 
+        : 'I can supercharge your business, let’s talk! 👔';
+    }
+    if (promptStep === 3) {
+      return isRu 
+        ? 'Ну ладно, я думал ты поговоришь со мной... 🥺 Но я всегда здесь!' 
+        : 'Aww, maybe next time... 🥺 I’m always here for you!';
+    }
+    return '';
+  };
+
+  const handleOpenChat = () => {
+    setIsOpen(true);
+    setPromptStep(0);
+    setEmotionState('finished');
+  };
+
+  const handleDismissBubble = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsBubbleDismissed(true);
+    setPromptStep(0);
+    setEmotionState('finished');
+  };
+
   return (
     <>
-      {/* Floating trigger button */}
-      <button
-        className={`${styles.trigger} ${isPulsing ? styles.pulsing : ''} ${isOpen ? styles.triggerOpen : ''}`}
-        onClick={() => setIsOpen(!isOpen)}
-        aria-label="Open AI assistant"
-        aria-expanded={isOpen}
-      >
-        {isOpen ? (
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <path d="M18 6L6 18M6 6l12 12" />
-          </svg>
-        ) : (
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
-            <circle cx="9" cy="10" r="1.5" fill="currentColor" />
-            <circle cx="15" cy="10" r="1.5" fill="currentColor" />
-            <path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
+      <div className={styles.triggerWrap}>
+        {/* Proactive Calling Message Cloud */}
+        {promptStep > 0 && !isOpen && (
+          <div 
+            key={promptStep}
+            className={styles.callingBubble}
+            onClick={handleOpenChat}
+            role="button"
+            tabIndex={0}
+          >
+            <div className={styles.bubbleHeader}>
+              <span className={styles.bubbleAuthor}>MINDCORE AI</span>
+              <button 
+                className={styles.bubbleClose} 
+                onClick={handleDismissBubble}
+                aria-label="Close message"
+              >
+                ✕
+              </button>
+            </div>
+            <div className={styles.bubbleText}>
+              {getPromptText()}
+            </div>
+            <div className={styles.bubbleCta}>
+              <span>{isRu ? 'Нажмите, чтобы открыть чат' : 'Click to start chat'}</span>
+              <span>→</span>
+            </div>
+          </div>
         )}
-        {!isOpen && <span className={styles.triggerBadge} />}
-      </button>
+
+        {/* Floating trigger button with 3D Video Avatar */}
+        <button
+          className={`${styles.trigger} ${isOpen ? styles.triggerOpen : ''}`}
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label="Open AI assistant"
+          aria-expanded={isOpen}
+        >
+          <ChatFace emotion={emotionState} isOpen={isOpen} />
+        </button>
+      </div>
 
       {/* Chat panel */}
       <div className={`${styles.panel} ${isOpen ? styles.panelOpen : ''}`} role="complementary" aria-label="AI Chat Assistant">
@@ -101,19 +201,19 @@ export default function AIChat() {
             className={styles.input}
             placeholder={t('placeholder')}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            disabled={isTyping || leadCollected}
-            aria-label="Type your message"
+            disabled={isTyping}
           />
           <button
             className={styles.sendBtn}
             onClick={sendMessage}
-            disabled={!input.trim() || isTyping}
-            aria-label="Send message"
+            disabled={isTyping || !input.trim()}
+            aria-label={t('send')}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 2L11 13" />
+              <path d="M22 2l-7 20-4-9-9-4 20-7z" />
             </svg>
           </button>
         </div>
