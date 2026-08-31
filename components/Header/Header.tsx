@@ -96,26 +96,38 @@ export default function Header({ locale }: HeaderProps) {
 
       {/* Fullscreen navigation overlay */}
       <nav className={`${styles.navOverlay} ${menuOpen ? styles.navOverlayOpen : ''}`} aria-hidden={!menuOpen}>
-        <ul className={styles.navList}>
-          {navLinks.map((link, idx) => (
-            <li key={link.href} className={styles.navItem} style={{ '--delay': `${idx * 0.08}s` } as React.CSSProperties}>
-              <Link
-                href={link.href}
-                className={styles.navLink}
-                onClick={() => setMenuOpen(false)}
-              >
-                <span className={styles.navNumber}>0{idx + 1}</span>
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <div className={styles.navContainer}>
+          <ul className={styles.navList}>
+            {navLinks.map((link, idx) => (
+              <li key={link.href} className={styles.navItem} style={{ '--delay': `${idx * 0.08}s` } as React.CSSProperties}>
+                <Link
+                  href={link.href}
+                  className={styles.navLink}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <span className={styles.navNumber}>0{idx + 1}</span>
+                  <span className={styles.navLabel}>{link.label}</span>
+                  <span className={styles.navArrow}>→</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
 
-        <div className={styles.navFooter}>
-          <a href={`mailto:${siteConfig.email}`} className={styles.navEmail}>{siteConfig.email}</a>
-          <p className={styles.navOffices}>
-            {siteConfig.offices.map(o => o.city).join(' · ')}
-          </p>
+          {/* Quick direct contact links */}
+          <div className={styles.navQuickContacts}>
+            <a href="https://t.me/kraeved111" target="_blank" rel="noopener noreferrer" className={styles.quickContactBtn}>
+              Telegram
+            </a>
+            <a href="https://wa.me/4207278671129" target="_blank" rel="noopener noreferrer" className={styles.quickContactBtn}>
+              WhatsApp
+            </a>
+            <a href="mailto:edik40288@gmail.com" className={styles.quickContactBtn}>
+              Email
+            </a>
+            <a href="viber://chat?number=%2B4207278671129" className={styles.quickContactBtn}>
+              Viber
+            </a>
+          </div>
         </div>
       </nav>
     </>

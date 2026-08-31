@@ -122,18 +122,19 @@
 }
 
 .langActive {
-  color: var(--color-gold) !important;
-  background: rgba(201, 168, 76, 0.12) !important;
+  color: #ffffff !important;
+  background: rgba(107, 91, 239, 0.25) !important;
+  border: 1px solid rgba(139, 92, 246, 0.4) !important;
 }
 
 /* Menu button */
 .menuBtn {
   position: relative;
-  width: 36px;
-  height: 36px;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -146,13 +147,13 @@
 }
 
 .menuBtn:hover {
-  border-color: rgba(201, 168, 76, 0.4);
-  background: rgba(201, 168, 76, 0.05);
+  border-color: rgba(139, 92, 246, 0.6);
+  background: rgba(107, 91, 239, 0.12);
 }
 
 .menuLine {
   display: block;
-  width: 16px;
+  width: 17px;
   height: 1.5px;
   background: var(--color-text);
   border-radius: 1px;
@@ -199,7 +200,7 @@
   width: 3px;
   height: 3px;
   border-radius: 50%;
-  background: var(--color-gold);
+  background: #a78bfa;
   transform: scale(0);
   animation: dotPop 0.4s calc(var(--i) * 0.03s) forwards;
 }
@@ -213,15 +214,17 @@
   position: fixed;
   inset: 0;
   z-index: 99;
-  background: rgba(10, 10, 12, 0.97);
-  backdrop-filter: blur(20px);
+  background: radial-gradient(circle at 50% 30%, rgba(18, 18, 28, 0.98), rgba(6, 6, 10, 0.99));
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 6rem 2.5rem 3rem;
+  align-items: center;
+  padding: 6rem 2.5rem 3.5rem;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
               visibility 0.45s ease;
 }
 
@@ -230,18 +233,27 @@
   visibility: visible;
 }
 
+.navContainer {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 .navList {
   list-style: none;
   margin: 0;
   padding: 0;
+  width: 100%;
 }
 
 .navItem {
   overflow: hidden;
-  transform: translateY(40px);
+  transform: translateY(30px);
   opacity: 0;
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) var(--delay),
-              opacity 0.5s ease var(--delay);
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) var(--delay),
+              opacity 0.45s ease var(--delay);
 }
 
 .navOverlayOpen .navItem {
@@ -251,56 +263,100 @@
 
 .navLink {
   display: flex;
-  align-items: baseline;
-  gap: 1rem;
-  padding: 0.8rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.4rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   text-decoration: none;
-  color: var(--color-text);
-  font-size: clamp(2rem, 6vw, 4.5rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  transition: color 0.3s ease;
-}
-
-.navLink:hover {
-  color: var(--color-gold);
+  color: #ffffff;
+  font-size: clamp(2.4rem, 6vw, 4.8rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .navNumber {
-  font-size: 0.9rem;
-  font-weight: 400;
-  color: var(--color-text-muted);
-  letter-spacing: 0.05em;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #a78bfa;
+  background: rgba(107, 91, 239, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  padding: 0.25rem 0.65rem;
+  border-radius: 8px;
+  letter-spacing: 0.04em;
+  transition: all 0.3s ease;
 }
 
-.navFooter {
-  margin-top: 3rem;
+.navLabel {
+  flex: 1;
+  transition: transform 0.3s ease, color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.navArrow {
+  font-size: 2.2rem;
+  color: rgba(255, 255, 255, 0.2);
+  transform: translateX(-15px);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, color 0.3s ease;
+}
+
+.navLink:hover {
+  color: #ffffff;
+  padding-left: 0.5rem;
+}
+
+.navLink:hover .navNumber {
+  background: rgba(139, 92, 246, 0.3);
+  border-color: rgba(167, 139, 250, 0.6);
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(139, 92, 246, 0.4);
+}
+
+.navLink:hover .navLabel {
+  text-shadow: 0 0 24px rgba(255, 255, 255, 0.5);
+  transform: translateX(4px);
+}
+
+.navLink:hover .navArrow {
+  color: #a78bfa;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.navQuickContacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 3.5rem;
   opacity: 0;
   transform: translateY(20px);
-  transition: opacity 0.5s ease 0.35s, transform 0.5s ease 0.35s;
+  transition: opacity 0.45s ease 0.3s, transform 0.45s ease 0.3s;
 }
 
-.navOverlayOpen .navFooter {
+.navOverlayOpen .navQuickContacts {
   opacity: 1;
   transform: translateY(0);
 }
 
-.navEmail {
-  display: block;
-  font-size: 0.9rem;
-  color: var(--color-gold);
+.quickContactBtn {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0.6rem 1.25rem;
+  border-radius: 12px;
   text-decoration: none;
-  margin-bottom: 0.5rem;
-  transition: opacity 0.2s ease;
+  transition: all 0.25s ease;
 }
 
-.navEmail:hover { opacity: 0.75; }
-
-.navOffices {
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-  letter-spacing: 0.06em;
+.quickContactBtn:hover {
+  color: #ffffff;
+  background: rgba(107, 91, 239, 0.2);
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 0 16px rgba(107, 91, 239, 0.25);
+  transform: translateY(-2px);
 }
 
 /* Mobile */
