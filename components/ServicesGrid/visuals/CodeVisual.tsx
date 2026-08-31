@@ -41,13 +41,6 @@ export default function CodeVisual({ hovered }: VisualProps) {
         />
         <div className={styles.videoOverlay} />
       </div>
-
-      {hovered && (
-        <div className={styles.statusBadge}>
-          <span className={styles.statusDot} />
-          <span>● LIVE · DEPLOYED</span>
-        </div>
-      )}
     </div>
   );
 }
