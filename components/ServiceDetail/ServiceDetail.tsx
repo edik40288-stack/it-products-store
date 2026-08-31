@@ -14,15 +14,6 @@ export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const t = useTranslations('serviceDetail');
 
-  // Lock background body scroll when modal is open
-  useEffect(() => {
-    const origOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = origOverflow;
-    };
-  }, []);
-
   useEffect(() => {
     // Entrance animation
     const el = panelRef.current;
@@ -30,7 +21,7 @@ export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
     el.style.opacity = '0';
     el.style.transform = 'scale(0.96) translateY(20px)';
     requestAnimationFrame(() => {
-      el.style.transition = 'opacity 0.4s cubic-bezier(0.16,1,0.3,1), transform 0.4s cubic-bezier(0.16,1,0.3,1)';
+      el.style.transition = 'opacity 0.35s cubic-bezier(0.16,1,0.3,1), transform 0.35s cubic-bezier(0.16,1,0.3,1)';
       el.style.opacity = '1';
       el.style.transform = 'scale(1) translateY(0)';
     });
@@ -46,7 +37,14 @@ export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
   };
 
   return (
-    <div className={styles.backdrop} onClick={handleClose} role="dialog" aria-modal="true" aria-label={item.title}>
+    <div 
+      className={styles.backdrop} 
+      onClick={handleClose} 
+      onWheel={(e) => e.stopPropagation()}
+      role="dialog" 
+      aria-modal="true" 
+      aria-label={item.title}
+    >
       <div ref={panelRef} className={styles.panel} onClick={(e) => e.stopPropagation()}>
         {/* Header bar */}
         <div className={styles.panelHeader}>

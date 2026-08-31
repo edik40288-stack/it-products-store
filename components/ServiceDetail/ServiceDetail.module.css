@@ -5,24 +5,42 @@
   background: rgba(8, 8, 12, 0.88);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 4rem 1.5rem;
+}
+
+/* Custom Sleek Scrollbar for backdrop */
+.backdrop::-webkit-scrollbar {
+  width: 6px;
+}
+.backdrop::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+.backdrop::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.3);
+  border-radius: 3px;
+}
+.backdrop::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.6);
 }
 
 .panel {
+  position: relative;
   background: rgba(16, 16, 24, 0.98);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 24px;
   width: 100%;
   max-width: 840px;
-  max-height: 88vh;
+  margin: auto 0;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.85), 0 0 40px rgba(107, 91, 239, 0.15);
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.9), 0 0 40px rgba(107, 91, 239, 0.15);
 }
 
 .panelHeader {
@@ -76,26 +94,7 @@
 }
 
 .panelBody {
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-  flex: 1;
   padding: 2.5rem;
-}
-
-/* Custom Sleek Scrollbar */
-.panelBody::-webkit-scrollbar {
-  width: 6px;
-}
-.panelBody::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
-}
-.panelBody::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.3);
-  border-radius: 3px;
-}
-.panelBody::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.6);
 }
 
 .contentArea { max-width: 720px; }
