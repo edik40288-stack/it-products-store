@@ -81,6 +81,14 @@ export default function WebGLDistortionCanvas() {
     window.addEventListener('resize', handleResize);
     handleResize();
 
+    const handleScroll = () => {
+      // scroll position is read directly from window.scrollY in animate loop
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    // Periodic check for layout changes (e.g. after images load) every 1s instead of every frame
+    const intervalId = setInterval(updateCache, 1000);
+
     const clock = new THREE.Clock();
 
     // 3. Render Loop
@@ -88,33 +96,8 @@ export default function WebGLDistortionCanvas() {
     const animate = () => {
       rafId = requestAnimationFrame(animate);
       const time = clock.getElapsedTime();
-      
       const currentScrollY = window.scrollY;
-
       const cards = getCards();
-
-      // Fast layout shift detection (detects font loads, hero jumping, etc.)
-      let needsCacheUpdate = false;
-      if (cards.size > 0) {
-        const firstCardId = cards.keys().next().value;
-        if (firstCardId) {
-          const card = cards.get(firstCardId);
-          const cached = rectCache.get(firstCardId);
-          if (card && cached) {
-            const rect = card.element.getBoundingClientRect();
-            if (
-              Math.abs((rect.top + currentScrollY) - cached.absoluteTop) > 1 || 
-              Math.abs(rect.height - cached.height) > 1
-            ) {
-              needsCacheUpdate = true;
-            }
-          }
-        }
-      }
-
-      if (needsCacheUpdate) {
-        updateCache();
-      }
 
       // Sync DOM to WebGL
       cards.forEach((card, id) => {
@@ -223,6 +206,8 @@ export default function WebGLDistortionCanvas() {
     animate();
 
     return () => {
+      clearInterval(intervalId);
+      window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(rafId);
       renderer.dispose();

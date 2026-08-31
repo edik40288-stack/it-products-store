@@ -8,6 +8,9 @@
   z-index: 5;
   pointer-events: auto;
   cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .container:active {

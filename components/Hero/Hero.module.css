@@ -60,35 +60,43 @@
 }
 
 .heading {
-  font-size: clamp(2.4rem, 4.5vw, 4.5rem);
+  font-size: clamp(2.2rem, 4.2vw, 4.2rem);
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1.15;
   letter-spacing: -0.02em;
   color: var(--color-text);
   margin-bottom: 1rem;
-  min-height: 3.3em;
+}
+
+.titleLine {
+  display: block;
 }
 
 .headingStatic {
   color: rgba(255, 255, 255, 0.6);
   font-weight: 400;
+  margin-right: 0.35em;
 }
 
 .typewriterWrap {
   display: inline-flex;
-  align-items: center;
-  min-height: 1.2em;
+  align-items: baseline;
+  vertical-align: baseline;
 }
 
 .dynamicWord {
-  transition: color 0.5s ease;
+  display: inline-block;
+  transition: color 0.4s ease;
+  white-space: nowrap;
 }
 
 .cursor {
+  display: inline-block;
   font-weight: 200;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-gold);
   animation: blink 1s step-end infinite;
-  margin-left: 2px;
+  margin-left: 3px;
+  line-height: 1;
 }
 
 @keyframes blink {

@@ -23,7 +23,6 @@ export default function CyberSphere({
   const containerRef = useRef<HTMLDivElement>(null);
   const propsRef = useRef({ topicColor, isTopicChanging, isFocused, isScanning, hasStarted });
 
-  // Keep ref updated for the animation loop without re-running useEffect
   useEffect(() => {
     propsRef.current = { topicColor, isTopicChanging, isFocused, isScanning, hasStarted };
   }, [topicColor, isTopicChanging, isFocused, isScanning, hasStarted]);
@@ -45,19 +44,20 @@ export default function CyberSphere({
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-    camera.position.set(0, 0, 5);
+    camera.position.set(0, 0, 5.2);
 
-    // ─── GEOMETRY: WIREFRAME CORE ───
+    // ─── MASTER SPHERE GROUP ───
+    const masterSphere = new THREE.Group();
+    masterSphere.scale.setScalar(0.001); // starts small for smooth appearance
+    scene.add(masterSphere);
+
+    // ─── 1. CORE ICOSAHEDRON WIREFRAME ───
     const coreGroup = new THREE.Group();
-    // Start at scale 0 for Act 1 explosion
-    coreGroup.scale.setScalar(0.001); 
-    scene.add(coreGroup);
+    masterSphere.add(coreGroup);
 
-    // Icosahedron for the wireframe core
-    const geo = new THREE.IcosahedronGeometry(1.2, 2);
+    const geo = new THREE.IcosahedronGeometry(1.25, 2);
     const edges = new THREE.EdgesGeometry(geo);
     
-    // Custom shader for the wireframe lines to make them glow and pulse
     const wireframeMat = new THREE.ShaderMaterial({
       uniforms: {
         u_time: { value: 0 },
@@ -65,19 +65,25 @@ export default function CyberSphere({
         u_pulse: { value: 0.0 }
       },
       vertexShader: `
+        uniform float u_time;
         uniform float u_pulse;
+        varying vec3 vNormal;
+        varying vec3 vPos;
         void main() {
-          vec3 pos = position * (1.0 + u_pulse * 0.1);
+          vPos = position;
+          vec3 pos = position * (1.0 + u_pulse * 0.08 + sin(position.y * 4.0 + u_time * 2.0) * 0.02);
           gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
         }
       `,
       fragmentShader: `
         uniform vec3 u_color;
         uniform float u_pulse;
+        uniform float u_time;
+        varying vec3 vPos;
         void main() {
-          // Очень мягкое осветление при пульсации (чтобы не выглядело как глитч/обновление)
-          vec3 finalColor = mix(u_color, vec3(1.0), u_pulse * 0.15); 
-          gl_FragColor = vec4(finalColor, 0.5 + u_pulse * 0.2);
+          float wave = sin(vPos.y * 3.0 + u_time * 3.0) * 0.5 + 0.5;
+          vec3 finalColor = mix(u_color, vec3(1.0), u_pulse * 0.25 + wave * 0.15); 
+          gl_FragColor = vec4(finalColor, 0.65 + u_pulse * 0.3);
         }
       `,
       transparent: true,
@@ -88,52 +94,94 @@ export default function CyberSphere({
     const wireframe = new THREE.LineSegments(edges, wireframeMat);
     coreGroup.add(wireframe);
 
-    // Inner glowing core
-    const innerGeo = new THREE.IcosahedronGeometry(0.8, 1);
+    // Inner glowing crystal core
+    const innerGeo = new THREE.IcosahedronGeometry(0.85, 1);
     const innerMat = new THREE.MeshBasicMaterial({
-      color: propsRef.current.topicColor,
+      color: new THREE.Color(propsRef.current.topicColor),
       transparent: true,
-      opacity: 0.1,
+      opacity: 0.12,
       blending: THREE.AdditiveBlending,
       wireframe: true
     });
     const innerCore = new THREE.Mesh(innerGeo, innerMat);
     coreGroup.add(innerCore);
 
-    // ─── PARTICLES ───
-    const particleCount = 300;
+    // ─── 2. GYROSCOPIC ORBITAL RINGS ───
+    const ringsGroup = new THREE.Group();
+    masterSphere.add(ringsGroup);
+
+    const ringMat = new THREE.ShaderMaterial({
+      uniforms: {
+        u_color: { value: new THREE.Color(propsRef.current.topicColor) },
+        u_time: { value: 0 }
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform vec3 u_color;
+        uniform float u_time;
+        varying vec2 vUv;
+        void main() {
+          float pulse = sin(vUv.x * 12.0 - u_time * 4.0) * 0.5 + 0.5;
+          gl_FragColor = vec4(mix(u_color, vec3(1.0), pulse * 0.4), 0.35 + pulse * 0.4);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+
+    const ringGeo1 = new THREE.TorusGeometry(1.65, 0.008, 16, 64);
+    const ring1 = new THREE.Mesh(ringGeo1, ringMat);
+    ringsGroup.add(ring1);
+
+    const ringGeo2 = new THREE.TorusGeometry(1.9, 0.006, 16, 64);
+    const ring2 = new THREE.Mesh(ringGeo2, ringMat);
+    ring2.rotation.x = Math.PI * 0.35;
+    ring2.rotation.y = Math.PI * 0.2;
+    ringsGroup.add(ring2);
+
+    // ─── 3. PARTICLE CLOUD (Inside Master Group so it rotates with sphere) ───
+    const particleCount = 380;
     const pPositions = new Float32Array(particleCount * 3);
+    const pBaseRadii = new Float32Array(particleCount);
     const pSpeeds = new Float32Array(particleCount);
-    const pOffsets = new Float32Array(particleCount); // random phase
+    const pPhases = new Float32Array(particleCount);
 
     for (let i = 0; i < particleCount; i++) {
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
-      const r = 1.6 + Math.random() * 2.0;
+      const r = 1.45 + Math.random() * 1.5;
 
       pPositions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
       pPositions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
       pPositions[i * 3 + 2] = r * Math.cos(phi);
 
-      pSpeeds[i] = 0.2 + Math.random() * 0.5;
-      pOffsets[i] = Math.random() * Math.PI * 2;
+      pBaseRadii[i] = r;
+      pSpeeds[i] = 0.4 + Math.random() * 0.8;
+      pPhases[i] = Math.random() * Math.PI * 2;
     }
 
     const pGeo = new THREE.BufferGeometry();
     pGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
     pGeo.setAttribute('a_speed', new THREE.BufferAttribute(pSpeeds, 1));
-    pGeo.setAttribute('a_offset', new THREE.BufferAttribute(pOffsets, 1));
+    pGeo.setAttribute('a_phase', new THREE.BufferAttribute(pPhases, 1));
 
     const pMat = new THREE.ShaderMaterial({
       uniforms: {
         u_time: { value: 0 },
         u_color: { value: new THREE.Color(propsRef.current.topicColor) },
         u_speedMulti: { value: 1.0 },
-        u_formationPhase: { value: 0.0 } // 0 = point, 1 = sphere
+        u_formationPhase: { value: 0.0 }
       },
       vertexShader: `
         attribute float a_speed;
-        attribute float a_offset;
+        attribute float a_phase;
         uniform float u_time;
         uniform float u_speedMulti;
         uniform float u_formationPhase;
@@ -142,25 +190,20 @@ export default function CyberSphere({
         void main() {
           vec3 pos = position;
           
-          // Orbital rotation
-          float angle = u_time * a_speed * u_speedMulti + a_offset;
-          
-          // Rotate around Y axis
+          // Subtle orbital wobble
+          float angle = u_time * a_speed * 0.3 * u_speedMulti + a_phase;
           float s = sin(angle);
           float c = cos(angle);
-          float nx = pos.x * c - pos.z * s;
-          float nz = pos.x * s + pos.z * c;
-          pos.x = nx;
-          pos.z = nz;
+          pos.x += s * 0.08;
+          pos.y += c * 0.08;
           
-          // Act 1: Formation explosion (particles start at center and explode out)
           pos *= u_formationPhase;
 
           vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
           gl_Position = projectionMatrix * mvPos;
-          gl_PointSize = (40.0 / -mvPos.z) * u_formationPhase;
+          gl_PointSize = (38.0 / -mvPos.z) * u_formationPhase;
           
-          vAlpha = smoothstep(3.5, 1.5, length(pos)) * 0.6;
+          vAlpha = smoothstep(3.2, 1.2, length(pos)) * 0.8;
         }
       `,
       fragmentShader: `
@@ -168,8 +211,8 @@ export default function CyberSphere({
         varying float vAlpha;
         void main() {
           float d = length(gl_PointCoord - 0.5) * 2.0;
-          float alpha = smoothstep(1.0, 0.2, d) * vAlpha;
-          gl_FragColor = vec4(u_color, alpha);
+          float alpha = smoothstep(1.0, 0.15, d) * vAlpha;
+          gl_FragColor = vec4(mix(u_color, vec3(1.0), 0.3), alpha);
         }
       `,
       transparent: true,
@@ -178,78 +221,89 @@ export default function CyberSphere({
     });
 
     const particles = new THREE.Points(pGeo, pMat);
-    scene.add(particles);
+    masterSphere.add(particles);
 
-    // ─── STATE VARIABLES ───
+    // ─── 4. INTERACTION STATE & PHYSICS ───
     let mouseX = 0;
     let mouseY = 0;
-    let targetRotY = 0;
-    let targetRotX = 0;
-    let currentRotY = 0;
-    let currentRotX = 0;
-    let scrollProgress = 0;
-    let currentColor = new THREE.Color(propsRef.current.topicColor);
-    let currentPulse = 0;
-    let scanPhase = 0;
-    let formationPhase = 0;
-    let formationSpeed = 0;
+    let targetParallaxX = 0;
+    let targetParallaxY = 0;
+    let currentParallaxX = 0;
+    let currentParallaxY = 0;
 
-    // ─── DRAG STATE ───
+    let sphereRotX = 0;
+    let sphereRotY = 0;
+    let sphereRotZ = 0;
+
+    let velocityX = 0;
+    let velocityY = 0;
+
     let isDragging = false;
-    let previousMousePosition = { x: 0, y: 0 };
-    let dragVelocityX = 0;
-    let dragVelocityY = 0;
-    let dragRotX = 0;
-    let dragRotY = 0;
+    let lastPointerX = 0;
+    let lastPointerY = 0;
+    let formationPhase = 0;
+    let currentPulse = 0;
+    let currentColor = new THREE.Color(propsRef.current.topicColor);
 
-    // ─── EVENT LISTENERS ───
-    let heroHeight = window.innerHeight;
+    // ─── POINTER / DRAG LISTENERS ───
+    const onPointerDown = (e: PointerEvent) => {
+      isDragging = true;
+      lastPointerX = e.clientX;
+      lastPointerY = e.clientY;
+      velocityX = 0;
+      velocityY = 0;
+      if (container.setPointerCapture) {
+        container.setPointerCapture(e.pointerId);
+      }
+    };
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const onPointerMove = (e: PointerEvent) => {
+      // Global mouse coordinate for parallax
       mouseX = (e.clientX / window.innerWidth) * 2 - 1;
       mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
 
       if (isDragging) {
-        const deltaX = e.clientX - previousMousePosition.x;
-        const deltaY = e.clientY - previousMousePosition.y;
-        
-        dragVelocityX = deltaX * 0.03;
-        dragVelocityY = deltaY * 0.03;
-        
-        previousMousePosition = { x: e.clientX, y: e.clientY };
+        const deltaX = e.clientX - lastPointerX;
+        const deltaY = e.clientY - lastPointerY;
+
+        // Directly rotate sphere
+        sphereRotY += deltaX * 0.008;
+        sphereRotX += deltaY * 0.008;
+
+        // Track velocity with smoothing
+        velocityX = deltaX * 0.006;
+        velocityY = deltaY * 0.006;
+
+        lastPointerX = e.clientX;
+        lastPointerY = e.clientY;
       }
     };
-    window.addEventListener('mousemove', handleMouseMove);
 
-    const handleMouseDown = (e: MouseEvent) => {
-      // Don't drag if clicking an input or button
-      if ((e.target as HTMLElement).tagName.toLowerCase() === 'input' || 
-          (e.target as HTMLElement).tagName.toLowerCase() === 'button') {
-        return;
-      }
-      isDragging = true;
-      previousMousePosition = { x: e.clientX, y: e.clientY };
-    };
-    window.addEventListener('mousedown', handleMouseDown);
-
-    const handleMouseUp = () => {
+    const onPointerUp = (e: PointerEvent) => {
       isDragging = false;
+      if (container.releasePointerCapture) {
+        try {
+          container.releasePointerCapture(e.pointerId);
+        } catch {
+          // pointer might have released already
+        }
+      }
     };
-    window.addEventListener('mouseup', handleMouseUp);
 
-    const handleScroll = () => {
-      scrollProgress = Math.min(window.scrollY / (heroHeight * 0.6), 1);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    container.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
 
+    // ─── RESIZE ───
     const handleResize = () => {
       const rect = container.getBoundingClientRect();
-      const size = Math.min(rect.width, rect.height);
+      const size = Math.max(Math.min(rect.width, rect.height), 200);
       renderer.setSize(size, size);
       camera.aspect = 1;
       camera.updateProjectionMatrix();
-      heroHeight = container.parentElement?.offsetHeight || window.innerHeight;
     };
+
     window.addEventListener('resize', handleResize);
     handleResize();
 
@@ -259,113 +313,88 @@ export default function CyberSphere({
 
     const animate = () => {
       rafId = requestAnimationFrame(animate);
+      const delta = Math.min(clock.getDelta(), 0.1);
       const time = clock.getElapsedTime();
       const props = propsRef.current;
 
-      // 1. Act 1: Formation Explosion
+      // 1. Formation explosion on startup
       if (props.hasStarted && formationPhase < 1) {
-        formationSpeed += 0.005; // Accelerate outwards
-        formationPhase += formationSpeed;
-        if (formationPhase > 1) {
-          formationPhase = 1; // Snap to full size
-          // Overshoot bounce
-          coreGroup.scale.setScalar(1.1);
-        }
-        // Expand core
-        if (coreGroup.scale.x < 1 && formationPhase === 1) {
-          // handled by lerp below
-        } else if (formationPhase < 1) {
-          coreGroup.scale.setScalar(formationPhase * 0.8); 
-        }
+        formationPhase += delta * 1.5;
+        if (formationPhase > 1) formationPhase = 1;
       }
+      masterSphere.scale.setScalar(THREE.MathUtils.lerp(0.001, 1.0, formationPhase));
       pMat.uniforms.u_formationPhase.value = formationPhase;
 
-      // Core scale bounce return
-      if (formationPhase === 1 && !props.isFocused) {
-        coreGroup.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
+      // 2. Physics & Drag Momentum
+      if (!isDragging) {
+        // Apply friction to momentum
+        sphereRotY += velocityX;
+        sphereRotX += velocityY;
+        velocityX *= 0.93;
+        velocityY *= 0.93;
+
+        // Base continuous ambient planetary rotation
+        sphereRotY += delta * 0.25;
+        sphereRotX += delta * 0.08;
+        sphereRotZ += delta * 0.05;
       }
 
-      // 2. Mouse Tracking & Act 3 Focus & Dragging
-      // Drag physics (inertia)
-      dragRotY += dragVelocityX;
-      dragRotX += dragVelocityY;
-      
-      // Apply damping to drag velocity
-      dragVelocityX *= 0.92;
-      dragVelocityY *= 0.92;
-
+      // Parallax mouse tilt
       if (props.isFocused) {
-        // Look down at input
-        targetRotX = 0.6;
-        targetRotY = 0;
+        targetParallaxX = 0.35;
+        targetParallaxY = -0.2;
       } else {
-        // Инвертированное слежение: сфера "смотрит" за курсором + вращение от драга
-        targetRotY = -mouseX * 1.2 + dragRotY; 
-        targetRotX = mouseY * 1.0 + dragRotX;
+        targetParallaxX = -mouseY * 0.35;
+        targetParallaxY = mouseX * 0.45;
       }
 
-      // Отзывчивость мыши
-      currentRotY += (targetRotY - currentRotY) * 0.15;
-      currentRotX += (targetRotX - currentRotX) * 0.15;
+      currentParallaxX += (targetParallaxX - currentParallaxX) * 0.08;
+      currentParallaxY += (targetParallaxY - currentParallaxY) * 0.08;
 
-      // Idle float (only if not focused)
-      const levitation = props.isFocused ? 0 : Math.sin(time * 1.5) * 0.1;
+      // Apply master orientation
+      masterSphere.rotation.x = sphereRotX + currentParallaxX;
+      masterSphere.rotation.y = sphereRotY + currentParallaxY;
+      masterSphere.rotation.z = sphereRotZ;
 
-      coreGroup.rotation.y = currentRotY;
-      coreGroup.rotation.x = currentRotX + time * 0.1; // slow constant spin
-      coreGroup.rotation.z = time * 0.05;
-      coreGroup.position.y = levitation;
+      // Idle levitation
+      masterSphere.position.y = Math.sin(time * 1.5) * 0.08;
 
-      // 3. Act 2: Topic Color & Pulse
+      // Rotate orbital rings individually
+      ring1.rotation.z = time * 0.3;
+      ring2.rotation.x = Math.PI * 0.35 + Math.sin(time * 0.4) * 0.15;
+      ring2.rotation.y = time * 0.2;
+
+      // 3. Color & Pulse Animation
       const targetColor = new THREE.Color(props.topicColor);
-      currentColor.lerp(targetColor, 0.05);
+      currentColor.lerp(targetColor, 0.08);
+
       wireframeMat.uniforms.u_color.value = currentColor;
+      ringMat.uniforms.u_color.value = currentColor;
       pMat.uniforms.u_color.value = currentColor;
       innerMat.color = currentColor;
 
-      // Pulse on topic change (сделаем его более плавным и долгим)
       if (props.isTopicChanging) {
-        currentPulse = THREE.MathUtils.lerp(currentPulse, 1.0, 0.1);
+        currentPulse = THREE.MathUtils.lerp(currentPulse, 1.2, 0.15);
       } else {
         currentPulse = THREE.MathUtils.lerp(currentPulse, 0.0, 0.05);
       }
 
-      // 4. Act 3: Scanning Pulsations + Drag Boost
-      const dragSpeed = Math.sqrt(dragVelocityX * dragVelocityX + dragVelocityY * dragVelocityY);
-      const isSpinning = dragSpeed > 0.005 || isDragging;
-
-      if (props.isScanning) {
-        scanPhase += 0.2; // Fast pulse
-        currentPulse = Math.abs(Math.sin(scanPhase)) * 1.5;
-        // Lean closer
-        coreGroup.position.z = THREE.MathUtils.lerp(coreGroup.position.z, 1.0, 0.1);
-      } else {
-        scanPhase = 0;
-        coreGroup.position.z = THREE.MathUtils.lerp(coreGroup.position.z, 0, 0.1);
-        
-        // Add glowing pulse when spinning manually
-        if (isSpinning && !props.isTopicChanging) {
-          currentPulse = Math.min(currentPulse + dragSpeed * 5.0, 1.2);
-        }
+      // Boost energy when dragging fast
+      const dragSpeed = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
+      if (dragSpeed > 0.002) {
+        currentPulse = Math.min(currentPulse + dragSpeed * 8.0, 1.5);
       }
 
       wireframeMat.uniforms.u_pulse.value = currentPulse;
-
-      // Particle speed (x3 when focused/scanning, x5+ when dragging)
-      let targetSpeedMulti = 1.0;
-      if (props.isFocused || props.isScanning) targetSpeedMulti = 3.0;
-      if (isSpinning) targetSpeedMulti = Math.max(targetSpeedMulti, 2.0 + dragSpeed * 150.0);
-
-      pMat.uniforms.u_speedMulti.value = THREE.MathUtils.lerp(pMat.uniforms.u_speedMulti.value, targetSpeedMulti, 0.05);
+      wireframeMat.uniforms.u_time.value = time;
+      ringMat.uniforms.u_time.value = time;
       pMat.uniforms.u_time.value = time;
 
-      // 5. Act 4: Scroll Z-Depth
-      // Move deep into screen (Z gets negative)
-      const scrollZ = -scrollProgress * 5.0;
-      const scrollOpacity = 1.0 - scrollProgress * 1.5;
-      
-      scene.position.z = scrollZ;
-      canvas.style.opacity = String(Math.max(scrollOpacity, 0));
+      // Particle speed multiplier
+      let speedMulti = 1.0;
+      if (props.isFocused || props.isScanning) speedMulti = 2.5;
+      if (dragSpeed > 0.002) speedMulti = Math.max(speedMulti, 1.5 + dragSpeed * 80.0);
+      pMat.uniforms.u_speedMulti.value = THREE.MathUtils.lerp(pMat.uniforms.u_speedMulti.value, speedMulti, 0.08);
 
       renderer.render(scene, camera);
     };
@@ -373,18 +402,22 @@ export default function CyberSphere({
     animate();
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-      window.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('scroll', handleScroll);
+      container.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerUp);
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(rafId);
+
       renderer.dispose();
       geo.dispose();
       edges.dispose();
       wireframeMat.dispose();
       innerGeo.dispose();
       innerMat.dispose();
+      ringGeo1.dispose();
+      ringGeo2.dispose();
+      ringMat.dispose();
       pGeo.dispose();
       pMat.dispose();
     };

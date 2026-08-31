@@ -1,19 +1,20 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import styles from './Hero.module.css';
 import CyberSphere from './CyberSphere';
 
-// Topics structure will be generated inside the component to use translations
 const TOPIC_COLORS = ['#C9A84C', '#00F0FF', '#B534FF'];
 
+export default function Hero() {
   const t = useTranslations('hero');
-  const TOPICS = [
+  
+  const TOPICS = useMemo(() => [
     { text: t('topic0'), color: TOPIC_COLORS[0] },
     { text: t('topic1'), color: TOPIC_COLORS[1] },
     { text: t('topic2'), color: TOPIC_COLORS[2] }
-  ];
+  ], [t]);
   
   const [topicIndex, setTopicIndex] = useState(0);
   const [typedText, setTypedText] = useState('');
@@ -30,37 +31,42 @@ const TOPIC_COLORS = ['#C9A84C', '#00F0FF', '#B534FF'];
   useEffect(() => {
     const timer = setTimeout(() => {
       setHasStarted(true);
-    }, 1500); // 1.5s delay before text appears, while sphere forms
+    }, 1200);
     return () => clearTimeout(timer);
   }, []);
 
-  // Act 2: Typewriter Effect
+  // Act 2: Typewriter Effect without layout jumps
   useEffect(() => {
-    if (!hasStarted || isInputFocused || isScanning) return; // Pause typing if focused/scanning
+    if (!hasStarted || isInputFocused || isScanning) return;
 
-    const currentTopic = TOPICS[topicIndex].text;
-    const typingSpeed = isDeleting ? 40 : 100;
-    const pauseTime = 2500;
+    const currentTopic = TOPICS[topicIndex]?.text || '';
+    let timer: NodeJS.Timeout;
 
-    const timeout = setTimeout(() => {
-      if (!isDeleting && typedText === currentTopic) {
-        // Pause at full word before deleting
-        setTimeout(() => setIsDeleting(true), pauseTime);
-      } else if (isDeleting && typedText === '') {
-        // Move to next word
+    if (!isDeleting && typedText === currentTopic) {
+      // Pause when full word is typed
+      timer = setTimeout(() => {
+        setIsDeleting(true);
+      }, 2400);
+    } else if (isDeleting && typedText === '') {
+      // Move to next word when deleted
+      timer = setTimeout(() => {
         setIsDeleting(false);
         setTopicIndex((prev) => (prev + 1) % TOPICS.length);
-      } else {
-        // Type or delete characters
-        const nextText = isDeleting
-          ? currentTopic.substring(0, typedText.length - 1)
-          : currentTopic.substring(0, typedText.length + 1);
-        setTypedText(nextText);
-      }
-    }, typingSpeed);
+      }, 400);
+    } else {
+      // Typing or deleting characters
+      const speed = isDeleting ? 35 : 85;
+      timer = setTimeout(() => {
+        setTypedText(
+          isDeleting
+            ? currentTopic.substring(0, typedText.length - 1)
+            : currentTopic.substring(0, typedText.length + 1)
+        );
+      }, speed);
+    }
 
-    return () => clearTimeout(timeout);
-  }, [typedText, isDeleting, topicIndex, hasStarted, isInputFocused, isScanning]);
+    return () => clearTimeout(timer);
+  }, [typedText, isDeleting, topicIndex, hasStarted, isInputFocused, isScanning, TOPICS]);
 
   // Act 3: Form Submit & AIChat Trigger
   const handleAnalyzeSubmit = (e: React.FormEvent) => {
@@ -70,19 +76,17 @@ const TOPIC_COLORS = ['#C9A84C', '#00F0FF', '#B534FF'];
     setIsScanning(true);
     inputRef.current?.blur();
     
-    // Sequence of simulated logs
     setLogMessages([t('log1')]);
     
-    setTimeout(() => {
-      setLogMessages(prev => [...prev, t('log2')]);
+    const t1 = setTimeout(() => {
+      setLogMessages((prev) => [...prev, t('log2')]);
     }, 800);
     
-    setTimeout(() => {
-      setLogMessages(prev => [...prev, t('log3')]);
+    const t2 = setTimeout(() => {
+      setLogMessages((prev) => [...prev, t('log3')]);
     }, 1600);
 
-    // Finally, open chat
-    setTimeout(() => {
+    const t3 = setTimeout(() => {
       const event = new CustomEvent('open-ai-chat', {
         detail: { context: `Analyze link: ${inputValue}` }
       });
@@ -91,23 +95,29 @@ const TOPIC_COLORS = ['#C9A84C', '#00F0FF', '#B534FF'];
       setLogMessages([]);
       setInputValue('');
     }, 2400);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
   };
 
   return (
     <section className={styles.hero} id="hero">
-      {/* Act 1: Initial Black Overlay */}
+      {/* Initial Black Overlay */}
       <div className={`${styles.overlay} ${hasStarted ? styles.overlayHidden : ''}`} />
 
-      {/* Cyber-Sphere Background Component */}
+      {/* Interactive 3D Cyber-Sphere */}
       <CyberSphere 
-        topicColor={TOPICS[topicIndex].color}
-        isTopicChanging={typedText === '' && !isDeleting} // Pulse trigger
+        topicColor={TOPICS[topicIndex]?.color || TOPIC_COLORS[0]}
+        isTopicChanging={typedText === '' && !isDeleting}
         isFocused={isInputFocused}
         isScanning={isScanning}
         hasStarted={hasStarted}
       />
 
-      {/* Typography block */}
+      {/* Typography Block */}
       <div className={`${styles.content} ${hasStarted ? styles.contentVisible : ''}`}>
         <div className={styles.eyebrow}>
           <span>MINDCORE</span>
@@ -116,16 +126,15 @@ const TOPIC_COLORS = ['#C9A84C', '#00F0FF', '#B534FF'];
         </div>
 
         <h1 className={styles.heading}>
-          {t('title').split(' ')[0]} {/* e.g. "Ракета-носитель" / "A booster" */}
+          <span className={styles.titleLine}>{t('title').split(' ')[0]}</span>
           <br />
           <span className={styles.headingStatic}>{t('forTeams')}</span>
-          <br className={styles.mobileBreak} />
           <span className={styles.typewriterWrap}>
             <span 
               className={styles.dynamicWord} 
-              style={{ color: TOPICS[topicIndex].color }}
+              style={{ color: TOPICS[topicIndex]?.color || TOPIC_COLORS[0] }}
             >
-              {typedText}
+              {typedText || '\u00A0'}
             </span>
             <span className={styles.cursor}>|</span>
           </span>
@@ -140,7 +149,7 @@ const TOPIC_COLORS = ['#C9A84C', '#00F0FF', '#B534FF'];
           ))}
         </p>
 
-        {/* Act 3: Analysis Input - Positioned below text */}
+        {/* Lead Analysis Form */}
         <div className={styles.analyzeFormWrapper}>
           <form onSubmit={handleAnalyzeSubmit} className={styles.analyzeForm}>
             <div className={`${styles.inputWrapper} ${isInputFocused ? styles.inputWrapperFocused : ''}`}>
@@ -176,8 +185,6 @@ const TOPIC_COLORS = ['#C9A84C', '#00F0FF', '#B534FF'];
           </form>
         </div>
       </div>
-
-
 
       {/* Scroll indicator */}
       <div className={`${styles.scrollHint} ${hasStarted ? styles.contentVisible : ''}`} aria-hidden="true">
