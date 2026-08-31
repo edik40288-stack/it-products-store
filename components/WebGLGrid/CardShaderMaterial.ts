@@ -63,18 +63,18 @@ void main() {
   float mouseDist = distance(uv, mouseNorm);
   float spotGlow = exp(-mouseDist * mouseDist * 6.0) * u_hoverState;
 
-  // Deep dark obsidian glass base (maintains high contrast for white text)
-  vec3 baseGlass = vec3(0.045, 0.045, 0.065);
+  // Deep dark luxury obsidian glass base (maintains 100% contrast for typography)
+  vec3 baseGlass = vec3(0.045, 0.05, 0.07);
   
-  // Subtle ambient tint from theme colors
+  // Subtle ambient tint only on hover, never blowing out into flat purple
   vec3 accentGlow = mix(u_color1, u_color2, uv.x * 0.7 + uv.y * 0.3);
-  vec3 rgb = mix(baseGlass, accentGlow, 0.08 + spotGlow * 0.15);
+  vec3 rgb = mix(baseGlass, accentGlow, 0.015 + spotGlow * 0.06);
 
-  // Soft specular highlight, keeping dark luxury tone without blinding whiteout
-  rgb += u_color1 * (spotGlow * 0.15);
+  // Soft specular highlight
+  rgb += u_color1 * (spotGlow * 0.08);
 
   // Alpha
-  float alpha = 0.85 + spotGlow * 0.1;
+  float alpha = 0.9 + spotGlow * 0.08;
 
   // Pixel-perfect rounded rect mask
   vec2 px = vUv * u_cardSize;
@@ -84,8 +84,8 @@ void main() {
   // 1px luxury neon border with glowing highlight near cursor
   float border = mask * (1.0 - smoothstep(-1.5, -0.5, d));
   float borderGlow = exp(-mouseDist * mouseDist * 3.5) * u_hoverState;
-  vec3 borderCol = mix(vec3(0.2, 0.22, 0.3), mix(u_color1, u_color2, uv.x), 0.4 + borderGlow * 0.6);
-  borderCol += vec3(0.7) * (borderGlow * 0.5);
+  vec3 borderCol = mix(vec3(0.18, 0.2, 0.28), mix(u_color1, u_color2, uv.x), 0.35 + borderGlow * 0.5);
+  borderCol += vec3(0.6) * (borderGlow * 0.4);
 
   rgb = mix(rgb, borderCol, border);
   alpha = max(alpha, border * (0.5 + borderGlow * 0.5));
