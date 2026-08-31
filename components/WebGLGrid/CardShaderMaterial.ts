@@ -67,15 +67,15 @@ void main() {
   float wave = sin(uv.x * 3.0 + u_time * 0.5) * cos(uv.y * 3.0 + u_time * 0.4) * 0.5 + 0.5;
   vec3 gradientCol = mix(u_color1, u_color2, wave * 0.7 + uv.y * 0.3);
 
-  // Dark obsidian base
-  vec3 baseGlass = vec3(0.05, 0.06, 0.1);
-  vec3 rgb = mix(baseGlass, gradientCol, 0.12 + spotGlow * 0.35);
+  // Dark obsidian base with preserved contrast
+  vec3 baseGlass = vec3(0.045, 0.05, 0.08);
+  vec3 rgb = mix(baseGlass, gradientCol, 0.1 + spotGlow * 0.25);
 
-  // Specular highlight under cursor
-  rgb += mix(u_color1, vec3(1.0), 0.5) * (spotGlow * 0.4);
+  // Smooth specular highlight under cursor (electric, non-blinding)
+  rgb += mix(u_color1, vec3(0.7, 0.85, 1.0), 0.3) * (spotGlow * 0.28);
 
   // Alpha
-  float alpha = 0.65 + spotGlow * 0.25;
+  float alpha = 0.7 + spotGlow * 0.2;
 
   // Pixel-perfect rounded rect mask
   vec2 px = vUv * u_cardSize;
