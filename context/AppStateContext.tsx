@@ -13,31 +13,11 @@ const AppStateContext = createContext<AppState | undefined>(undefined);
 export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
 
-  // Handle SPA routing and body overflow
+  // Handle SPA routing
   useEffect(() => {
     if (activeCardId) {
-      // Save scroll position
-      const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
-      
-      // Update history API
       window.history.pushState({ cardId: activeCardId }, '', `?service=${activeCardId}`);
     } else {
-      // Restore scroll position
-      const scrollY = document.body.style.top;
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.style.overflow = '';
-      
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0') * -1);
-      }
-      
-      // Clean history
       window.history.pushState({}, '', window.location.pathname);
     }
   }, [activeCardId]);

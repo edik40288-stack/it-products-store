@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { useTranslations } from 'next-intl';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ServiceItem } from '@/types';
 import styles from './ServiceDetail.module.css';
 
@@ -11,10 +11,15 @@ interface ServiceDetailProps {
 }
 
 export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
+  const [mounted, setMounted] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Entrance animation
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     const el = panelRef.current;
     if (!el) return;
     el.style.opacity = '0';
@@ -24,7 +29,7 @@ export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
       el.style.opacity = '1';
       el.style.transform = 'scale(1) translateY(0)';
     });
-  }, [item]);
+  }, [mounted, item]);
 
   const handleClose = () => {
     const el = panelRef.current;
@@ -44,7 +49,9 @@ export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
     }, 300);
   };
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div 
       className={styles.backdrop} 
       onClick={handleClose} 
@@ -119,6 +126,7 @@ export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

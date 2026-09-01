@@ -35,35 +35,6 @@ export default function WebGLDistortionCanvas() {
     const geometry = new THREE.PlaneGeometry(1, 1, 48, 48);
     const meshes = new Map<string, THREE.Mesh>();
 
-    // --- LAYOUT THRASHING FIX ---
-    // Cache absolute positions of cards so we don't call getBoundingClientRect() every frame
-    interface CachedRect {
-      width: number;
-      height: number;
-      left: number;
-      absoluteTop: number;
-    }
-    const rectCache = new Map<string, CachedRect>();
-    
-    const updateCache = () => {
-      const currentScrollY = window.scrollY;
-      const cards = getCards();
-      cards.forEach((card, id) => {
-        const rect = card.element.getBoundingClientRect();
-        rectCache.set(id, {
-          width: rect.width,
-          height: rect.height,
-          left: rect.left,
-          absoluteTop: rect.top + currentScrollY
-        });
-      });
-    };
-
-    // Initial cache - wait for layout to settle (e.g., fonts)
-    setTimeout(updateCache, 100);
-    setTimeout(updateCache, 500);
-    setTimeout(updateCache, 2000);
-
     const handleResize = () => {
       const width = window.innerWidth;
       const height = window.innerHeight;
@@ -74,88 +45,70 @@ export default function WebGLDistortionCanvas() {
       camera.top = 0;
       camera.bottom = height;
       camera.updateProjectionMatrix();
-      
-      updateCache();
     };
 
     window.addEventListener('resize', handleResize);
     handleResize();
 
-    const handleScroll = () => {
-      // scroll position is read directly from window.scrollY in animate loop
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
-    // Periodic check for layout changes (e.g. after images load) every 1s instead of every frame
-    const intervalId = setInterval(updateCache, 1000);
-
     const clock = new THREE.Clock();
 
-    // 3. Render Loop
+    // 3. Render Loop with real-time DOM sync
     let rafId: number;
     const animate = () => {
       rafId = requestAnimationFrame(animate);
       const time = clock.getElapsedTime();
-      const currentScrollY = window.scrollY;
       const cards = getCards();
 
-      // Sync DOM to WebGL
+      // Sync DOM elements directly to WebGL in real-time
       cards.forEach((card, id) => {
         let mesh = meshes.get(id);
         if (!mesh) {
           const material = createCardShaderMaterial();
-          // Assign colors based on card type
-          if (card.type === 'ai-integrations') {
+          // Assign colors based on exact card ID
+          if (card.type === 'development') {
+            material.uniforms.u_color1.value.set('#6366f1');
+            material.uniforms.u_color2.value.set('#8b5cf6');
+          } else if (card.type === 'ai-agents') {
+            material.uniforms.u_color1.value.set('#06b6d4');
+            material.uniforms.u_color2.value.set('#3b82f6');
+          } else if (card.type === 'crm') {
             material.uniforms.u_color1.value.set('#3b82f6');
             material.uniforms.u_color2.value.set('#8b5cf6');
-          } else if (card.type === 'process-automation') {
+          } else if (card.type === 'llm-integrations') {
+            material.uniforms.u_color1.value.set('#8b5cf6');
+            material.uniforms.u_color2.value.set('#d946ef');
+          } else if (card.type === 'automation') {
             material.uniforms.u_color1.value.set('#10b981');
             material.uniforms.u_color2.value.set('#3b82f6');
-          } else if (card.type === 'audit-analytics') {
+          } else if (card.type === 'analytics') {
             material.uniforms.u_color1.value.set('#f59e0b');
             material.uniforms.u_color2.value.set('#ef4444');
-          } else if (card.type === 'redesign-uiux') {
+          } else if (card.type === 'redesign') {
             material.uniforms.u_color1.value.set('#ec4899');
             material.uniforms.u_color2.value.set('#8b5cf6');
-          } else if (card.type === 'security-audit') {
+          } else if (card.type === 'security') {
             material.uniforms.u_color1.value.set('#ef4444');
             material.uniforms.u_color2.value.set('#f97316');
           } else {
-             material.uniforms.u_color1.value.set('#6366f1');
-             material.uniforms.u_color2.value.set('#a855f7');
+            material.uniforms.u_color1.value.set('#6366f1');
+            material.uniforms.u_color2.value.set('#a855f7');
           }
 
           mesh = new THREE.Mesh(geometry, material);
           mesh.frustumCulled = false;
           scene.add(mesh);
           meshes.set(id, mesh);
-          
-          // Force cache update for new mesh
-          const rect = card.element.getBoundingClientRect();
-          rectCache.set(id, {
-            width: rect.width,
-            height: rect.height,
-            left: rect.left,
-            absoluteTop: rect.top + currentScrollY
-          });
         }
 
-        // DOM Sync (Cached!)
-        const cached = rectCache.get(id);
-        if (!cached) return; // Should not happen
-
-        const top = cached.absoluteTop - currentScrollY;
-        const bottom = top + cached.height;
-        
-        // Frustum Culling manually (extreme optimization)
-        const isVisible = (bottom > 0 && top < window.innerHeight);
+        const rect = card.element.getBoundingClientRect();
+        const isVisible = rect.bottom > -50 && rect.top < window.innerHeight + 50 && rect.width > 0;
         mesh.visible = isVisible;
 
         if (isVisible) {
-          mesh.scale.set(cached.width, cached.height, 1);
+          mesh.scale.set(rect.width, rect.height, 1);
           mesh.position.set(
-            cached.left + cached.width / 2,
-            top + cached.height / 2,
+            rect.left + rect.width / 2,
+            rect.top + rect.height / 2,
             0
           );
 
@@ -165,27 +118,27 @@ export default function WebGLDistortionCanvas() {
           
           // Easing for hover state (smooth transition in and out)
           const targetHover = card.isHovered ? 1.0 : 0.0;
-          material.uniforms.u_hoverState.value += (targetHover - material.uniforms.u_hoverState.value) * 0.1;
+          material.uniforms.u_hoverState.value += (targetHover - material.uniforms.u_hoverState.value) * 0.15;
 
           if (material.uniforms.u_cardSize) {
-             material.uniforms.u_cardSize.value.set(cached.width, cached.height);
+            material.uniforms.u_cardSize.value.set(rect.width, rect.height);
           }
           
-          // Smooth out mouse tracking so it doesn't instantly snap
+          // Smooth out mouse tracking
           const currentMouseX = material.uniforms.u_mouse.value.x;
           const currentMouseY = material.uniforms.u_mouse.value.y;
           
           if (card.isHovered) {
-             material.uniforms.u_mouse.value.set(
-               currentMouseX + (card.mouse.relX - currentMouseX) * 0.15,
-               currentMouseY + (card.mouse.relY - currentMouseY) * 0.15
-             );
+            material.uniforms.u_mouse.value.set(
+              currentMouseX + (card.mouse.relX - currentMouseX) * 0.2,
+              currentMouseY + (card.mouse.relY - currentMouseY) * 0.2
+            );
           } else {
-             // Return to center slowly when not hovered
-             material.uniforms.u_mouse.value.set(
-               currentMouseX + (0.5 - currentMouseX) * 0.05,
-               currentMouseY + (0.5 - currentMouseY) * 0.05
-             );
+            // Return to center when not hovered
+            material.uniforms.u_mouse.value.set(
+              currentMouseX + (0.5 - currentMouseX) * 0.08,
+              currentMouseY + (0.5 - currentMouseY) * 0.08
+            );
           }
         }
       });
@@ -206,8 +159,6 @@ export default function WebGLDistortionCanvas() {
     animate();
 
     return () => {
-      clearInterval(intervalId);
-      window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(rafId);
       renderer.dispose();
