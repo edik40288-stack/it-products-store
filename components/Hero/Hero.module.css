@@ -74,24 +74,23 @@
   background: linear-gradient(
     90deg,
     #ffffff 0%,
-    #e2e8f0 20%,
-    #a78bfa 40%,
-    #38bdf8 60%,
-    #c084fc 80%,
+    #cbd5e1 25%,
+    #ffffff 50%,
+    #e2e8f0 75%,
     #ffffff 100%
   );
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: chromaticFlow 8s linear infinite;
+  animation: metallicShimmer 6s ease-in-out infinite alternate;
 }
 
-@keyframes chromaticFlow {
+@keyframes metallicShimmer {
   0% {
     background-position: 0% center;
   }
   100% {
-    background-position: 200% center;
+    background-position: 100% center;
   }
 }
 
@@ -120,12 +119,14 @@
   display: inline-block;
   transition: color 0.3s ease;
   white-space: nowrap;
+  font-weight: 800;
+  filter: drop-shadow(0 0 16px currentColor);
 }
 
 .cursor {
   display: inline-block;
   font-weight: 200;
-  color: #a78bfa;
+  color: #00F0FF;
   animation: blink 1s step-end infinite;
   margin-left: 3px;
   line-height: 1;

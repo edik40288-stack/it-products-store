@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import styles from './Hero.module.css';
 import CyberSphere from './CyberSphere';
 
-const TOPIC_COLORS = ['#a78bfa', '#00F0FF', '#c084fc'];
+const TOPIC_COLORS = ['#00F0FF', '#00FF9D', '#B534FF'];
 
 export default function Hero() {
   const t = useTranslations('hero');
