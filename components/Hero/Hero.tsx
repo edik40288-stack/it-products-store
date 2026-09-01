@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import styles from './Hero.module.css';
 import CyberSphere from './CyberSphere';
 
-const TOPIC_COLORS = ['#C9A84C', '#00F0FF', '#B534FF'];
+const TOPIC_COLORS = ['#a78bfa', '#00F0FF', '#c084fc'];
 
 export default function Hero() {
   const t = useTranslations('hero');
@@ -142,7 +142,7 @@ export default function Hero() {
         <h1 className={styles.heading}>
           <span className={styles.titleLine}>{t('title')}</span>
           <div className={styles.typewriterRow}>
-            <span className={styles.headingStatic}>{t('forTeams')}</span>
+            {t('forTeams') ? <span className={styles.headingStatic}>{t('forTeams')}</span> : null}
             <span className={styles.typewriterWrap}>
               <span 
                 className={styles.dynamicWord} 

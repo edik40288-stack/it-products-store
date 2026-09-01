@@ -56,7 +56,7 @@
 }
 
 .eyebrow span:first-child {
-  color: var(--color-gold);
+  color: #a78bfa;
 }
 
 .heading {
@@ -103,7 +103,7 @@
 .cursor {
   display: inline-block;
   font-weight: 200;
-  color: var(--color-gold);
+  color: #a78bfa;
   animation: blink 1s step-end infinite;
   margin-left: 3px;
   line-height: 1;
@@ -120,7 +120,7 @@
   line-height: 1.6;
   color: var(--color-text-muted);
   margin-bottom: 1.5rem;
-  max-width: 500px;
+  max-width: 540px;
 }
 
 .analyzeFormWrapper {
@@ -151,8 +151,8 @@
 
 .inputWrapperFocused {
   background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(201, 168, 76, 0.5);
-  box-shadow: 0 0 30px rgba(201, 168, 76, 0.15), inset 0 0 10px rgba(201, 168, 76, 0.05);
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 0 30px rgba(107, 91, 239, 0.15), inset 0 0 10px rgba(107, 91, 239, 0.05);
   transform: translateY(-2px) translateZ(0);
   will-change: transform;
 }
@@ -187,14 +187,14 @@
 }
 
 .analyzeBtnActive {
-  background: var(--color-gold);
-  color: #000;
+  background: linear-gradient(135deg, #7c3aed, #6366f1);
+  color: #ffffff;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(201, 168, 76, 0.35);
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
 }
 
 .analyzeBtnActive:hover {
-  background: #e2c05e;
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
   transform: scale(1.02);
 }
 
