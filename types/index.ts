@@ -1,3 +1,14 @@
+export interface ServiceMetric {
+  title: string;
+  desc: string;
+  highlight?: boolean;
+}
+
+export interface ServiceFeature {
+  title: string;
+  desc: string;
+}
+
 export interface ServiceItem {
   id: string;
   title: string;
@@ -6,6 +17,12 @@ export interface ServiceItem {
   duration: string;
   description: string;
   index?: number;
+  categoryBadge?: string;
+  stack?: string;
+  metrics?: ServiceMetric[];
+  features?: ServiceFeature[];
+  footerNote?: string;
+  ctaText?: string;
 }
 
 export interface Message {

@@ -12,7 +12,6 @@ interface ServiceDetailProps {
 
 export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
   const panelRef = useRef<HTMLDivElement>(null);
-  const t = useTranslations('serviceDetail');
 
   useEffect(() => {
     // Entrance animation
@@ -36,6 +35,15 @@ export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
     setTimeout(onClose, 250);
   };
 
+  const handleDiscuss = () => {
+    handleClose();
+    setTimeout(() => {
+      document.dispatchEvent(new CustomEvent('open-ai-chat', {
+        detail: { context: item.title }
+      }));
+    }, 300);
+  };
+
   return (
     <div 
       className={styles.backdrop} 
@@ -46,87 +54,69 @@ export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
       aria-label={item.title}
     >
       <div ref={panelRef} className={styles.panel} onClick={(e) => e.stopPropagation()}>
-        {/* Header bar */}
-        <div className={styles.panelHeader}>
-          <button className={styles.closeBtn} onClick={handleClose} aria-label="Close">
-            <span>✕</span>
-          </button>
-          <div className={styles.meta}>
-            <span className={styles.metaDuration}>⏱ {item.duration}</span>
-            <div className={styles.metaTags}>
-              {item.tags.map((tag: string) => (
-                <span key={tag} className={styles.metaTag}>{tag}</span>
-              ))}
-            </div>
+        {/* Верхний бар */}
+        <div className={styles.topBar}>
+          <div className={styles.metaLeft}>
+            <span className={styles.categoryBadge}>
+              {item.categoryBadge || 'MINDCORE // WORKFLOW AUTOMATION'}
+            </span>
+            <span className={styles.divider}>/</span>
+            <span className={styles.stackText}>
+              {item.stack || `Стек: ${item.tags.join(' • ')}`}
+            </span>
           </div>
+
+          <button className={styles.closeBtn} onClick={handleClose} aria-label="Close">
+            ✕
+          </button>
         </div>
 
-        {/* Scrollable content */}
-        <div className={styles.panelBody}>
-          <div className={styles.contentArea}>
-            {/* Title block */}
-            <div className={styles.titleBlock}>
-              <h2 className={styles.title}>{item.title}</h2>
-              <p className={styles.subtitle}>{item.subtitle}</p>
+        {/* Заголовок и суть услуги */}
+        <div className={styles.headerSection}>
+          <h2 className={styles.title}>{item.title}</h2>
+          <p className={styles.description}>{item.description}</p>
+        </div>
+
+        {/* Технические параметры надежности (3 колонки) */}
+        {item.metrics && item.metrics.length >= 3 && (
+          <div className={styles.metricsGrid}>
+            <div className={styles.metricCol}>
+              <div className={styles.metricTitle}>{item.metrics[0].title}</div>
+              <div className={styles.metricDesc}>{item.metrics[0].desc}</div>
             </div>
-
-            {/* Description */}
-            <p className={styles.description}>{item.description}</p>
-
-            {/* Value props */}
-            <div className={styles.props}>
-              <div className={styles.prop}>
-                <span className={styles.propIcon}>⚡</span>
-                <div>
-                  <strong>{t('fastDelivery')}</strong>
-                  <p>{t('fastDeliveryDesc')}</p>
-                </div>
+            <div className={`${styles.metricCol} ${styles.metricBordered}`}>
+              <div className={`${styles.metricTitle} ${item.metrics[1].highlight ? styles.metricHighlight : ''}`}>
+                {item.metrics[1].title}
               </div>
-              <div className={styles.prop}>
-                <span className={styles.propIcon}>🎯</span>
-                <div>
-                  <strong>{t('businessFirst')}</strong>
-                  <p>{t('businessFirstDesc')}</p>
-                </div>
-              </div>
-              <div className={styles.prop}>
-                <span className={styles.propIcon}>🔧</span>
-                <div>
-                  <strong>{t('fullOwnership')}</strong>
-                  <p>{t('fullOwnershipDesc')}</p>
-                </div>
-              </div>
+              <div className={styles.metricDesc}>{item.metrics[1].desc}</div>
             </div>
-
-            {/* CTAs */}
-            <div className={styles.ctas}>
-              <button
-                className={styles.ctaPrimary}
-                onClick={() => {
-                  handleClose();
-                  setTimeout(() => {
-                    document.dispatchEvent(new CustomEvent('open-ai-chat', {
-                      detail: { context: item.title }
-                    }));
-                  }, 300);
-                }}
-              >
-                {t('discussProject')} 💬
-              </button>
-
-              <div className={styles.directLinks}>
-                <a href="https://t.me/kraeved111" target="_blank" rel="noopener noreferrer" className={styles.directBtn}>
-                  Telegram
-                </a>
-                <a href="https://wa.me/4207278671129" target="_blank" rel="noopener noreferrer" className={styles.directBtn}>
-                  WhatsApp
-                </a>
-                <a href="mailto:edik40288@gmail.com" className={styles.directBtn}>
-                  Email
-                </a>
-              </div>
+            <div className={`${styles.metricCol} ${styles.metricBordered}`}>
+              <div className={styles.metricTitle}>{item.metrics[2].title}</div>
+              <div className={styles.metricDesc}>{item.metrics[2].desc}</div>
             </div>
           </div>
+        )}
+
+        {/* Что конкретно настраивается (2 карточки) */}
+        {item.features && item.features.length > 0 && (
+          <div className={styles.featuresList}>
+            {item.features.map((feat, idx) => (
+              <div key={idx} className={styles.featureCard}>
+                <h4 className={styles.featureTitle}>{feat.title}</h4>
+                <p className={styles.featureDesc}>{feat.desc}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Футер */}
+        <div className={styles.footerSection}>
+          <span className={styles.footerNote}>
+            {item.footerNote || 'Анализируем текущий стек и проектируем схему интеграций'}
+          </span>
+          <button className={styles.ctaBtn} onClick={handleDiscuss}>
+            {item.ctaText || 'Обсудить задачу →'}
+          </button>
         </div>
       </div>
     </div>
