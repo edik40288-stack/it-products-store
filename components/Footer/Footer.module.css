@@ -62,18 +62,20 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 1.1rem;
-  color: var(--color-gold);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #00FF85;
   text-decoration: none;
-  border-bottom: 1px solid rgba(201, 168, 76, 0.3);
-  padding-bottom: 2px;
-  transition: border-color 0.2s, opacity 0.2s;
+  border-bottom: 1px solid rgba(0, 255, 133, 0.35);
+  padding-bottom: 3px;
+  transition: all 0.25s ease;
   letter-spacing: 0.02em;
 }
 
 .emailCta:hover {
-  border-color: var(--color-gold);
-  opacity: 0.85;
+  border-color: #00FF85;
+  text-shadow: 0 0 16px rgba(0, 255, 133, 0.6);
+  transform: translateX(4px);
 }
 
 /* Bottom bar */
@@ -101,7 +103,7 @@
 }
 
 .brandDot {
-  color: var(--color-gold);
+  color: #00FF85;
 }
 
 .copyright {

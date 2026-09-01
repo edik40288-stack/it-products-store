@@ -28,12 +28,18 @@ export default function Footer() {
         {/* Main slogan */}
         <div className={styles.sloganWrap}>
           <h2 className={styles.slogan}>
-            {isRu 
-              ? 'Ракета-носитель для команд цифровых продуктов' 
-              : 'A booster rocket for digital product teams'}
+            {locale === 'ru' 
+              ? 'Создаем надежные веб-продукты и внедряем AI-системы'
+              : locale === 'ro'
+              ? 'Construim produse web scalabile și integrăm sisteme AI'
+              : 'Engineering high-impact web products and autonomous AI systems'}
           </h2>
           <a href="#contact" className={styles.emailCta}>
-            {isRu ? 'Обсудить проект →' : 'Discuss a project →'}
+            {locale === 'ru' 
+              ? 'Обсудить проект →' 
+              : locale === 'ro'
+              ? 'Discută proiectul →'
+              : 'Start a Project →'}
           </a>
         </div>
 
