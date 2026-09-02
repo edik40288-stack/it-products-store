@@ -314,7 +314,7 @@
 }
 
 .bubble {
-  max-width: 85%;
+  max-width: 100%;
   padding: 0.7rem 0.95rem;
   border-radius: 16px;
   font-size: 0.84rem;

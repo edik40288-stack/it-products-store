@@ -47,7 +47,7 @@ export function useAIChat() {
       const data = await res.json();
       setIsTyping(false);
       addMessage('assistant', data.reply);
-      if (data.dynamicCard?.niche && data.dynamicCard.niche !== 'Не определена') {
+      if (data.dynamicCard) {
         setDynamicCardConfig(data.dynamicCard);
         setTimeout(() => {
           setShowLeadCard(true);

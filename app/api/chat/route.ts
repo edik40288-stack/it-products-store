@@ -179,13 +179,21 @@ async function callGemini(apiKey: string, messages: Array<{ role: string; conten
         const data = await res.json();
         const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
         if (rawText) {
+          const cleanText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
           try {
-            const parsed = JSON.parse(rawText) as GeminiParsedResult;
+            const parsed = JSON.parse(cleanText) as GeminiParsedResult;
             if (parsed.reply) return parsed;
-          } catch {
-            const match = rawText.match(/"reply"\s*:\s*"([\s\S]*?)(?:"\s*,\s*"niche"|"$)/);
+          } catch (e) {
+            console.error("JSON parse error:", e, "Raw:", rawText);
+            // Fallback: forcefully extract everything in "reply" field
+            const replyMatch = cleanText.match(/"reply"\s*:\s*"([\s\S]*?)"(?=\s*,\s*"niche"|\s*,\s*"serviceType"|\s*\})/);
+            const nicheMatch = cleanText.match(/"niche"\s*:\s*"([^"]*)"/);
+            const serviceMatch = cleanText.match(/"serviceType"\s*:\s*"([^"]*)"/);
+            
             return { 
-              reply: match ? match[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : rawText.trim() 
+              reply: replyMatch ? replyMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : 'Ошибка парсинга. Повторите запрос.',
+              niche: nicheMatch ? nicheMatch[1] : undefined,
+              serviceType: serviceMatch ? serviceMatch[1] : undefined
             };
           }
         }
