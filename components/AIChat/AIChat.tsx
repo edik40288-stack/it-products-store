@@ -262,14 +262,23 @@ export default function AIChat() {
         {/* Header */}
         <div className={styles.header}>
           <div className={styles.avatarWrap}>
-            <div className={styles.avatar}>M</div>
+            <div className={styles.avatar}>
+              <video
+                src="/videos/bot-greeting.mp4"
+                muted
+                playsInline
+                autoPlay
+                loop
+                className={styles.headerBotVideo}
+              />
+            </div>
             <div className={styles.onlineDot} />
           </div>
           <div className={styles.headerInfo}>
             <span className={styles.headerName}>MINDCORE AI</span>
-            <span className={styles.headerStatus}>
-              {isTyping ? t('typing') : 'Online · Lead Architect'}
-            </span>
+            {isTyping && (
+              <span className={styles.headerStatus}>{t('typing')}</span>
+            )}
           </div>
         </div>
 
