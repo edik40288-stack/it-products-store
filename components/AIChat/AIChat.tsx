@@ -24,9 +24,11 @@ export default function AIChat() {
     sendMessage,
     handleKeyDown,
     showLeadCard,
+    setShowLeadCard,
     dynamicCardConfig,
     initialQuery,
-    addMessage
+    addMessage,
+    setIsTyping
   } = useAIChat();
 
   // Voice Input Speech Recognition state
@@ -125,15 +127,18 @@ export default function AIChat() {
       }),
     }).catch(console.error);
 
+    // 2. Hide card immediately so conversation flow is seamless
+    setShowLeadCard(false);
     setIsCardSubmitted(true);
     setIsSubmittingCard(false);
 
-    // 2. Add lead submission message to chat
-    addMessage('user', `Заявка: ${name}, фирма «${company}» (${contact})`);
+    // 3. Add lead submission message to chat & show typing
+    addMessage('user', `📋 Заполнил данные: ${name}, фирма «${company}» (${contact})`);
+    setIsTyping(true);
 
-    // 3. Trigger live Gemini response
+    // 4. Trigger live Gemini response
     try {
-      const promptText = `Клиент заполнил карточку: имя ${name}, компания «${company}», контакты ${contact}. Если компания реальная — дай краткий анализ рынка и как ее усилить через AI. Если вымышленная, тестовая или неизвестная — зафиксируй данные, напомни про бесплатный сайт (0 €) и спроси, какие главные задачи в процессах хотят решить.`;
+      const promptText = `Клиент заполнил карточку: имя ${name}, фирма «${company}», контакт ${contact}. Если фирма реальная — дай краткий анализ ниши и как ее усилить через AI. Если неизвестная или тестовая — энергично подтверди фиксацию проекта под 0 € и задай живой цепляющий вопрос об узких местах в продажах или обработке заявок, чтобы продолжить диалог!`;
       const history = [
         ...messages,
         { role: 'user' as const, content: promptText, id: Date.now().toString() }
@@ -147,11 +152,13 @@ export default function AIChat() {
         }),
       });
       const data = await res.json();
+      setIsTyping(false);
       if (data?.reply) {
         addMessage('assistant', data.reply);
       }
     } catch {
-      addMessage('assistant', 'Заявка зафиксирована. Старший архитектор свяжется с вами в течение 48 часов.');
+      setIsTyping(false);
+      addMessage('assistant', 'Заявка зафиксирована! 🚀 Старший архитектор свяжется с вами в течение 48 часов с готовой концепцией 💼');
     }
   };
 
@@ -362,7 +369,7 @@ export default function AIChat() {
           ))}
 
           {/* Interactive Project & Lead Card */}
-          {showLeadCard && (
+          {showLeadCard && !isCardSubmitted && (
             <div className={styles.leadCard}>
               <div className={styles.leadCardHeader}>
                 <div className={styles.leadCardBadge}>
@@ -372,54 +379,44 @@ export default function AIChat() {
                 <span className={styles.leadCardFree}>{locale === 'ru' ? 'Сайт: 0 €' : 'Web: 0 €'}</span>
               </div>
 
-              {!isCardSubmitted ? (
-                <form onSubmit={handleCardSubmit} className={styles.leadCardForm}>
-                  <div className={styles.leadCardFields}>
-                    <input
-                      type="text"
-                      placeholder={locale === 'ru' ? 'Имя Фамилия *' : 'Full Name *'}
-                      value={cardName}
-                      onChange={(e) => setCardName(e.target.value)}
-                      required
-                      className={styles.leadCardInput}
-                    />
-                    <input
-                      type="text"
-                      placeholder={locale === 'ru' ? 'Название фирмы или компании *' : 'Company Name *'}
-                      value={cardCompany}
-                      onChange={(e) => setCardCompany(e.target.value)}
-                      required
-                      className={styles.leadCardInput}
-                    />
-                    <input
-                      type="text"
-                      placeholder={locale === 'ru' ? 'Контакты для связи (Telegram, телефон) *' : 'Telegram / WhatsApp / Phone *'}
-                      value={cardContact}
-                      onChange={(e) => setCardContact(e.target.value)}
-                      required
-                      className={`${styles.leadCardInput} ${styles.leadCardInputFull}`}
-                    />
-                  </div>
-
-                  <button 
-                    type="submit" 
-                    disabled={isSubmittingCard || !cardName.trim() || !cardCompany.trim() || !cardContact.trim()}
-                    className={styles.leadCardSubmitBtn}
-                  >
-                    {isSubmittingCard 
-                      ? (locale === 'ru' ? 'Анализирую компанию...' : 'Analyzing company...') 
-                      : (locale === 'ru' ? 'Отправить на экспресс-анализ 🚀' : 'Run Express Analysis 🚀')}
-                  </button>
-                </form>
-              ) : (
-                <div className={styles.cardSuccessBox}>
-                  <div className={styles.cardSuccessIcon}>✓</div>
-                  <div className={styles.cardSuccessText}>
-                    <strong>{locale === 'ru' ? 'Заявка зафиксирована!' : 'Project Secured!'}</strong>
-                    <span>{locale === 'ru' ? 'Старший архитектор свяжется с вами в ближайшее время.' : 'Our lead engineer will connect with you shortly.'}</span>
-                  </div>
+              <form onSubmit={handleCardSubmit} className={styles.leadCardForm}>
+                <div className={styles.leadCardFields}>
+                  <input
+                    type="text"
+                    placeholder={locale === 'ru' ? 'Имя Фамилия *' : 'Full Name *'}
+                    value={cardName}
+                    onChange={(e) => setCardName(e.target.value)}
+                    required
+                    className={styles.leadCardInput}
+                  />
+                  <input
+                    type="text"
+                    placeholder={locale === 'ru' ? 'Название фирмы или компании *' : 'Company Name *'}
+                    value={cardCompany}
+                    onChange={(e) => setCardCompany(e.target.value)}
+                    required
+                    className={styles.leadCardInput}
+                  />
+                  <input
+                    type="text"
+                    placeholder={locale === 'ru' ? 'Контакты для связи (Telegram, телефон) *' : 'Telegram / WhatsApp / Phone *'}
+                    value={cardContact}
+                    onChange={(e) => setCardContact(e.target.value)}
+                    required
+                    className={`${styles.leadCardInput} ${styles.leadCardInputFull}`}
+                  />
                 </div>
-              )}
+
+                <button 
+                  type="submit" 
+                  disabled={isSubmittingCard || !cardName.trim() || !cardCompany.trim() || !cardContact.trim()}
+                  className={styles.leadCardSubmitBtn}
+                >
+                  {isSubmittingCard 
+                    ? (locale === 'ru' ? 'Анализирую компанию...' : 'Analyzing company...') 
+                    : (locale === 'ru' ? 'Отправить на экспресс-анализ 🚀' : 'Run Express Analysis 🚀')}
+                </button>
+              </form>
             </div>
           )}
 

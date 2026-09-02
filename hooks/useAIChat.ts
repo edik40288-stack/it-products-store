@@ -149,6 +149,7 @@ export function useAIChat() {
     input,
     setInput,
     isTyping,
+    setIsTyping,
     leadCollected,
     isPulsing,
     messagesEndRef,
