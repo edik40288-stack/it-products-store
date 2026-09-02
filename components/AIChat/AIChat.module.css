@@ -515,32 +515,64 @@
   color: #737373;
 }
 
-.cardSuccessBox {
-  border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(0, 0, 0, 0.4);
-  padding: 1rem;
-  font-family: var(--font-mono, monospace);
-  font-size: 0.75rem;
-  color: #d4d4d4;
+/* Compact submitted status ticker with running scanline */
+.submittedTicker {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  background: rgba(0, 255, 133, 0.05);
+  border: 1px solid rgba(0, 255, 133, 0.3);
+  padding: 8px 12px;
+  margin: 6px 0;
   animation: msgIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.cardSuccessTitle {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #00FF85;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+.tickerGlowLine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #00FF85, #C9A84C, transparent);
+  animation: tickerScan 2.2s infinite linear;
 }
 
-.cardSuccessText {
-  margin-top: 0.5rem;
-  font-size: 11px;
-  line-height: 1.6;
-  color: #a3a3a3;
+@keyframes tickerScan {
+  0% { left: -50%; }
+  100% { left: 150%; }
+}
+
+.tickerContent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tickerPulseDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #00FF85;
+  box-shadow: 0 0 8px #00FF85;
+  flex-shrink: 0;
+  animation: pulseDot 1.6s infinite ease-in-out;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.8); }
+}
+
+.tickerText {
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  font-weight: 600;
+  color: #00FF85;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Success banner */
