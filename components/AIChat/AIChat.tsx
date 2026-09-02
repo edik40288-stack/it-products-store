@@ -26,8 +26,16 @@ export default function AIChat() {
     showLeadCard,
     dynamicCardConfig,
     initialQuery,
-    addMessage
+    addMessage,
+    sendQueryDirectly
   } = useAIChat();
+
+  const QUICK_ACTIONS = [
+    { emoji: '🎁', label: isRu ? 'Сайт бесплатно (0 €)' : 'Free Website (0 €)', query: isRu ? 'Хочу создать продающий сайт бесплатно (0 €) 🎁' : 'I want to build a free turnkey website (0 €) 🎁' },
+    { emoji: '🤖', label: isRu ? 'AI-Агенты' : 'AI Agents', query: isRu ? 'Как внедрить AI-агентов в наш отдел продаж и поддержку? 🤖' : 'How can we deploy AI agents for sales and support? 🤖' },
+    { emoji: '⚡️', label: isRu ? 'Интеграция CRM' : 'CRM Integration', query: isRu ? 'Нужна интеграция CRM, ботов и платежных сервисов ⚡️' : 'We need CRM, bot, and payment gateway integration ⚡️' },
+    { emoji: '📊', label: isRu ? 'Аудит ниши' : 'Market Audit', query: isRu ? 'Хочу провести аудит ниши и точек роста бизнеса 📊' : 'I want an express audit of our market and growth points 📊' },
+  ];
 
   // Lead Card local state
   const [cardName, setCardName] = useState('');
@@ -377,13 +385,33 @@ export default function AIChat() {
           <div ref={messagesEndRef} />
         </div>
 
+        {/* Quick Action Chips */}
+        {messages.length <= 2 && !isTyping && (
+          <div className={styles.quickChipsWrapper}>
+            {QUICK_ACTIONS.map((chip, idx) => (
+              <button
+                key={idx}
+                type="button"
+                className={styles.quickChip}
+                onClick={() => {
+                  setInput('');
+                  sendQueryDirectly(chip.query);
+                }}
+              >
+                <span>{chip.emoji}</span>
+                <span>{chip.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Input */}
         <div className={styles.inputArea}>
           <input
             ref={inputRef}
             type="text"
             className={styles.input}
-            placeholder={t('placeholder')}
+            placeholder={isRu ? 'Напишите задачу или вопрос...' : t('placeholder')}
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}

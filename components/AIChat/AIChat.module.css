@@ -551,11 +551,43 @@
   animation: msgIn 0.4s ease forwards;
 }
 
+/* Quick Action Chips */
+.quickChipsWrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.4rem 1rem 0;
+  flex-shrink: 0;
+}
+
+.quickChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(201, 168, 76, 0.25);
+  border-radius: 20px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #f3f4f6;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.quickChip:hover {
+  background: rgba(201, 168, 76, 0.15);
+  border-color: rgba(201, 168, 76, 0.6);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
 /* Input */
 .inputArea {
   display: flex;
   gap: 0.5rem;
-  padding: 0.85rem 1rem;
+  padding: 0.75rem 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   flex-shrink: 0;
   background: rgba(255, 255, 255, 0.02);

@@ -159,6 +159,7 @@ export function useAIChat() {
     setShowLeadCard,
     dynamicCardConfig,
     initialQuery,
-    addMessage
+    addMessage,
+    sendQueryDirectly
   };
 }
