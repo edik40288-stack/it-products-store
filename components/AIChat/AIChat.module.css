@@ -69,6 +69,7 @@
   opacity: 0;
   transition: opacity 0.45s ease;
   pointer-events: none;
+  z-index: 2;
 }
 
 .botVideoActive {
@@ -244,7 +245,7 @@
   align-items: center;
   justify-content: center;
   background: #0c0e14;
-  z-index: 1;
+  z-index: 0;
 }
 
 .onlineDot {

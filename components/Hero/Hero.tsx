@@ -24,15 +24,23 @@ export default function Hero() {
   const [inputValue, setInputValue] = useState('');
   const [logMessages, setLogMessages] = useState<string[]>([]);
   const [hasStarted, setHasStarted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Act 1: Initial load timing
+  // Act 1: Initial load timing & mobile detection
   useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
     const timer = setTimeout(() => {
       setHasStarted(true);
     }, 1200);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', checkMobile);
+    };
   }, []);
 
   // Act 2: Typewriter Effect without layout jumps
@@ -178,7 +186,7 @@ export default function Hero() {
                 <input
                   ref={inputRef}
                   type="text"
-                  placeholder={t('placeholder')}
+                  placeholder={isMobile ? 'Сайт или задача...' : t('placeholder')}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onFocus={() => setIsInputFocused(true)}

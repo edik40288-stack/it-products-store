@@ -16,10 +16,17 @@ export default function ChatVisual({ hovered }: VisualProps) {
     const video = videoRef.current;
     if (!video) return;
 
+    const isTouch = typeof window !== 'undefined' && 
+      ('ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth < 1024);
+
+    if (isTouch) {
+      video.muted = true;
+      video.play().catch(() => {});
+      return;
+    }
+
     if (hovered) {
-      video.play().catch(() => {
-        // Autoplay fallback
-      });
+      video.play().catch(() => {});
     } else {
       video.pause();
       video.currentTime = 0;
@@ -30,11 +37,23 @@ export default function ChatVisual({ hovered }: VisualProps) {
     <div className={styles.workspaceContainer}>
       <div className={styles.videoWrapper}>
         <video
-          ref={videoRef}
-          src="/videos/ai-agents.mp4"
+          ref={(el) => {
+            (videoRef as any).current = el;
+            if (el) {
+              el.muted = true;
+              el.defaultMuted = true;
+              const isTouch = typeof window !== 'undefined' && 
+                ('ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth < 1024);
+              if (isTouch && el.paused) {
+                el.play().catch(() => {});
+              }
+            }
+          }}
+          src="/videos/ai-agents.mp4#t=0.001"
           className={`${styles.videoElement} ${hovered ? styles.videoHovered : ''}`}
           muted
           playsInline
+          autoPlay
           preload="auto"
           loop
         />
