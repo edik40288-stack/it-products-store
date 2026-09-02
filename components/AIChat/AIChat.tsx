@@ -28,8 +28,7 @@ export default function AIChat() {
     dynamicCardConfig,
     initialQuery,
     addMessage,
-    setIsTyping,
-    releasePendingResponse
+    setIsTyping
   } = useAIChat();
 
   // Voice Input Speech Recognition state
@@ -129,10 +128,6 @@ export default function AIChat() {
     } finally {
       setIsSubmittingCard(false);
       setIsCardSubmitted(true);
-      // Wait a tiny bit for the UI to update, then show the AI's response!
-      setTimeout(() => {
-        releasePendingResponse();
-      }, 600);
     }
   };
 

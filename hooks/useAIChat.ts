@@ -30,24 +30,20 @@ export function useAIChat() {
     niche?: string;
     serviceType?: string;
   }>({});
-  const [pendingResponse, setPendingResponse] = useState<string | null>(null);
 
   const sendQueryDirectly = useCallback(async (text: string) => {
     addMessage('user', text);
     
-    // SMART UX TRICK: Instantly reply with a script and show the card. 
-    // This buys us 5-10 seconds of user attention while they fill it out!
+    // Natural delay before showing typing indicator
     setTimeout(() => {
-      addMessage('assistant', 'Принято. Я начал собирать данные и анализировать вашу задачу. Пока я готовлю ответ, пожалуйста, заполните контакты для связи в форме ниже.');
-      setShowLeadCard(true);
       setIsTyping(true);
-    }, 400);
+    }, 300);
 
     setInitialQuery(text);
 
     try {
       const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), 12000); // 12 seconds
+      const id = setTimeout(() => controller.abort(), 12000); // 12 seconds max
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -59,16 +55,19 @@ export function useAIChat() {
       clearTimeout(id);
       
       const data = await res.json();
-      
-      // Store the response to be shown LATER when they submit the card!
-      setPendingResponse(data.reply);
-      // We do NOT set isTyping(false) here, so it looks like it's still thinking 
-      // or we can turn it off so it doesn't distract them. Let's turn it off.
       setIsTyping(false);
+      
+      addMessage('assistant', data.reply);
+      if (data.dynamicCard?.showCard) {
+        setDynamicCardConfig(data.dynamicCard);
+        setTimeout(() => {
+          setShowLeadCard(true);
+        }, 600);
+      }
 
     } catch {
       setIsTyping(false);
-      setPendingResponse('Анализ завершен в базовом режиме. Инженер свяжется с вами в течение 48 часов.');
+      addMessage('assistant', 'Сбой связи с сервером. Пожалуйста, попробуйте еще раз.');
     }
   }, [addMessage]);
 
@@ -159,13 +158,6 @@ export function useAIChat() {
     }
   };
 
-  const releasePendingResponse = useCallback(() => {
-    if (pendingResponse) {
-      addMessage('assistant', pendingResponse);
-      setPendingResponse(null);
-    }
-  }, [pendingResponse, addMessage]);
-
   return {
     isOpen,
     setIsOpen,
@@ -185,7 +177,6 @@ export function useAIChat() {
     dynamicCardConfig,
     initialQuery,
     addMessage,
-    sendQueryDirectly,
-    releasePendingResponse
+    sendQueryDirectly
   };
 }
