@@ -46,30 +46,26 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className={styles.bottomBar}>
           <div className={styles.bottomLeft}>
-            <span className={styles.brand}>MINDCORE<span className={styles.brandDot}>.</span></span>
+            <div className={styles.brandRow}>
+              <span className={styles.brand}>MINDCORE<span className={styles.brandDot}>.</span></span>
+              <span className={styles.brandTagline}>// AI & DIGITAL PRODUCTION</span>
+            </div>
             <span className={styles.copyright}>© {year} All rights reserved.</span>
           </div>
 
-          <div className={styles.statusIndicator}>
-            <span className={styles.statusDot} />
-            <span className={styles.statusText}>
-              {locale === 'ru' 
-                ? 'Все системы работают стабильно' 
-                : locale === 'ro' 
-                ? 'Toate sistemele operaționale' 
-                : 'All systems operational'}
-            </span>
-          </div>
-
           <div className={styles.bottomRight}>
-            <a href="#services" className={styles.footerLink}>
-              {locale === 'ru' ? 'Услуги' : locale === 'ro' ? 'Servicii' : 'Services'}
+            <a href="https://t.me/kraeved111" target="_blank" rel="noopener noreferrer" className={styles.footerLink}>
+              Telegram
             </a>
-            <span className={styles.footerDivider}>/</span>
-            <a href="#contact" className={styles.footerLink}>
-              {locale === 'ru' ? 'Контакты' : locale === 'ro' ? 'Contact' : 'Contact'}
+            <span className={styles.footerDivider}>•</span>
+            <a href="https://wa.me/4207278671129" target="_blank" rel="noopener noreferrer" className={styles.footerLink}>
+              WhatsApp
             </a>
-            <span className={styles.footerDivider}>/</span>
+            <span className={styles.footerDivider}>•</span>
+            <a href="mailto:edik40288@gmail.com" className={styles.footerLink}>
+              Email
+            </a>
+            <span className={styles.footerDivider}>•</span>
             <button 
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} 
               className={styles.backToTop}

@@ -84,7 +84,7 @@
   align-items: center;
   justify-content: space-between;
   position: relative;
-  gap: 1.5rem;
+  gap: 2rem;
   padding-top: 2.2rem;
   border-top: 1px solid rgba(255, 255, 255, 0.07);
 }
@@ -92,13 +92,20 @@
 .bottomLeft {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.35rem;
+}
+
+.brandRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .brand {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 800;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   color: var(--color-text);
 }
 
@@ -106,54 +113,30 @@
   color: #00FF85;
 }
 
-.copyright {
-  font-size: 0.72rem;
-  color: var(--color-text-muted);
-}
-
-/* Operational Status */
-.statusIndicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  padding: 0.35rem 0.85rem;
-  border-radius: 999px;
-  background: rgba(0, 255, 133, 0.04);
-  border: 1px solid rgba(0, 255, 133, 0.15);
+.brandTagline {
   font-family: var(--font-mono, monospace);
   font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.45);
 }
 
-.statusDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #00FF85;
-  box-shadow: 0 0 8px #00FF85;
-  animation: statusPulse 2s ease-in-out infinite;
-}
-
-@keyframes statusPulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.85); }
-}
-
-.statusText {
-  color: rgba(255, 255, 255, 0.75);
-  letter-spacing: 0.02em;
+.copyright {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
 }
 
 /* Quick Links */
 .bottomRight {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.75rem;
 }
 
 .footerLink {
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   font-weight: 500;
-  color: var(--color-text-muted);
+  color: rgba(255, 255, 255, 0.65);
   text-decoration: none;
   transition: color 0.2s ease;
 }
@@ -163,23 +146,24 @@
 }
 
 .footerDivider {
-  color: rgba(255, 255, 255, 0.15);
-  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 0.65rem;
 }
 
 .backToTop {
   background: none;
   border: none;
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: #00FF85;
   cursor: pointer;
   padding: 0;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .backToTop:hover {
-  opacity: 0.8;
+  color: #15e07b;
+  text-shadow: 0 0 12px rgba(0, 255, 133, 0.5);
   transform: translateY(-1px);
 }
 
@@ -194,5 +178,8 @@
   }
   .bottomLeft {
     align-items: center;
+  }
+  .brandRow {
+    justify-content: center;
   }
 }
