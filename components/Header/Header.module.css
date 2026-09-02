@@ -130,40 +130,85 @@
 /* Menu button */
 .menuBtn {
   position: relative;
-  width: 36px;
-  height: 36px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 9px;
+  width: 38px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 4.5px;
   padding: 0;
-  transition: all 0.25s ease;
+  transition: all 0.3s ease;
+  overflow: hidden;
 }
 
 .menuBtn:hover {
-  border-color: rgba(123, 97, 255, 0.5);
-  background: rgba(123, 97, 255, 0.1);
+  border-color: rgba(139, 92, 246, 0.6);
+  background: rgba(107, 91, 239, 0.15);
+  box-shadow: 0 0 16px rgba(123, 97, 255, 0.25);
 }
 
 .menuLine {
   display: block;
-  width: 16px;
+  width: 17px;
   height: 1.5px;
   background: #ffffff;
   border-radius: 1px;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s ease,
+              width 0.3s ease;
+  position: relative;
+  z-index: 2;
 }
 
+/* Open state — X */
 .menuBtnOpen .menuLine:nth-child(1) {
-  transform: translateY(3.25px) rotate(45deg);
+  transform: translateY(6px) rotate(45deg);
 }
 .menuBtnOpen .menuLine:nth-child(2) {
-  transform: translateY(-3.25px) rotate(-45deg);
+  opacity: 0;
+  width: 0;
+}
+.menuBtnOpen .menuLine:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/* Dots overlay on hover */
+.menuDots {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  place-items: center;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 1;
+}
+
+.menuBtnHovered:not(.menuBtnOpen) .menuLine {
+  opacity: 0;
+}
+.menuBtnHovered:not(.menuBtnOpen) .menuDots {
+  opacity: 1;
+}
+
+.menuDot {
+  width: 3.5px;
+  height: 3.5px;
+  border-radius: 50%;
+  background: #a78bfa;
+  box-shadow: 0 0 6px #7B61FF;
+  transform: scale(0);
+  animation: dotPop 0.35s calc(var(--i) * 0.025s) forwards;
+}
+
+@keyframes dotPop {
+  to { transform: scale(1); }
 }
 
 /* ─── Studio Navigation Overlay ─── */

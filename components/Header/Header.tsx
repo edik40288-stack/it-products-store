@@ -22,6 +22,7 @@ export default function Header({ locale }: HeaderProps) {
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuHovered, setMenuHovered] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 30);
@@ -89,15 +90,24 @@ export default function Header({ locale }: HeaderProps) {
             ))}
           </div>
 
-          {/* Clean minimal hamburger / close button */}
+          {/* 9-dot matrix animated menu button */}
           <button
-            className={`${styles.menuBtn} ${menuOpen ? styles.menuBtnOpen : ''}`}
+            className={`${styles.menuBtn} ${menuOpen ? styles.menuBtnOpen : ''} ${menuHovered ? styles.menuBtnHovered : ''}`}
             onClick={() => setMenuOpen(!menuOpen)}
+            onMouseEnter={() => setMenuHovered(true)}
+            onMouseLeave={() => setMenuHovered(false)}
             aria-label="Toggle navigation menu"
             aria-expanded={menuOpen}
           >
             <span className={styles.menuLine} />
             <span className={styles.menuLine} />
+            <span className={styles.menuLine} />
+            {/* 9-dot matrix overlay on hover */}
+            <div className={styles.menuDots} aria-hidden="true">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <span key={i} className={styles.menuDot} style={{ '--i': i } as React.CSSProperties} />
+              ))}
+            </div>
           </button>
         </div>
       </header>
