@@ -161,7 +161,7 @@ async function callGemini(apiKey: string, messages: Array<{ role: string; conten
           generationConfig: {
             responseMimeType: 'application/json',
             temperature: 0.6,
-            maxOutputTokens: 500,
+            maxOutputTokens: 1200,
           }
         }),
       });
@@ -174,7 +174,10 @@ async function callGemini(apiKey: string, messages: Array<{ role: string; conten
             const parsed = JSON.parse(rawText) as GeminiParsedResult;
             if (parsed.reply) return parsed;
           } catch {
-            return { reply: rawText.trim() };
+            const match = rawText.match(/"reply"\s*:\s*"([\s\S]*?)(?:"\s*,\s*"niche"|"$)/);
+            return { 
+              reply: match ? match[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : rawText.trim() 
+            };
           }
         }
       } else {

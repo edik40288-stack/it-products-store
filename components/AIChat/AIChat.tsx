@@ -308,7 +308,7 @@ export default function AIChat() {
                     />
                     <input
                       type="text"
-                      placeholder={locale === 'ru' ? 'Компания / Ниша бизнеса *' : 'Company / Niche *'}
+                      placeholder={locale === 'ru' ? 'Компания / Ниша *' : 'Company / Niche *'}
                       value={cardCompany}
                       onChange={(e) => setCardCompany(e.target.value)}
                       required
@@ -316,27 +316,20 @@ export default function AIChat() {
                     />
                     <input
                       type="text"
-                      placeholder={locale === 'ru' ? 'Ссылка на текущий сайт / Instagram (если есть)' : 'Website or Instagram link'}
-                      value={cardLink}
-                      onChange={(e) => setCardLink(e.target.value)}
-                      className={styles.leadCardInput}
-                    />
-                    <input
-                      type="text"
-                      placeholder={locale === 'ru' ? 'Telegram @username или телефон *' : 'Telegram @username or Phone *'}
+                      placeholder={locale === 'ru' ? 'Telegram @username или телефон для связи *' : 'Telegram @username or Phone *'}
                       value={cardContact}
                       onChange={(e) => setCardContact(e.target.value)}
                       required
-                      className={styles.leadCardInput}
+                      className={`${styles.leadCardInput} ${styles.leadCardInputFull}`}
                     />
                   </div>
 
                   <div className={styles.leadCardTypes}>
-                    {['Веб-сайт под ключ (0 €)', 'AI-Агенты', 'CRM-Система', 'Мобильное приложение'].map((type) => (
+                    {['Веб-сайт (0 €)', 'AI-Агенты', 'CRM-Система', 'Мобильное приложение'].map((type) => (
                       <button
                         key={type}
                         type="button"
-                        className={`${styles.typePill} ${cardType === type ? styles.typePillActive : ''}`}
+                        className={`${styles.typePill} ${cardType.includes(type.split(' ')[0]) ? styles.typePillActive : ''}`}
                         onClick={() => setCardType(type)}
                       >
                         {type}

@@ -356,13 +356,14 @@
 .leadCard {
   background: rgba(14, 18, 28, 0.95);
   border: 1px solid rgba(123, 97, 255, 0.35);
-  border-radius: 16px;
-  padding: 1rem 1.1rem;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(123, 97, 255, 0.12);
+  border-radius: 14px;
+  padding: 0.75rem 0.9rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(123, 97, 255, 0.1);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  animation: msgIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  gap: 0.55rem;
+  animation: msgIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  margin-top: 0.25rem;
 }
 
 .leadCardHeader {
@@ -370,18 +371,18 @@
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.4rem;
 }
 
 .leadCardBadge {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.4rem;
   font-family: var(--font-mono, monospace);
   font-size: 0.65rem;
   font-weight: 700;
   color: #c4b5fd;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
 }
 
 .leadCardDot {
@@ -394,36 +395,41 @@
 
 .leadCardFree {
   font-family: var(--font-mono, monospace);
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 700;
   color: #00FF85;
   background: rgba(0, 255, 133, 0.1);
   border: 1px solid rgba(0, 255, 133, 0.3);
-  padding: 0.15rem 0.45rem;
+  padding: 0.1rem 0.4rem;
   border-radius: 4px;
 }
 
 .leadCardForm {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.5rem;
 }
 
 .leadCardFields {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
 }
 
 .leadCardInput {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.78rem;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.75rem;
   color: #ffffff;
   outline: none;
   transition: border-color 0.2s, background 0.2s;
+  width: 100%;
+}
+
+.leadCardInputFull {
+  grid-column: span 2;
 }
 
 .leadCardInput:focus {
