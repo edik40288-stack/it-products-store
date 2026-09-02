@@ -151,6 +151,23 @@ interface GeminiParsedResult {
   showCard?: boolean;
 }
 
+async function fetchWithTimeout(resource: string, options: RequestInit & { timeout?: number } = {}) {
+  const { timeout = 12000 } = options;
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  try {
+    const response = await fetch(resource, {
+      ...options,
+      signal: controller.signal
+    });
+    clearTimeout(id);
+    return response;
+  } catch (error) {
+    clearTimeout(id);
+    throw error;
+  }
+}
+
 async function callGemini(apiKey: string, messages: Array<{ role: string; content: string }>): Promise<GeminiParsedResult | null> {
   const models = ['gemini-3.6-flash', 'gemini-3.1-pro-preview', 'gemini-3.6-flash-8b'];
   
@@ -164,7 +181,7 @@ async function callGemini(apiKey: string, messages: Array<{ role: string; conten
   for (const model of models) {
     try {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-      const res = await fetch(url, {
+      const res = await fetchWithTimeout(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -213,7 +230,7 @@ async function callGemini(apiKey: string, messages: Array<{ role: string; conten
 
 async function callDeepSeek(apiKey: string, messages: Array<{ role: string; content: string }>): Promise<GeminiParsedResult | null> {
   try {
-    const res = await fetch('https://api.deepseek.com/chat/completions', {
+    const res = await fetchWithTimeout('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
@@ -260,7 +277,7 @@ async function callDeepSeek(apiKey: string, messages: Array<{ role: string; cont
 
 async function callOpenRouter(apiKey: string, model: string, messages: Array<{ role: string; content: string }>): Promise<GeminiParsedResult | null> {
   try {
-    const res = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
+    const res = await fetchWithTimeout(`${OPENROUTER_BASE}/chat/completions`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
@@ -305,7 +322,7 @@ async function callOpenRouter(apiKey: string, model: string, messages: Array<{ r
 
 async function callOpenAI(apiKey: string, messages: Array<{ role: string; content: string }>): Promise<string | null> {
   try {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    const res = await fetchWithTimeout('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,

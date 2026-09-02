@@ -37,13 +37,17 @@ export function useAIChat() {
     setInitialQuery(text);
 
     try {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), 20000);
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [{ role: 'user', content: text }],
         }),
+        signal: controller.signal
       });
+      clearTimeout(id);
       const data = await res.json();
       setIsTyping(false);
       addMessage('assistant', data.reply);
@@ -114,13 +118,17 @@ export function useAIChat() {
 
     try {
       const history = [...messages, { role: 'user' as const, content: text, id: 'tmp' }];
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), 20000);
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: history.map(({ role, content }) => ({ role, content })),
         }),
+        signal: controller.signal
       });
+      clearTimeout(id);
       const data = await res.json();
       setIsTyping(false);
       addMessage('assistant', data.reply);
