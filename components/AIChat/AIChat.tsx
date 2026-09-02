@@ -32,9 +32,7 @@ export default function AIChat() {
   // Lead Card local state
   const [cardName, setCardName] = useState('');
   const [cardCompany, setCardCompany] = useState('');
-  const [cardLink, setCardLink] = useState('');
   const [cardContact, setCardContact] = useState('');
-  const [cardType, setCardType] = useState('Веб-сайт под ключ (0 €)');
   const [isCardSubmitted, setIsCardSubmitted] = useState(false);
   const [isSubmittingCard, setIsSubmittingCard] = useState(false);
 
@@ -42,9 +40,6 @@ export default function AIChat() {
   useEffect(() => {
     if (dynamicCardConfig?.niche && dynamicCardConfig.niche !== 'Не указано' && !cardCompany) {
       setCardCompany(dynamicCardConfig.niche);
-    }
-    if (dynamicCardConfig?.serviceType) {
-      setCardType(dynamicCardConfig.serviceType);
     }
   }, [dynamicCardConfig, cardCompany]);
 
