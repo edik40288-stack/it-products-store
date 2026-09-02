@@ -82,9 +82,12 @@ export async function POST(request: NextRequest) {
 
       // 2. Fallback to OpenRouter if needed
       if (!reply && openrouterKey) {
-        const orReply = await callOpenRouter(openrouterKey, process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-001', messages || []);
-        if (orReply) {
-          reply = orReply;
+        const orRes = await callOpenRouter(openrouterKey, process.env.OPENROUTER_MODEL || 'google/gemini-3.7-flash', messages || []);
+        if (orRes) {
+          reply = orRes.reply;
+          dynamicCard = {
+            showCard: orRes.showCard
+          };
           engine = 'openrouter';
         }
       }
@@ -138,7 +141,7 @@ interface GeminiParsedResult {
 }
 
 async function callGemini(apiKey: string, messages: Array<{ role: string; content: string }>): Promise<GeminiParsedResult | null> {
-  const models = ['gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-2.5-pro'];
+  const models = ['gemini-3.6-flash', 'gemini-3.1-pro-preview', 'gemini-3.6-flash-8b'];
   
   const contents = messages
     .filter(m => m.role !== 'system')
@@ -195,9 +198,7 @@ async function callGemini(apiKey: string, messages: Array<{ role: string; conten
     }
   }
   return null;
-}
-
-async function callOpenRouter(apiKey: string, model: string, messages: Array<{ role: string; content: string }>): Promise<string | null> {
+async function callOpenRouter(apiKey: string, model: string, messages: Array<{ role: string; content: string }>): Promise<GeminiParsedResult | null> {
   try {
     const res = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
       method: 'POST',
@@ -208,7 +209,7 @@ async function callOpenRouter(apiKey: string, model: string, messages: Array<{ r
         'X-Title': 'MINDCORE Studio',
       },
       body: JSON.stringify({
-        model: model || 'google/gemini-2.0-flash-001',
+        model: model || 'google/gemini-3.7-flash',
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           ...messages,
@@ -220,7 +221,21 @@ async function callOpenRouter(apiKey: string, model: string, messages: Array<{ r
 
     if (res.ok) {
       const data = await res.json();
-      return data?.choices?.[0]?.message?.content?.trim() || null;
+      const rawText = data?.choices?.[0]?.message?.content?.trim() || '';
+      if (rawText) {
+        const cleanText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+        try {
+          const parsed = JSON.parse(cleanText) as GeminiParsedResult;
+          if (parsed.reply) return parsed;
+        } catch (e) {
+          const replyMatch = cleanText.match(/"reply"\s*:\s*"([\s\S]*?)"(?=\s*,\s*"showCard"|\s*\})/);
+          const showCardMatch = cleanText.match(/"showCard"\s*:\s*(true|false)/i);
+          return {
+            reply: replyMatch ? replyMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : 'Ошибка парсинга. Повторите запрос.',
+            showCard: showCardMatch ? showCardMatch[1].toLowerCase() === 'true' : false
+          };
+        }
+      }
     }
   } catch (err) {
     console.error('OpenRouter call error:', err);
