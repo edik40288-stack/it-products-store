@@ -207,8 +207,25 @@ async function callGemini(apiKey: string, messages: Array<{ role: string; conten
   return null;
 }
 
-async function callDeepSeek(apiKey: string, messages: Array<{ role: string; content: string }>): Promise<GeminiParsedResult | null> {
+async function callDeepSeek(apiKey: string, rawMessages: Array<{ role: string; content: string }>): Promise<GeminiParsedResult | null> {
   try {
+    // DeepSeek with json_object mode requires that previous assistant messages in history
+    // are also valid JSON. If an assistant turn was plain text, wrap it into { reply, showCard }!
+    const formattedMessages = (rawMessages || []).map(m => {
+      if (m.role === 'assistant') {
+        try {
+          JSON.parse(m.content);
+          return m;
+        } catch {
+          return {
+            role: 'assistant',
+            content: JSON.stringify({ reply: m.content, showCard: false })
+          };
+        }
+      }
+      return m;
+    });
+
     const res = await fetchWithTimeout('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {
@@ -219,7 +236,7 @@ async function callDeepSeek(apiKey: string, messages: Array<{ role: string; cont
         model: 'deepseek-chat',
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
-          ...messages,
+          ...formattedMessages,
         ],
         response_format: { type: 'json_object' },
         max_tokens: 300,

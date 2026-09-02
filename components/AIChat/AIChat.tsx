@@ -301,13 +301,31 @@ export default function AIChat() {
           <div className={styles.avatarWrap}>
             <div className={styles.avatar}>
               <video
-                src="/videos/bot-greeting.mp4"
+                ref={(el) => {
+                  if (el) {
+                    el.muted = true;
+                    el.defaultMuted = true;
+                    if (el.paused) el.play().catch(() => {});
+                  }
+                }}
+                src="/videos/bot-greeting.mp4#t=0.001"
                 muted
                 playsInline
                 autoPlay
                 loop
+                preload="auto"
                 className={styles.headerBotVideo}
+                onLoadedData={(e) => {
+                  e.currentTarget.muted = true;
+                  e.currentTarget.play().catch(() => {});
+                }}
               />
+              <div className={styles.avatarFallback}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect width="18" height="12" x="3" y="6" rx="2" />
+                  <path d="M12 2v4M9 12h.01M15 12h.01" />
+                </svg>
+              </div>
             </div>
             <div className={styles.onlineDot} />
           </div>

@@ -41,9 +41,26 @@ async function testQuery(input) {
 }
 
 async function run() {
-  await testQuery("привет");
-  await testQuery("у меня нет сайта");
-  await testQuery("хочу чат бота");
-  await testQuery("https://delivery-food.ru");
+  const start = Date.now();
+  const res = await fetch('https://api.deepseek.com/chat/completions', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'deepseek-chat',
+      messages: [
+        { role: 'system', content: prompt },
+        { role: 'user', content: 'привет' },
+        { role: 'assistant', content: JSON.stringify({ reply: 'Здравствуйте. Планируете запуск нового IT-продукта с нуля или хотите автоматизировать текущие бизнес-процессы?', showCard: false }) },
+        { role: 'user', content: 'не знаю если честно даже что планирую' }
+      ],
+      response_format: { type: 'json_object' },
+      max_tokens: 300,
+      temperature: 0.6
+    })
+  });
+  const data = await res.json();
+  const elapsed = Date.now() - start;
+  console.log(`Elapsed: ${elapsed}ms`);
+  console.log('CONTENT STRING:', JSON.stringify(data?.choices?.[0]?.message?.content));
 }
 run();
