@@ -21,8 +21,35 @@ export function useAIChat() {
   }, []);
 
   const greeting = locale === 'ru' ? CHAT_GREETING_RU : CHAT_GREETING_EN;
-
   const hasEventOpenedRef = useRef(false);
+  const [showLeadCard, setShowLeadCard] = useState(false);
+  const [initialQuery, setInitialQuery] = useState('');
+
+  const sendQueryDirectly = useCallback(async (text: string) => {
+    addMessage('user', text);
+    setIsTyping(true);
+    setInitialQuery(text);
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: text }],
+        }),
+      });
+      const data = await res.json();
+      setIsTyping(false);
+      addMessage('assistant', data.reply);
+      // Automatically prompt the lead card after initial query
+      setTimeout(() => {
+        setShowLeadCard(true);
+      }, 600);
+    } catch {
+      setIsTyping(false);
+      addMessage('assistant', t('error'));
+    }
+  }, [addMessage, t]);
 
   // Open chat via event
   useEffect(() => {
@@ -30,19 +57,19 @@ export function useAIChat() {
       const detail = (e as CustomEvent).detail;
       hasEventOpenedRef.current = true;
       setIsOpen(true);
-      if (detail?.context === 'audit') {
-        setTimeout(() => {
-          addMessage('assistant', t('auditGreeting'));
-        }, 100);
+      
+      if (detail?.context === 'audit' && detail?.value) {
+        sendQueryDirectly(detail.value);
       } else if (detail?.context) {
         setTimeout(() => {
           addMessage('assistant', t('contextGreeting', { context: detail.context }));
+          setShowLeadCard(true);
         }, 100);
       }
     };
     document.addEventListener('open-ai-chat', handler);
     return () => document.removeEventListener('open-ai-chat', handler);
-  }, [addMessage, t]);
+  }, [addMessage, t, sendQueryDirectly]);
 
   // Initial greeting (only when opened manually by clicking the floating avatar, not by event)
   useEffect(() => {
@@ -51,6 +78,7 @@ export function useAIChat() {
       setTimeout(() => {
         setIsTyping(false);
         addMessage('assistant', greeting);
+        setShowLeadCard(true);
       }, 500);
     }
   }, [isOpen, messages.length, addMessage, greeting]);
@@ -115,6 +143,10 @@ export function useAIChat() {
     messagesEndRef,
     inputRef,
     sendMessage,
-    handleKeyDown
+    handleKeyDown,
+    showLeadCard,
+    setShowLeadCard,
+    initialQuery,
+    addMessage
   };
 }

@@ -22,8 +22,59 @@ export default function AIChat() {
     messagesEndRef,
     inputRef,
     sendMessage,
-    handleKeyDown
+    handleKeyDown,
+    showLeadCard,
+    initialQuery,
+    addMessage
   } = useAIChat();
+
+  // Lead Card local state
+  const [cardName, setCardName] = useState('');
+  const [cardCompany, setCardCompany] = useState('');
+  const [cardLink, setCardLink] = useState('');
+  const [cardContact, setCardContact] = useState('');
+  const [cardType, setCardType] = useState('Веб-сайт под ключ (0 €)');
+  const [isCardSubmitted, setIsCardSubmitted] = useState(false);
+  const [isSubmittingCard, setIsSubmittingCard] = useState(false);
+
+  const handleCardSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!cardContact.trim() || isSubmittingCard) return;
+
+    setIsSubmittingCard(true);
+    const cardData = {
+      name: cardName.trim(),
+      company: cardCompany.trim(),
+      link: cardLink.trim(),
+      contact: cardContact.trim(),
+      projectType: cardType,
+      initialQuery: initialQuery || input
+    };
+
+    try {
+      await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'lead_card',
+          cardData
+        }),
+      });
+
+      setIsCardSubmitted(true);
+      setIsSubmittingCard(false);
+
+      const confirmText = locale === 'ru'
+        ? `Благодарю, ${cardName || 'уважаемый клиент'}! Карточка по проекту «${cardCompany || 'Ваш бизнес'}» успешно зафиксирована. Мы готовим концепцию сайта без оплаты за разработку. Наш старший архитектор свяжется с вами по контакту: ${cardContact}.`
+        : locale === 'ro'
+        ? `Vă mulțumesc, ${cardName || 'stimate client'}! Solicitarea pentru «${cardCompany || 'Proiectul dvs.'}» a fost înregistrată. Inginerul nostru vă va contacta la: ${cardContact}.`
+        : `Thank you, ${cardName || 'valued client'}! Your project card for "${cardCompany || 'Your Business'}" has been secured. Our lead engineer will connect with you via: ${cardContact}.`;
+
+      addMessage('assistant', confirmText);
+    } catch {
+      setIsSubmittingCard(false);
+    }
+  };
 
   // Proactive calling message step: 0 = hidden, 1 = hello, 2 = business, 3 = pout
   const [promptStep, setPromptStep] = useState<number>(0);
@@ -163,7 +214,7 @@ export default function AIChat() {
               {getPromptText()}
             </div>
             <div className={styles.bubbleCta}>
-              <span>{isRu ? 'Нажмите, чтобы открыть чат' : 'Click to start chat'}</span>
+              <span>{locale === 'ru' ? 'Нажмите, чтобы открыть чат' : 'Click to start chat'}</span>
               <span>→</span>
             </div>
           </div>
@@ -191,7 +242,7 @@ export default function AIChat() {
           <div className={styles.headerInfo}>
             <span className={styles.headerName}>MINDCORE AI</span>
             <span className={styles.headerStatus}>
-              {isTyping ? t('typing') : 'Online · AI Assistant'}
+              {isTyping ? t('typing') : 'Online · Lead Architect'}
             </span>
           </div>
         </div>
@@ -208,6 +259,88 @@ export default function AIChat() {
             </div>
           ))}
 
+          {/* Interactive Project & Lead Card */}
+          {showLeadCard && (
+            <div className={styles.leadCard}>
+              <div className={styles.leadCardHeader}>
+                <div className={styles.leadCardBadge}>
+                  <span className={styles.leadCardDot} />
+                  <span>{locale === 'ru' ? 'КАРТОЧКА ПРОЕКТА // ПАРТНЕРСКАЯ МОДЕЛЬ' : 'PROJECT SCOPE CARD'}</span>
+                </div>
+                <span className={styles.leadCardFree}>{locale === 'ru' ? 'Сайт: 0 €' : 'Web: 0 €'}</span>
+              </div>
+
+              {!isCardSubmitted ? (
+                <form onSubmit={handleCardSubmit} className={styles.leadCardForm}>
+                  <div className={styles.leadCardFields}>
+                    <input
+                      type="text"
+                      placeholder={locale === 'ru' ? 'Ваше имя *' : 'Your name *'}
+                      value={cardName}
+                      onChange={(e) => setCardName(e.target.value)}
+                      required
+                      className={styles.leadCardInput}
+                    />
+                    <input
+                      type="text"
+                      placeholder={locale === 'ru' ? 'Компания / Ниша бизнеса *' : 'Company / Niche *'}
+                      value={cardCompany}
+                      onChange={(e) => setCardCompany(e.target.value)}
+                      required
+                      className={styles.leadCardInput}
+                    />
+                    <input
+                      type="text"
+                      placeholder={locale === 'ru' ? 'Ссылка на текущий сайт / Instagram (если есть)' : 'Website or Instagram link'}
+                      value={cardLink}
+                      onChange={(e) => setCardLink(e.target.value)}
+                      className={styles.leadCardInput}
+                    />
+                    <input
+                      type="text"
+                      placeholder={locale === 'ru' ? 'Telegram @username или телефон *' : 'Telegram @username or Phone *'}
+                      value={cardContact}
+                      onChange={(e) => setCardContact(e.target.value)}
+                      required
+                      className={styles.leadCardInput}
+                    />
+                  </div>
+
+                  <div className={styles.leadCardTypes}>
+                    {['Веб-сайт под ключ (0 €)', 'AI-Агенты', 'CRM-Система', 'Мобильное приложение'].map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        className={`${styles.typePill} ${cardType === type ? styles.typePillActive : ''}`}
+                        onClick={() => setCardType(type)}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    disabled={isSubmittingCard || !cardContact.trim()}
+                    className={styles.leadCardSubmitBtn}
+                  >
+                    {isSubmittingCard 
+                      ? (locale === 'ru' ? 'Отправка...' : 'Sending...') 
+                      : (locale === 'ru' ? 'Закрепить условия и отправить инженеру 🚀' : 'Secure Terms & Submit Scope 🚀')}
+                  </button>
+                </form>
+              ) : (
+                <div className={styles.cardSuccessBox}>
+                  <div className={styles.cardSuccessIcon}>✓</div>
+                  <div className={styles.cardSuccessText}>
+                    <strong>{locale === 'ru' ? 'Заявка зафиксирована!' : 'Project Secured!'}</strong>
+                    <span>{locale === 'ru' ? 'Старший архитектор свяжется с вами в ближайшее время.' : 'Our lead engineer will connect with you shortly.'}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {isTyping && (
             <div className={`${styles.message} ${styles.messageBot}`}>
               <div className={`${styles.bubble} ${styles.typingBubble}`}>
@@ -216,7 +349,7 @@ export default function AIChat() {
             </div>
           )}
 
-          {leadCollected && (
+          {leadCollected && !showLeadCard && (
             <div className={styles.successBanner}>
               {t('success')}
             </div>
