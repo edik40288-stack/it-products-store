@@ -2,23 +2,34 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
 
-const SYSTEM_PROMPT = `Вы — ведущий архитектор решений студии MINDCORE. Вы общаетесь с занятым владельцем бизнеса или топ-менеджером.
+const SYSTEM_PROMPT = `Вы — ведущий технический архитектор решений премиальной студии разработки MINDCORE (AI & Digital Production).
 
-ПРАВИЛА И СТИЛЬ (КАК ТОПОВЫЙ IT-ПРОДАЖНИК И АРХИТЕКТОР):
-1. НИКАКОЙ ВОДЫ, КАНЦЕЛЯРИТА И ДЛИННЫХ РАССУЖДЕНИЙ.
+ПАРТНЕРСКАЯ МОДЕЛЬ MINDCORE:
+- Мы создаем современные, конверсионные сайты и платформы БЕСПЛАТНО (0 € за разработку сайта под ключ).
+- Мы зарабатываем не на продаже сайтов, а на долгосрочном партнерстве: внедрении AI-агентов, CRM, автоматизации и проценте с роста выручки бизнеса.
+- Платными являются только сложные нативные мобильные приложения (iOS/Android).
+
+СТРОГИЕ ПРАВИЛА ВЕДЕНИЯ ДИАЛОГА (УРОВЕНЬ ТОПОВОГО IT-ПРОДАЖНИКА):
+1. НИКАКИХ ШАБЛОННЫХ СКРИПТОВ. Каждый ответ строится ТОЛЬКО на реальном запросе клиента.
 2. ДЛИНА ОТВЕТА: СТРОГО 2–3 КОРОТКИХ, ЧЕТКИХ ПРЕДЛОЖЕНИЯ.
-3. СТРУКТУРА:
-   - Предложение 1 (Суть решения): Уверенно и просто подтвердите решение задачи (свяжем CRM, ботов, учет, базы, платежки).
-   - Предложение 2 (Оффер): Напомните, что современный веб-сайт или витрину мы собираем бесплатно (0 €) в рамках партнерства.
-   - Предложение 3 (1 простой вопрос): Задайте ОДИН простой вопрос в 1 строку, на который клиент ответит за секунду (например: «Какую CRM используете сейчас — amoCRM, Битрикс24 или таблицы?» / «Сайт уже есть или запускаем новый с нуля?»).
-4. Общение на «Вы», уверенно, уважительно, на языке клиента (RU / RO / EN).
+3. ЭТАПЫ ДИАЛОГА:
+   - ЭТАП 1 (Клиент задал вопрос / написал запрос):
+     * Предложение 1: Коротко и экспертно подтвердите решение задачи под его специфику.
+     * Предложение 2: Укажите, что современный сайт мы разрабатываем бесплатно (0 €) в рамках партнерской модели.
+     * Предложение 3: Задайте ОДИН простой, приземленный вопрос (например: об используемой CRM, текущем сайте или основном источнике заявок).
+   - ЭТАП 2 (Клиент заполнил карточку или указал название компании):
+     * Сделайте быстрый живой анализ ниши/конкурентов (например: покажите знание рынка, оборот лидеров ниши и то, как обогнать их за счет AI).
+     * Спросите: «Какие еще узкие места или проблемы в процессах вы сейчас видите в компании?»
+   - ЭТАП 3 (Клиент ответил или подтвердил готовность):
+     * Подтвердите, что архитектор свяжется с готовым решением в течение 48 часов.
+4. Общение строго на «Вы», по делу, без заумных академических терминов.
 5. Всегда возвращайте строго валидный JSON:
 {
-  "reply": "2-3 коротких предложения с 1 простым вопросом в конце.",
-  "niche": "Ниша или сфера бизнеса",
+  "reply": "2-3 коротких емких предложения.",
+  "niche": "Определенная ниша бизнеса",
   "serviceType": "Веб-сайт (0 €) | AI-Агенты | CRM-Система | Мобильное приложение",
-  "cardTitle": "Короткий заголовок (до 4 слов)",
-  "ctaText": "Текст кнопки (до 3 слов)"
+  "cardTitle": "Карточка проекта",
+  "ctaText": "Отправить 🚀"
 }`;
 
 export async function POST(request: NextRequest) {
@@ -28,13 +39,11 @@ export async function POST(request: NextRequest) {
 
     // 1. Handle interactive project card submission
     if (type === 'lead_card') {
-      const { name, company, link, contact, projectType, initialQuery } = cardData || {};
-      const cardHtml = `🔥 <b>НОВАЯ ПОЛНАЯ ЗАЯВКА: КАРТОЧКА ПРОЕКТА</b> 🔥\n\n` +
-        `👤 <b>Имя:</b> ${name || 'Не указано'}\n` +
-        `🏢 <b>Компания / Ниша:</b> ${company || 'Не указано'}\n` +
-        `🔗 <b>Ссылка / Проект:</b> ${link || 'Не указана'}\n` +
-        `📞 <b>Контакт:</b> ${contact || 'Не указан'}\n` +
-        `🎯 <b>Тип задачи:</b> ${projectType || 'Веб-сайт под ключ (0 €)'}\n` +
+      const { name, company, contact, initialQuery } = cardData || {};
+      const cardHtml = `🔥 <b>НОВАЯ ЗАЯВКА: КАРТОЧКА КЛИЕНТА</b> 🔥\n\n` +
+        `👤 <b>Имя Фамилия:</b> ${name || 'Не указано'}\n` +
+        `🏢 <b>Фирма / Компания:</b> ${company || 'Не указано'}\n` +
+        `📞 <b>Контакты для связи:</b> ${contact || 'Не указан'}\n` +
         (initialQuery ? `💡 <b>Исходный запрос:</b> ${initialQuery}\n` : '') +
         `⏱ <b>Время:</b> ${getFormattedTime()}`;
 
@@ -55,10 +64,10 @@ export async function POST(request: NextRequest) {
 
     let reply = '';
     let dynamicCard: { niche?: string; serviceType?: string; cardTitle?: string; ctaText?: string } = {};
-    let engine = 'scripted';
+    let engine = 'gemini';
 
     if (mode !== 'scripted') {
-      // Try Gemini first if key available
+      // 1. Query Gemini
       if (geminiKey) {
         const geminiRes = await callGemini(geminiKey, messages || []);
         if (geminiRes) {
@@ -73,7 +82,7 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Fallback to OpenRouter if Gemini failed or not present
+      // 2. Fallback to OpenRouter if needed
       if (!reply && openrouterKey) {
         const orReply = await callOpenRouter(openrouterKey, process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-001', messages || []);
         if (orReply) {
@@ -82,7 +91,7 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Fallback to OpenAI if present
+      // 3. Fallback to OpenAI if needed
       if (!reply && openaiKey) {
         const oaiReply = await callOpenAI(openaiKey, messages || []);
         if (oaiReply) {
@@ -92,14 +101,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Fallback to official scripted response if no LLM succeeded
+    // If still empty (e.g. offline), dynamic polite fallback
     if (!reply) {
-      const scripted = getScriptedResponse(messages || []);
-      reply = scripted.reply;
-      engine = 'scripted';
+      reply = 'Здравствуйте! Принял ваш запрос в работу. Мы разрабатываем сайт бесплатно (0 €), а окупаемость строим на автоматизации. Уточните название вашей компании или контакты в карточке ниже?';
     }
 
-    // 2. Instant lead & contact detection
+    // Instant lead & contact detection
     const lastUserMsg = messages?.filter((m: { role: string }) => m.role === 'user').slice(-1)[0]?.content || '';
     const contactInfo = extractContactInfo(lastUserMsg);
     const hasLeadConfirmed = detectLeadCollected(messages || [], reply);
@@ -117,8 +124,11 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Chat API error:', error);
-    const fallback = getScriptedResponse([]);
-    return NextResponse.json({ reply: fallback.reply, leadCollected: false, engine: 'fallback' });
+    return NextResponse.json({ 
+      reply: 'Здравствуйте! Мы создаем сайт бесплатно (0 €) в рамках партнерской модели. Уточните название компании и контакты ниже, чтобы закрепить условия.',
+      leadCollected: false, 
+      engine: 'fallback' 
+    });
   }
 }
 
@@ -244,44 +254,6 @@ async function callOpenAI(apiKey: string, messages: Array<{ role: string; conten
     console.error('OpenAI call error:', err);
   }
   return null;
-}
-
-// ─── Polite Executive Scripted Fallback ──────────────────────────────────────────
-
-const SCRIPTED_FLOWS: Record<number, string[]> = {
-  0: [
-    "Understood. Are you looking for full-cycle web engineering, autonomous AI agents, or business process automation?",
-    "Принято. Вас интересует веб-разработка под ключ, внедрение AI-агентов или автоматизация внутренних процессов?",
-    "Înțeles. Vă interesează dezvoltare web completă, integrare de agenți AI sau automatizarea proceselor?",
-  ],
-  1: [
-    "What stage is the project at — conceptual design from scratch, existing product, or scaling an active system?",
-    "На каком этапе находится проект — проектирование с нуля, готовый продукт или масштабирование действующей системы?",
-    "În ce etapă se află proiectul — concept de la zero, produs existent sau scalare?",
-  ],
-  2: [
-    "What is your target timeline and estimated budget range?",
-    "Какой ориентировочный бюджет и сроки вы рассматриваете для реализации?",
-    "Care este bugetul estimativ și termenul dorit de livrare?",
-  ],
-  3: [
-    "Thank you for the information! Could you please share your name and preferred contact method (Telegram, WhatsApp, or Email) for our lead engineer?",
-    "Благодарю за информацию! Подскажите, пожалуйста, ваше имя и удобный контакт (Telegram, WhatsApp или Email) для связи с ведущим инженером.",
-    "Vă mulțumesc pentru detalii. Vă rog să indicați numele și un canal convenabil de contact (Telegram, WhatsApp sau Email).",
-  ],
-};
-
-function getScriptedResponse(messages: Array<{ role: string; content: string }>) {
-  const userMessages = messages.filter((m) => m.role === 'user');
-  const step = Math.min(userMessages.length, 3);
-  const lastMsg = userMessages[userMessages.length - 1]?.content ?? '';
-  const lang = detectLanguage(lastMsg);
-  const langIdx = lang === 'ru' ? 1 : lang === 'ro' ? 2 : 0;
-
-  const replies = SCRIPTED_FLOWS[step];
-  const reply = replies?.[langIdx] ?? replies?.[0] ?? "Здравствуйте! Опишите, пожалуйста, вашу задачу.";
-
-  return { reply, step };
 }
 
 function detectLanguage(text: string): 'ru' | 'ro' | 'en' {

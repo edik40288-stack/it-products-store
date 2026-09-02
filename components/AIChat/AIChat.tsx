@@ -50,19 +50,18 @@ export default function AIChat() {
 
   const handleCardSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!cardContact.trim() || isSubmittingCard) return;
+    if (!cardName.trim() || !cardCompany.trim() || !cardContact.trim() || isSubmittingCard) return;
 
     setIsSubmittingCard(true);
     const cardData = {
       name: cardName.trim(),
-      company: cardCompany.trim() || dynamicCardConfig?.niche || '',
-      link: cardLink.trim(),
+      company: cardCompany.trim(),
       contact: cardContact.trim(),
-      projectType: cardType,
       initialQuery: initialQuery || input
     };
 
     try {
+      // 1. Send instant lead notification to Telegram
       await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -75,13 +74,26 @@ export default function AIChat() {
       setIsCardSubmitted(true);
       setIsSubmittingCard(false);
 
-      const confirmText = locale === 'ru'
-        ? `Благодарю, ${cardName || 'уважаемый клиент'}! Карточка по проекту «${cardCompany || dynamicCardConfig?.niche || 'Ваш бизнес'}» успешно зафиксирована. Мы готовим концепцию сайта без оплаты за разработку. Наш старший архитектор свяжется с вами по контакту: ${cardContact}.`
-        : locale === 'ro'
-        ? `Vă mulțumesc, ${cardName || 'stimate client'}! Solicitarea pentru «${cardCompany || dynamicCardConfig?.niche || 'Proiectul dvs.'}» a fost înregistrată. Inginerul nostru vă va contacta la: ${cardContact}.`
-        : `Thank you, ${cardName || 'valued client'}! Your project card for "${cardCompany || dynamicCardConfig?.niche || 'Your Business'}" has been secured. Our lead engineer will connect with you via: ${cardContact}.`;
+      // 2. Trigger live Gemini competitor analysis for the company
+      const promptText = `Заполнил данные: ${cardName}, компания: ${cardCompany}, контакт: ${cardContact}. Сделай быстрый анализ нашей компании и ниши, покажи как обогнать конкурентов и спроси про узкие места в процессах.`;
+      addMessage('user', `Заявка: ${cardName}, фирма «${cardCompany}» (${cardContact})`);
 
-      addMessage('assistant', confirmText);
+      const history = [
+        ...messages,
+        { role: 'user' as const, content: promptText, id: 'card-lead' }
+      ];
+
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: history.map(({ role, content }) => ({ role, content })),
+        }),
+      });
+      const data = await res.json();
+      if (data.reply) {
+        addMessage('assistant', data.reply);
+      }
     } catch {
       setIsSubmittingCard(false);
     }
@@ -290,7 +302,7 @@ export default function AIChat() {
               <div className={styles.leadCardHeader}>
                 <div className={styles.leadCardBadge}>
                   <span className={styles.leadCardDot} />
-                  <span>{dynamicCardConfig?.cardTitle || (locale === 'ru' ? 'КАРТОЧКА ПРОЕКТА // ПАРТНЕРСКАЯ МОДЕЛЬ' : 'PROJECT SCOPE CARD')}</span>
+                  <span>{locale === 'ru' ? 'КАРТОЧКА ПРОЕКТА // ЭКСПРЕСС-АНАЛИЗ' : 'PROJECT SCOPE CARD'}</span>
                 </div>
                 <span className={styles.leadCardFree}>{locale === 'ru' ? 'Сайт: 0 €' : 'Web: 0 €'}</span>
               </div>
@@ -300,7 +312,7 @@ export default function AIChat() {
                   <div className={styles.leadCardFields}>
                     <input
                       type="text"
-                      placeholder={locale === 'ru' ? 'Ваше имя *' : 'Your name *'}
+                      placeholder={locale === 'ru' ? 'Имя Фамилия *' : 'Full Name *'}
                       value={cardName}
                       onChange={(e) => setCardName(e.target.value)}
                       required
@@ -308,7 +320,7 @@ export default function AIChat() {
                     />
                     <input
                       type="text"
-                      placeholder={locale === 'ru' ? 'Компания / Ниша *' : 'Company / Niche *'}
+                      placeholder={locale === 'ru' ? 'Название фирмы или компании *' : 'Company Name *'}
                       value={cardCompany}
                       onChange={(e) => setCardCompany(e.target.value)}
                       required
@@ -316,7 +328,7 @@ export default function AIChat() {
                     />
                     <input
                       type="text"
-                      placeholder={locale === 'ru' ? 'Telegram @username или телефон для связи *' : 'Telegram @username or Phone *'}
+                      placeholder={locale === 'ru' ? 'Контакты для связи (Telegram, телефон) *' : 'Telegram / WhatsApp / Phone *'}
                       value={cardContact}
                       onChange={(e) => setCardContact(e.target.value)}
                       required
@@ -324,27 +336,14 @@ export default function AIChat() {
                     />
                   </div>
 
-                  <div className={styles.leadCardTypes}>
-                    {['Веб-сайт (0 €)', 'AI-Агенты', 'CRM-Система', 'Мобильное приложение'].map((type) => (
-                      <button
-                        key={type}
-                        type="button"
-                        className={`${styles.typePill} ${cardType.includes(type.split(' ')[0]) ? styles.typePillActive : ''}`}
-                        onClick={() => setCardType(type)}
-                      >
-                        {type}
-                      </button>
-                    ))}
-                  </div>
-
                   <button 
                     type="submit" 
-                    disabled={isSubmittingCard || !cardContact.trim()}
+                    disabled={isSubmittingCard || !cardName.trim() || !cardCompany.trim() || !cardContact.trim()}
                     className={styles.leadCardSubmitBtn}
                   >
                     {isSubmittingCard 
-                      ? (locale === 'ru' ? 'Отправка...' : 'Sending...') 
-                      : (dynamicCardConfig?.ctaText || (locale === 'ru' ? 'Закрепить условия и отправить инженеру 🚀' : 'Secure Terms & Submit Scope 🚀'))}
+                      ? (locale === 'ru' ? 'Анализирую компанию...' : 'Analyzing company...') 
+                      : (locale === 'ru' ? 'Отправить на экспресс-анализ 🚀' : 'Run Express Analysis 🚀')}
                   </button>
                 </form>
               ) : (
