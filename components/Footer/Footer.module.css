@@ -111,35 +111,76 @@
   color: var(--color-text-muted);
 }
 
-/* Offices - Centered */
-.offices {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
+/* Operational Status */
+.statusIndicator {
+  display: inline-flex;
   align-items: center;
-  text-align: center;
-}
-
-.office {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.2rem;
-}
-
-.officeCity {
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--color-text);
-  letter-spacing: 0.04em;
-}
-
-.officeCountry {
+  gap: 0.55rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(0, 255, 133, 0.04);
+  border: 1px solid rgba(0, 255, 133, 0.15);
+  font-family: var(--font-mono, monospace);
   font-size: 0.72rem;
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00FF85;
+  box-shadow: 0 0 8px #00FF85;
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.statusText {
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: 0.02em;
+}
+
+/* Quick Links */
+.bottomRight {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.footerLink {
+  font-size: 0.76rem;
+  font-weight: 500;
   color: var(--color-text-muted);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footerLink:hover {
+  color: #ffffff;
+}
+
+.footerDivider {
+  color: rgba(255, 255, 255, 0.15);
+  font-size: 0.7rem;
+}
+
+.backToTop {
+  background: none;
+  border: none;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #00FF85;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.backToTop:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
 }
 
 /* Mobile */
@@ -149,11 +190,7 @@
     flex-direction: column; 
     align-items: center; 
     text-align: center; 
-    gap: 1.5rem;
-  }
-  .offices { 
-    position: static; 
-    transform: none; 
+    gap: 1.25rem;
   }
   .bottomLeft {
     align-items: center;

@@ -50,11 +50,32 @@ export default function Footer() {
             <span className={styles.copyright}>© {year} All rights reserved.</span>
           </div>
 
-          <div className={styles.offices}>
-            <div className={styles.office}>
-              <span className={styles.officeCity}>{isRu ? 'Весь мир' : 'Worldwide'}</span>
-              <span className={styles.officeCountry}>{isRu ? 'Удаленно' : 'Remote'}</span>
-            </div>
+          <div className={styles.statusIndicator}>
+            <span className={styles.statusDot} />
+            <span className={styles.statusText}>
+              {locale === 'ru' 
+                ? 'Все системы работают стабильно' 
+                : locale === 'ro' 
+                ? 'Toate sistemele operaționale' 
+                : 'All systems operational'}
+            </span>
+          </div>
+
+          <div className={styles.bottomRight}>
+            <a href="#services" className={styles.footerLink}>
+              {locale === 'ru' ? 'Услуги' : locale === 'ro' ? 'Servicii' : 'Services'}
+            </a>
+            <span className={styles.footerDivider}>/</span>
+            <a href="#contact" className={styles.footerLink}>
+              {locale === 'ru' ? 'Контакты' : locale === 'ro' ? 'Contact' : 'Contact'}
+            </a>
+            <span className={styles.footerDivider}>/</span>
+            <button 
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} 
+              className={styles.backToTop}
+            >
+              {locale === 'ru' ? 'Наверх ↑' : locale === 'ro' ? 'Sus ↑' : 'Top ↑'}
+            </button>
           </div>
         </div>
       </div>
