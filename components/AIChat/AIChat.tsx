@@ -26,16 +26,71 @@ export default function AIChat() {
     showLeadCard,
     dynamicCardConfig,
     initialQuery,
-    addMessage,
-    sendQueryDirectly
+    addMessage
   } = useAIChat();
 
-  const QUICK_ACTIONS = [
-    { emoji: '🎁', label: isRu ? 'Сайт бесплатно (0 €)' : 'Free Website (0 €)', query: isRu ? 'Хочу создать продающий сайт бесплатно (0 €) 🎁' : 'I want to build a free turnkey website (0 €) 🎁' },
-    { emoji: '🤖', label: isRu ? 'AI-Агенты' : 'AI Agents', query: isRu ? 'Как внедрить AI-агентов в наш отдел продаж и поддержку? 🤖' : 'How can we deploy AI agents for sales and support? 🤖' },
-    { emoji: '⚡️', label: isRu ? 'Интеграция CRM' : 'CRM Integration', query: isRu ? 'Нужна интеграция CRM, ботов и платежных сервисов ⚡️' : 'We need CRM, bot, and payment gateway integration ⚡️' },
-    { emoji: '📊', label: isRu ? 'Аудит ниши' : 'Market Audit', query: isRu ? 'Хочу провести аудит ниши и точек роста бизнеса 📊' : 'I want an express audit of our market and growth points 📊' },
-  ];
+  // Voice Input Speech Recognition state
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = locale === 'ru' ? 'ru-RU' : locale === 'ro' ? 'ro-RO' : 'en-US';
+
+        recognition.onstart = () => {
+          setIsListening(true);
+        };
+
+        recognition.onresult = (event: any) => {
+          let interimTranscript = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            interimTranscript += event.results[i][0].transcript;
+          }
+          if (interimTranscript) {
+            setInput(interimTranscript);
+          }
+        };
+
+        recognition.onerror = (event: any) => {
+          console.warn('Speech recognition error:', event.error);
+          setIsListening(false);
+        };
+
+        recognition.onend = () => {
+          setIsListening(false);
+        };
+
+        recognitionRef.current = recognition;
+      }
+    }
+  }, [locale, setInput]);
+
+  const toggleListening = () => {
+    if (!recognitionRef.current) {
+      alert(locale === 'ru' ? 'Голосовой ввод не поддерживается в этом браузере. Рекомендуем Google Chrome или Safari.' : 'Voice input is not supported in this browser. Please use Chrome or Safari.');
+      return;
+    }
+
+    if (isListening) {
+      try {
+        recognitionRef.current.stop();
+      } catch {}
+      setIsListening(false);
+    } else {
+      try {
+        recognitionRef.current.lang = locale === 'ru' ? 'ru-RU' : locale === 'ro' ? 'ro-RO' : 'en-US';
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (err) {
+        console.warn('Recognition start failed:', err);
+      }
+    }
+  };
 
   // Lead Card local state
   const [cardName, setCardName] = useState('');
@@ -385,33 +440,33 @@ export default function AIChat() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Quick Action Chips */}
-        {messages.length <= 2 && !isTyping && (
-          <div className={styles.quickChipsWrapper}>
-            {QUICK_ACTIONS.map((chip, idx) => (
-              <button
-                key={idx}
-                type="button"
-                className={styles.quickChip}
-                onClick={() => {
-                  setInput('');
-                  sendQueryDirectly(chip.query);
-                }}
-              >
-                <span>{chip.emoji}</span>
-                <span>{chip.label}</span>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Input */}
+        {/* Input & Voice Bar */}
         <div className={styles.inputArea}>
+          <button
+            type="button"
+            className={`${styles.micBtn} ${isListening ? styles.micBtnActive : ''}`}
+            onClick={toggleListening}
+            title={isListening ? (isRu ? 'Остановить запись' : 'Stop recording') : (isRu ? 'Голосовой ввод' : 'Voice input')}
+            aria-label="Voice input"
+          >
+            {isListening ? (
+              <span className={styles.listeningAnimation}>
+                <span /><span /><span /><span />
+              </span>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                <line x1="12" x2="12" y1="19" y2="22" />
+              </svg>
+            )}
+          </button>
+
           <input
             ref={inputRef}
             type="text"
-            className={styles.input}
-            placeholder={isRu ? 'Напишите задачу или вопрос...' : t('placeholder')}
+            className={`${styles.input} ${isListening ? styles.inputListening : ''}`}
+            placeholder={isListening ? (isRu ? 'Слушаю ваш голос... 🎙️' : 'Listening... 🎙️') : (isRu ? 'Напишите задачу или скажите голосом...' : 'Type or speak your message...')}
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}

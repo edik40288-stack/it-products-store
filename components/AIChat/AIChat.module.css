@@ -551,36 +551,71 @@
   animation: msgIn 0.4s ease forwards;
 }
 
-/* Quick Action Chips */
-.quickChipsWrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  padding: 0.4rem 1rem 0;
-  flex-shrink: 0;
-}
-
-.quickChip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(201, 168, 76, 0.25);
-  border-radius: 20px;
-  padding: 0.3rem 0.6rem;
-  font-size: 0.72rem;
-  font-weight: 500;
-  color: #f3f4f6;
+/* Mic Voice Input Button */
+.micBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c4b5fd;
+  flex-shrink: 0;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  white-space: nowrap;
+  position: relative;
 }
 
-.quickChip:hover {
-  background: rgba(201, 168, 76, 0.15);
-  border-color: rgba(201, 168, 76, 0.6);
+.micBtn:hover {
+  background: rgba(123, 97, 255, 0.15);
+  border-color: rgba(123, 97, 255, 0.4);
   color: #fff;
-  transform: translateY(-1px);
+  transform: scale(1.05);
+}
+
+.micBtnActive {
+  background: #ef4444 !important;
+  border-color: #f87171 !important;
+  color: #fff !important;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.6);
+  animation: micPulse 1.2s infinite ease-in-out;
+}
+
+@keyframes micPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
+  50% { transform: scale(1.08); box-shadow: 0 0 20px rgba(239, 68, 68, 0.8); }
+}
+
+.listeningAnimation {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 16px;
+}
+
+.listeningAnimation span {
+  width: 3px;
+  background: #fff;
+  border-radius: 2px;
+  animation: waveBar 0.8s ease-in-out infinite;
+}
+
+.listeningAnimation span:nth-child(1) { height: 6px; animation-delay: 0.1s; }
+.listeningAnimation span:nth-child(2) { height: 14px; animation-delay: 0.2s; }
+.listeningAnimation span:nth-child(3) { height: 10px; animation-delay: 0.3s; }
+.listeningAnimation span:nth-child(4) { height: 16px; animation-delay: 0.4s; }
+
+@keyframes waveBar {
+  0%, 100% { transform: scaleY(0.4); }
+  50% { transform: scaleY(1); }
+}
+
+.inputListening {
+  border-color: rgba(239, 68, 68, 0.6) !important;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.25) !important;
+  background: rgba(239, 68, 68, 0.04) !important;
 }
 
 /* Input */
