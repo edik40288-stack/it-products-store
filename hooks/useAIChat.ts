@@ -30,6 +30,7 @@ export function useAIChat() {
     niche?: string;
     serviceType?: string;
   }>({});
+  const [pendingResponse, setPendingResponse] = useState<string | null>(null);
 
   const sendQueryDirectly = useCallback(async (text: string) => {
     addMessage('user', text);
@@ -58,16 +59,16 @@ export function useAIChat() {
       clearTimeout(id);
       
       const data = await res.json();
-      setIsTyping(false);
       
-      // Append the actual intelligent AI response below the card
-      setTimeout(() => {
-        addMessage('assistant', data.reply);
-      }, 500);
+      // Store the response to be shown LATER when they submit the card!
+      setPendingResponse(data.reply);
+      // We do NOT set isTyping(false) here, so it looks like it's still thinking 
+      // or we can turn it off so it doesn't distract them. Let's turn it off.
+      setIsTyping(false);
 
     } catch {
       setIsTyping(false);
-      // If it fully fails, we don't need to do anything intrusive because the card is already there!
+      setPendingResponse('Анализ завершен в базовом режиме. Инженер свяжется с вами в течение 48 часов.');
     }
   }, [addMessage]);
 
@@ -158,6 +159,13 @@ export function useAIChat() {
     }
   };
 
+  const releasePendingResponse = useCallback(() => {
+    if (pendingResponse) {
+      addMessage('assistant', pendingResponse);
+      setPendingResponse(null);
+    }
+  }, [pendingResponse, addMessage]);
+
   return {
     isOpen,
     setIsOpen,
@@ -177,6 +185,7 @@ export function useAIChat() {
     dynamicCardConfig,
     initialQuery,
     addMessage,
-    sendQueryDirectly
+    sendQueryDirectly,
+    releasePendingResponse
   };
 }
