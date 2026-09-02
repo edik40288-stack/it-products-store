@@ -222,9 +222,10 @@ async function callDeepSeek(apiKey: string, messages: Array<{ role: string; cont
           ...messages,
         ],
         response_format: { type: 'json_object' },
-        max_tokens: 350,
+        max_tokens: 450,
         temperature: 0.6,
       }),
+      timeout: 20000
     });
 
     if (res.ok) {
@@ -233,10 +234,16 @@ async function callDeepSeek(apiKey: string, messages: Array<{ role: string; cont
       if (rawText) {
         const cleanText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
         try {
-          const parsed = JSON.parse(cleanText) as GeminiParsedResult;
-          if (parsed.reply) return parsed;
+          const parsed = JSON.parse(cleanText) as any;
+          const replyText = parsed.reply || parsed.response || parsed.text || parsed.answer || parsed.message;
+          if (replyText) {
+            return {
+              reply: replyText,
+              showCard: parsed.showCard === true || parsed.showCard === 'true'
+            };
+          }
         } catch (e) {
-          const replyMatch = cleanText.match(/"reply"\s*:\s*"([\s\S]*?)"(?=\s*,\s*"showCard"|\s*\})/);
+          const replyMatch = cleanText.match(/"(?:reply|response|text|answer)"\s*:\s*"([\s\S]*?)"(?=\s*,\s*"showCard"|\s*\})/);
           const showCardMatch = cleanText.match(/"showCard"\s*:\s*(true|false)/i);
           return {
             reply: replyMatch ? replyMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : 'Ошибка парсинга. Повторите запрос.',
