@@ -277,6 +277,28 @@
   font-family: monospace;
 }
 
+.headerCloseBtn {
+  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.headerCloseBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
 /* Messages */
 .messages {
   flex: 1 1 auto;
@@ -701,18 +723,36 @@
 .sendBtn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* Mobile */
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   .panel {
-    right: 0.75rem;
-    left: 0.75rem;
+    right: 0.5rem;
+    left: 0.5rem;
+    bottom: max(0.5rem, env(safe-area-inset-bottom, 0.5rem));
     width: auto;
-    bottom: 5rem;
+    height: min(640px, calc(100dvh - 1.25rem));
+    max-height: calc(100dvh - 1.25rem);
+    border-radius: 20px;
   }
   .triggerWrap {
-    right: 1rem;
-    bottom: 1rem;
+    right: max(1rem, env(safe-area-inset-right, 1rem));
+    bottom: max(1rem, env(safe-area-inset-bottom, 1rem));
   }
   .callingBubble {
-    max-width: calc(100vw - 3rem);
+    max-width: calc(100vw - 2.5rem);
+    right: 0.5rem;
+    bottom: 5.25rem;
+  }
+  .inputArea {
+    padding: 0.65rem 0.75rem max(0.65rem, env(safe-area-inset-bottom, 0.65rem));
+  }
+  .input {
+    font-size: 16px; /* Prevents iOS Safari auto-zoom */
+  }
+  .leadCardFieldsRow {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  .leadCardInput {
+    font-size: 16px; /* Prevents iOS Safari auto-zoom */
   }
 }

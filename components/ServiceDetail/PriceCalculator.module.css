@@ -71,3 +71,19 @@
   line-height: 1.5;
   margin: 0;
 }
+
+@media (max-width: 480px) {
+  .calculator {
+    padding: 1rem;
+  }
+  .options {
+    gap: 0.35rem;
+  }
+  .option {
+    padding: 0.4rem 0.65rem;
+    font-size: 0.76rem;
+  }
+  .resultPrice {
+    font-size: 1.6rem;
+  }
+}
