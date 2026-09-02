@@ -1,2 +1,3 @@
-export const CHAT_GREETING_EN = "Hey! I'm the MINDCORE AI assistant. I can help you estimate the cost of AI implementation or run a free conversion audit of your site. What challenge does your business face?";
-export const CHAT_GREETING_RU = "Привет! Я ИИ-ассистент MINDCORE. Помогу рассчитать стоимость внедрения ИИ-агентов или провести бесплатный аудит конверсии сайта. Какая задача стоит перед бизнесом?";
+export const CHAT_GREETING_EN = "Welcome! I am the MINDCORE Studio AI Consultant. I can assist you with project estimation, technical scoping, or a digital audit for your business. What challenge are you looking to solve?";
+export const CHAT_GREETING_RU = "Здравствуйте! Я AI-консультант студии MINDCORE. Помогу рассчитать ориентировочный бюджет разработки, подобрать архитектуру или провести технический аудит проекта. Какая задача стоит перед вашим бизнесом?";
+export const CHAT_GREETING_RO = "Bună ziua! Sunt consultantul AI al studioului MINDCORE. Vă pot ajuta cu estimarea bugetului, arhitectura tehnică sau un audit pentru proiectul dumneavoastră. Ce obiectiv doriți să realizați?";

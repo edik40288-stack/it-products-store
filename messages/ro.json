@@ -133,20 +133,20 @@
     ]
   },
   "chat": {
-    "greeting": "Salut! Sunt asistentul AI al MINDCORE. Te pot ajuta să estimezi costul implementării agenților AI sau să fac un audit gratuit al conversiilor site-ului tău. Ce provocare are afacerea ta?",
-    "placeholder": "Scrie mesajul tău...",
+    "greeting": "Bună ziua! Sunt consultantul AI al studioului MINDCORE. Vă pot ajuta cu estimarea bugetului, arhitectura tehnică sau un audit pentru proiectul dumneavoastră. Ce obiectiv doriți să realizați?",
+    "placeholder": "Scrieți întrebarea sau descrierea proiectului...",
     "send": "Trimite",
-    "typing": "MINDCORE AI gândește...",
+    "typing": "MINDCORE AI răspunde...",
     "qualify": {
-      "task": "Înțeles. Este vorba despre construire de la zero, adăugare de agenți AI sau automatizarea proceselor existente?",
-      "stage": "În ce etapă se află proiectul? Concept timpuriu, produs existent sau pregătit pentru scalare?",
-      "budget": "Care este orizontul și bugetul aproximativ? (Totul e flexibil, doar orientativ)",
-      "contact": "Excelent! Permiteți-mi să vă conectez cu echipa noastră. Cum vă numiți și cum vă putem contacta (Telegram sau email)?"
+      "task": "Înțeles. Vă interesează dezvoltare web completă, integrare de agenți AI sau automatizarea proceselor?",
+      "stage": "În ce etapă se află proiectul — concept de la zero, produs existent sau scalare?",
+      "budget": "Care este bugetul estimativ și termenul dorit de livrare?",
+      "contact": "Vă mulțumesc pentru detalii. Vă rog să indicați numele și un canal convenabil de contact (Telegram, WhatsApp sau Email)."
     },
-    "success": "Cererea dumneavoastră a fost trimisă echipei MINDCORE. Vă vom contacta în decurs de 2 ore lucrătoare. 🚀",
-    "error": "Am probleme de conectivitate. Vă rugăm să ne trimiteți un email direct la newbusiness@mindcore.studio 🙏",
-    "contextGreeting": "Alegere excelentă! Permiteți-mi să vă ajut să explorați serviciul **{context}**. Care este situația dumneavoastră actuală?",
-    "auditGreeting": "Hei, vino aici! Deja analizez afacerea ta 👔 Unde și în ce format doriți să trimit raportul (Telegram, WhatsApp sau Email)?"
+    "success": "Vă mulțumim pentru solicitare! Detaliile au fost transmise inginerilor MINDCORE. Vă vom contacta în cel mai scurt timp.",
+    "error": "Eroare de conexiune. Ne puteți contacta direct pe Telegram @kraeved111 sau email edik40288@gmail.com",
+    "contextGreeting": "Bună ziua! Vă pot oferi consultanță tehnică detaliată pentru **{context}**. Descrieți, vă rog, cerințele dumneavoastră.",
+    "auditGreeting": "Bună ziua! Analizez cererea dumneavoastră. Unde vă este mai convenabil să primiți raportul detaliat (Telegram, WhatsApp sau Email)?"
   },
   "footer": {
     "slogan": "A booster rocket for digital product teams",

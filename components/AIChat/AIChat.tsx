@@ -99,17 +99,25 @@ export default function AIChat() {
   // Prompt messages
   const getPromptText = () => {
     if (promptStep === 1) {
-      return isRu ? 'Приветики! Можем поговорить? 😊' : 'Hey there! Can we chat? 😊';
+      return locale === 'ru' 
+        ? 'Здравствуйте! Могу помочь с расчетом проекта или консультацией 💬' 
+        : locale === 'ro'
+        ? 'Bună ziua! Vă pot ajuta cu estimarea proiectului sau consultanță 💬'
+        : 'Hello! I can assist you with project estimation or technical scoping 💬';
     }
     if (promptStep === 2) {
-      return isRu 
-        ? 'Я помогу тебе с твоим бизнесом, пообщайся со мной! 👔' 
-        : 'I can supercharge your business, let’s talk! 👔';
+      return locale === 'ru' 
+        ? 'Подскажу по стеку, срокам и окупаемости внедрения AI-систем 👔' 
+        : locale === 'ro'
+        ? 'Vă pot oferi detalii despre tehnologii, termene și integrare AI 👔'
+        : 'I can advise on tech stacks, timelines, and AI implementation 👔';
     }
     if (promptStep === 3) {
-      return isRu 
-        ? 'Ну ладно, я думал ты поговоришь со мной... 🥺 Но я всегда здесь!' 
-        : 'Aww, maybe next time... 🥺 I’m always here for you!';
+      return locale === 'ru' 
+        ? 'Буду рад ответить на любые технические вопросы. Обращайтесь!' 
+        : locale === 'ro'
+        ? 'Voi fi bucuros să răspund la orice întrebare tehnică. Vă stau la dispoziție!'
+        : 'Ready to answer any technical questions whenever you need.';
     }
     return '';
   };

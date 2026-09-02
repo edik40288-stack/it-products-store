@@ -133,20 +133,20 @@
     ]
   },
   "chat": {
-    "greeting": "Hey! I'm the MINDCORE AI assistant. I can help you estimate the cost of AI implementation or run a free conversion audit of your site. What challenge does your business face?",
-    "placeholder": "Type your message...",
+    "greeting": "Welcome! I am the MINDCORE Studio AI Consultant. I can assist you with project estimation, technical scoping, or a digital audit for your business. What challenge are you looking to solve?",
+    "placeholder": "Type your message or project requirements...",
     "send": "Send",
-    "typing": "MINDCORE AI is thinking...",
+    "typing": "MINDCORE AI is typing...",
     "qualify": {
-      "task": "Got it. Is this about building from scratch, adding AI agents, or automating existing processes?",
-      "stage": "What stage is your project at? Early concept, existing product, or ready for scale?",
-      "budget": "What's your rough timeline and budget range? (No worries if it's flexible)",
-      "contact": "Excellent! Let me connect you with our team. What's your name and best way to reach you (Telegram or email)?"
+      "task": "Understood. Are you interested in full-cycle web engineering, autonomous AI agents, or business process automation?",
+      "stage": "What stage is the project at — conceptual design from scratch, existing product, or scaling an active system?",
+      "budget": "What is your target timeline and estimated budget range?",
+      "contact": "Thank you for the information! Could you please share your name and preferred contact method (Telegram, WhatsApp, or Email) for our lead engineer?"
     },
-    "success": "Your request has been sent to the MINDCORE team. We'll be in touch within 2 business hours. 🚀",
-    "error": "Connection issue. Please email us at newbusiness@mindcore.studio 🙏",
-    "contextGreeting": "Great choice! Let's discuss **{context}**. What's your current situation?",
-    "auditGreeting": "Hey, over here! I'm already analyzing your business 👔 Where and in what format should I send the report (Telegram, WhatsApp or Email)?"
+    "success": "Thank you for reaching out! Your inquiry has been forwarded to MINDCORE senior engineering leads. We will connect with you shortly.",
+    "error": "Connection error. You can contact us directly via Telegram @kraeved111 or email edik40288@gmail.com",
+    "contextGreeting": "Welcome! I am ready to provide in-depth technical consultation regarding **{context}**. Please describe your core requirements.",
+    "auditGreeting": "Welcome! Analyzing your project details. Where would you prefer to receive the comprehensive audit and technical scoping report (Telegram, WhatsApp, or Email)?"
   },
   "footer": {
     "slogan": "A booster rocket for digital product teams",
