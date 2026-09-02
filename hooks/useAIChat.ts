@@ -3,22 +3,6 @@ import { Message } from '@/types';
 import { CHAT_GREETING_EN, CHAT_GREETING_RU } from '@/data/constants';
 import { useLocale, useTranslations } from 'next-intl';
 
-function isAuditUrlOrCompany(str: string): boolean {
-  const urlRegex = /(https?:\/\/|www\.)[^\s]+|[a-zA-Z0-9][-a-zA-Z0-9]*\.(com|ru|io|md|net|org|dev|ai|app|co|biz|info|tech|online|store|shop|me|pro|eu|by|ua|kz)(\/[^\s]*)?/i;
-  const companyRegex = /(^|\s)(ооо|зао|ип|компания|фирма|агентство|студия|бренд)\s+[а-яА-Яa-zA-Z0-9]+/i;
-  return urlRegex.test(str) || companyRegex.test(str);
-}
-
-function getAuditParallelHook(locale: string): string {
-  if (locale === 'ro') {
-    return 'Am preluat linkul. Am pornit auditul rapid de arhitectură și viteză (~8–10 sec)... În timp ce analizez: care este principala provocare acum — volumul redus de lead-uri sau pierderea clienților din cauza timpului mare de procesare?';
-  }
-  if (locale === 'en') {
-    return 'URL received. Running background architectural & speed audit (~8–10s)... While scanning: what is your primary bottleneck right now — low inbound lead volume, or losing prospects due to slow response times?';
-  }
-  return 'Принял ссылку. Запустил фоновый экспресс-аудит архитектуры и скорости (~8–10 сек)... Пока идет сканирование: какая сейчас основная боль — не хватает целевых заявок или система теряет клиентов из-за долгой обработки?';
-}
-
 export function useAIChat() {
   const locale = useLocale();
   const t = useTranslations('chat');
@@ -50,20 +34,7 @@ export function useAIChat() {
   const sendQueryDirectly = useCallback(async (text: string) => {
     addMessage('user', text);
     setInitialQuery(text);
-
-    const isAudit = isAuditUrlOrCompany(text);
-
-    // Immediate conversational hook within 500ms so user has something engaging to read right away!
-    if (isAudit) {
-      setTimeout(() => {
-        addMessage('assistant', getAuditParallelHook(locale));
-        setIsTyping(true);
-      }, 500);
-    } else {
-      setTimeout(() => {
-        setIsTyping(true);
-      }, 200);
-    }
+    setIsTyping(true);
 
     try {
       const controller = new AbortController();
@@ -86,14 +57,14 @@ export function useAIChat() {
         setDynamicCardConfig(data.dynamicCard);
         setTimeout(() => {
           setShowLeadCard(true);
-        }, 500);
+        }, 400);
       }
 
     } catch {
       setIsTyping(false);
       addMessage('assistant', 'Сбой связи с сервером. Пожалуйста, попробуйте еще раз.');
     }
-  }, [addMessage, locale]);
+  }, [addMessage]);
 
   // Open chat via event
   useEffect(() => {
@@ -147,15 +118,7 @@ export function useAIChat() {
     setInput('');
     addMessage('user', text);
 
-    const isAudit = isAuditUrlOrCompany(text);
-    if (isAudit) {
-      setTimeout(() => {
-        addMessage('assistant', getAuditParallelHook(locale));
-        setIsTyping(true);
-      }, 500);
-    } else {
-      setIsTyping(true);
-    }
+    setIsTyping(true);
 
     try {
       const history = [...messages, { role: 'user' as const, content: text, id: 'tmp' }];
