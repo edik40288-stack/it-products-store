@@ -215,7 +215,7 @@
 
 @media (max-width: 768px) {
   .visualWrap {
-    width: 50%;
-    opacity: 0.25;
+    width: 48%;
+    opacity: 0.85;
   }
 }

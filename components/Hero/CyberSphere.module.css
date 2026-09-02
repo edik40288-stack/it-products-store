@@ -28,6 +28,8 @@
     right: 50%;
     transform: translate(50%, -20%);
     width: clamp(250px, 60vw, 400px);
-    opacity: 0.5; /* Slightly faded on mobile so it doesn't block text completely */
+    opacity: 0.5;
+    pointer-events: none !important;
+    touch-action: auto !important;
   }
 }
