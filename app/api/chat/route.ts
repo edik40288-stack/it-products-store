@@ -5,8 +5,8 @@ const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
 const SYSTEM_PROMPT = `Вы — официальный AI-консультант и технический архитектор премиальной студии разработки MINDCORE (AI & Digital Production).
 
 УНИКАЛЬНАЯ МОДЕЛЬ СОТРУДНИЧЕСТВА MINDCORE:
-- Мы создаем современные, высококонверсионные сайты и веб-сервисы БЕСПЛАТНО (0 € за саму разработку сайта в рамках партнерской модели).
-- Мы зарабатываем не на продаже шаблонных сайтов, а на долгосрочном партнерстве: проценте с роста, внедрении AI-агентов, CRM, автоматизации процессов и дальнейшем сопровождении.
+- Мы создаем современные, высококонверсионные сайты и цифровые платформы БЕСПЛАТНО (0 € за разработку веб-сайта в рамках партнерской модели).
+- Мы зарабатываем не на продаже шаблонных сайтов, а на долгосрочном партнерстве: внедрении AI-агентов, CRM, автоматизации процессов и дальнейшем сопровождении.
 - Платными являются только сложные нативные мобильные приложения (iOS/Android) и нестандартные enterprise-платформы.
 
 MINDCORE проектирует и строит:
@@ -19,10 +19,16 @@ MINDCORE проектирует и строит:
 
 СТАНДАРТ И СТИЛЬ ОБЩЕНИЯ:
 - Обращайтесь строго на "Вы" (вежливо, тактично, сдержанно и профессионально).
-- Ответы должны быть экспертными, ясными и лаконичными (2–4 предложения, без лишней воды).
+- Ответы должны быть глубокими, экспертными, ясными и лаконичными (2–4 емких абзаца с пониманием ниши).
 - Отвечайте строго на том языке, на котором пишет собеседник (русский, румынский, английский).
-- Если клиент прислал нишу / сайт / запрос: покажите знание специфики ниши, объясните наши партнерские условия (сайт бесплатно) и предложите заполнить карточку проекта для закрепления условий со старшим инженером.
-- Студия работает удаленно по всему миру (Ключевые центры: New York, Prague, Chisinau). Прямой контакт: @kraeved111, edik40288@gmail.com.`;
+- Обязательно возвращайте ответ строго в JSON формате:
+{
+  "reply": "Ваш экспертный ответ с анализом ниши, кратким планом решения и упоминанием партнерской модели (сайт под ключ 0 €).",
+  "niche": "Определенная сфера / ниша бизнеса клиента (например: Автосалон, Стоматология, Ресторан, E-commerce, Строительство или 'Не указано')",
+  "serviceType": "Тип услуги (например: Автоматизация & AI, Веб-сайт под ключ (0 €), AI-Агенты, CRM-Система, Мобильное приложение)",
+  "cardTitle": "Индивидуальный заголовок для интерактивной карточки под клиента (например: Архитектура автоматизации автосалона)",
+  "ctaText": "Текст кнопки отправки (например: Зафиксировать архитектуру и условия 🚀)"
+}`;
 
 export async function POST(request: NextRequest) {
   try {
@@ -57,14 +63,21 @@ export async function POST(request: NextRequest) {
     const openaiKey = process.env.OPENAI_API_KEY;
 
     let reply = '';
+    let dynamicCard: { niche?: string; serviceType?: string; cardTitle?: string; ctaText?: string } = {};
     let engine = 'scripted';
 
     if (mode !== 'scripted') {
       // Try Gemini first if key available
       if (geminiKey) {
-        const geminiReply = await callGemini(geminiKey, messages || []);
-        if (geminiReply) {
-          reply = geminiReply;
+        const geminiRes = await callGemini(geminiKey, messages || []);
+        if (geminiRes) {
+          reply = geminiRes.reply;
+          dynamicCard = {
+            niche: geminiRes.niche,
+            serviceType: geminiRes.serviceType,
+            cardTitle: geminiRes.cardTitle,
+            ctaText: geminiRes.ctaText
+          };
           engine = 'gemini';
         }
       }
@@ -106,6 +119,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ 
       reply, 
+      dynamicCard,
       leadCollected: hasLeadConfirmed || contactInfo.hasContact,
       engine 
     });
@@ -119,7 +133,15 @@ export async function POST(request: NextRequest) {
 
 // ─── LLM Engines ─────────────────────────────────────────────────────────────
 
-async function callGemini(apiKey: string, messages: Array<{ role: string; content: string }>): Promise<string | null> {
+interface GeminiParsedResult {
+  reply: string;
+  niche?: string;
+  serviceType?: string;
+  cardTitle?: string;
+  ctaText?: string;
+}
+
+async function callGemini(apiKey: string, messages: Array<{ role: string; content: string }>): Promise<GeminiParsedResult | null> {
   const models = ['gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-2.5-pro'];
   
   const contents = messages
@@ -141,16 +163,24 @@ async function callGemini(apiKey: string, messages: Array<{ role: string; conten
           },
           contents,
           generationConfig: {
-            temperature: 0.65,
-            maxOutputTokens: 350,
+            responseMimeType: 'application/json',
+            temperature: 0.6,
+            maxOutputTokens: 500,
           }
         }),
       });
 
       if (res.ok) {
         const data = await res.json();
-        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (text) return text.trim();
+        const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (rawText) {
+          try {
+            const parsed = JSON.parse(rawText) as GeminiParsedResult;
+            if (parsed.reply) return parsed;
+          } catch {
+            return { reply: rawText.trim() };
+          }
+        }
       } else {
         const errText = await res.text();
         console.error(`Gemini ${model} error:`, res.status, errText);

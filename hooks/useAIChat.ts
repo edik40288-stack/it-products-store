@@ -24,6 +24,12 @@ export function useAIChat() {
   const hasEventOpenedRef = useRef(false);
   const [showLeadCard, setShowLeadCard] = useState(false);
   const [initialQuery, setInitialQuery] = useState('');
+  const [dynamicCardConfig, setDynamicCardConfig] = useState<{
+    cardTitle?: string;
+    ctaText?: string;
+    niche?: string;
+    serviceType?: string;
+  }>({});
 
   const sendQueryDirectly = useCallback(async (text: string) => {
     addMessage('user', text);
@@ -41,10 +47,12 @@ export function useAIChat() {
       const data = await res.json();
       setIsTyping(false);
       addMessage('assistant', data.reply);
-      // Automatically prompt the lead card after initial query
+      if (data.dynamicCard) {
+        setDynamicCardConfig(data.dynamicCard);
+      }
       setTimeout(() => {
         setShowLeadCard(true);
-      }, 600);
+      }, 500);
     } catch {
       setIsTyping(false);
       addMessage('assistant', t('error'));
@@ -78,7 +86,6 @@ export function useAIChat() {
       setTimeout(() => {
         setIsTyping(false);
         addMessage('assistant', greeting);
-        setShowLeadCard(true);
       }, 500);
     }
   }, [isOpen, messages.length, addMessage, greeting]);
@@ -117,6 +124,10 @@ export function useAIChat() {
       const data = await res.json();
       setIsTyping(false);
       addMessage('assistant', data.reply);
+      if (data.dynamicCard) {
+        setDynamicCardConfig(data.dynamicCard);
+        setShowLeadCard(true);
+      }
       if (data.leadCollected) setLeadCollected(true);
     } catch {
       setIsTyping(false);
@@ -146,6 +157,7 @@ export function useAIChat() {
     handleKeyDown,
     showLeadCard,
     setShowLeadCard,
+    dynamicCardConfig,
     initialQuery,
     addMessage
   };
