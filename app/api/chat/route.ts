@@ -91,13 +91,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // STRICT 3 SECOND FALLBACK
+    // STRICT FALLBACK (if models time out after 10s)
     if (!reply) {
-      reply = 'Добрый день! У нас сейчас огромный завал клиентов. Пожалуйста, заполните карточку ниже — мы свяжемся в ближайшие 48 часов и решим вашу проблему в бизнесе.';
+      reply = 'Анализ завершен в базовом режиме (AI перегружен). Инженер детально изучит вашу задачу и напишет вам лично.';
       dynamicCard = { showCard: true };
       engine = 'scripted_fallback';
       // Alert Telegram asynchronously so we don't block the user's response!
-      sendTelegramMessage('🚨 <b>ВНИМАНИЕ: СБОЙ AI API</b> 🚨\nLLM не ответила за 2.5 секунды! Чат переведен в режим жесткого скрипта.').catch(console.error);
+      sendTelegramMessage('🚨 <b>ВНИМАНИЕ: СБОЙ AI API</b> 🚨\nLLM не ответила за 10 секунд! Сработал фоллбэк.').catch(console.error);
     }
 
     // Instant lead & contact detection
@@ -134,7 +134,7 @@ interface GeminiParsedResult {
 }
 
 async function fetchWithTimeout(resource: string, options: RequestInit & { timeout?: number } = {}) {
-  const { timeout = 2500 } = options;
+  const { timeout = 10000 } = options;
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
   try {

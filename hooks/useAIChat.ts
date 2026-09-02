@@ -33,12 +33,20 @@ export function useAIChat() {
 
   const sendQueryDirectly = useCallback(async (text: string) => {
     addMessage('user', text);
-    setIsTyping(true);
+    
+    // SMART UX TRICK: Instantly reply with a script and show the card. 
+    // This buys us 5-10 seconds of user attention while they fill it out!
+    setTimeout(() => {
+      addMessage('assistant', 'Принято. Я начал собирать данные и анализировать вашу задачу. Пока я готовлю ответ, пожалуйста, заполните контакты для связи в форме ниже.');
+      setShowLeadCard(true);
+      setIsTyping(true);
+    }, 400);
+
     setInitialQuery(text);
 
     try {
       const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), 4000);
+      const id = setTimeout(() => controller.abort(), 12000); // 12 seconds
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -48,20 +56,20 @@ export function useAIChat() {
         signal: controller.signal
       });
       clearTimeout(id);
+      
       const data = await res.json();
       setIsTyping(false);
-      addMessage('assistant', data.reply);
-      if (data.dynamicCard?.showCard) {
-        setDynamicCardConfig(data.dynamicCard);
-        setTimeout(() => {
-          setShowLeadCard(true);
-        }, 600);
-      }
+      
+      // Append the actual intelligent AI response below the card
+      setTimeout(() => {
+        addMessage('assistant', data.reply);
+      }, 500);
+
     } catch {
       setIsTyping(false);
-      addMessage('assistant', t('error'));
+      // If it fully fails, we don't need to do anything intrusive because the card is already there!
     }
-  }, [addMessage, t]);
+  }, [addMessage]);
 
   // Open chat via event
   useEffect(() => {
@@ -119,7 +127,7 @@ export function useAIChat() {
     try {
       const history = [...messages, { role: 'user' as const, content: text, id: 'tmp' }];
       const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), 4000);
+      const id = setTimeout(() => controller.abort(), 12000);
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
