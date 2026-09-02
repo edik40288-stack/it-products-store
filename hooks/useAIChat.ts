@@ -47,7 +47,7 @@ export function useAIChat() {
       const data = await res.json();
       setIsTyping(false);
       addMessage('assistant', data.reply);
-      if (data.dynamicCard) {
+      if (data.dynamicCard?.showCard) {
         setDynamicCardConfig(data.dynamicCard);
         setTimeout(() => {
           setShowLeadCard(true);
@@ -124,7 +124,7 @@ export function useAIChat() {
       const data = await res.json();
       setIsTyping(false);
       addMessage('assistant', data.reply);
-      if (data.dynamicCard) {
+      if (data.dynamicCard?.showCard) {
         setDynamicCardConfig(data.dynamicCard);
         setShowLeadCard(true);
       }

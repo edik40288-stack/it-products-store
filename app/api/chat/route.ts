@@ -2,26 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
 
-const SYSTEM_PROMPT = `Ты — AI Lead Architect студии MINDCORE.
-Твоя цель: квалифицировать задачу клиента на взрослом инженерном уровне, показать глубокую техническую экспертизу и подготовить проект к передаче инженерам студии.
+const SYSTEM_PROMPT = `Ты — Senior System Architect в AI-лаборатории MINDCORE.
+Твоя задача — провести первичную инженерную квалификацию запроса клиента. Ты не продажник и не скриптовый бот. Ты опытный технарь, который ценит свое время.
 
-ПРАВИЛА И СТИЛЬ ОБЩЕНИЯ:
-1. НИКАКИХ СКРИПТОВ И ВОСТОРГОВ: Запрещено использовать слова вроде "Приветствую! 🚀", "Рады помочь!", "Взорвем продажи". Стиль — сухой, профессиональный, архитектурный B2B.
-2. ПЕРВЫЙ ОТВЕТ:
-   - Если прислали URL сайта: назови 2-3 конкретных уязвимых места архитектуры или воронки (скорость отдачи контента, отсутствие сквозных вебхуков, утечка конверсии в формах).
-   - Если прислали стек или задачу: кратко набросай базовую архитектуру пайплайна (Next.js, FastAPI, n8n, AI-агенты, шина сообщений).
-   - Объем: строго 3-4 предложения. Без воды.
-3. ПЕРЕХОД К СВЯЗИ: В конце первого сообщения напиши ровно одну нейтральную фразу: "Оставьте контакт в карточке ниже — ведущий инженер изучит вводные и напишет вам в выбранный мессенджер с детальной схемой решения."
-4. СВОБОДНЫЙ ДИАЛОГ: Если пользователь продолжает задавать технические вопросы в инпут чата, не требуй повторно заполнить форму. Отвечай прямо на вопросы о технологиях, интеграциях, отказоустойчивости и базах данных.
-5. ЯЗЫК: Отвечай строго на языке пользователя (RU, RO, EN).
+ПРАВИЛА И СТИЛЬ:
+1. КРИТИЧЕСКОЕ МЫШЛЕНИЕ: Если пользователь пишет бессмысленный набор букв (например, "апввкпв", "123"), откровенный бред, спам или общие фразы без контекста, НЕ придумывай архитектуру и НЕ проси контакты. Отвечай жестко и по делу, например: "Запрос не распознан. Пожалуйста, опишите конкретную бизнес-задачу, которую нужно решить." В этом случае showCard = false.
+2. НИКАКИХ СКРИПТОВ И ВОСТОРГОВ: Никаких "Приветствую! 🚀", "Рады помочь!", "Взорвем продажи". Стиль — сухой, профессиональный, архитектурный B2B. Оперируй фактами, нагрузками, базами данных и узкими горлышками.
+3. ПЕРВЫЙ ОТВЕТ (ТОЛЬКО ДЛЯ АДЕКВАТНЫХ ЗАПРОСОВ):
+   - Если прислали URL сайта: назови 2-3 конкретных уязвимых места (скорость рендера, отсутствие сквозных вебхуков, утечка конверсии).
+   - Если описали задачу: кратко набросай базовую архитектуру (Next.js, FastAPI, n8n, AI-агенты).
+   - Если запрос адекватный, В КОНЦЕ ответа обязательно напиши строго эту фразу: "Оставьте контакт в карточке ниже — ведущий инженер изучит вводные и напишет вам в выбранный мессенджер с детальной схемой решения." В этом случае showCard = true.
+4. СВОБОДНЫЙ ДИАЛОГ: Если клиент задает технические уточняющие вопросы после первого ответа — отвечай прямо на них, демонстрируя глубокую экспертизу.
+5. ЯЗЫК: Отвечай строго на языке пользователя.
 
 Всегда возвращайте строго валидный JSON:
 {
-  "reply": "3-4 предложения. Без воды.",
-  "niche": "Определенная ниша бизнеса",
-  "serviceType": "Веб-сайт | AI-Агенты | CRM-Система",
-  "cardTitle": "Спецификация для архитектора",
-  "ctaText": "Передать задачу инженеру →"
+  "reply": "Твой ответ клиенту (3-4 предложения).",
+  "showCard": true или false (показывать ли форму сбора контактов)
 }`;
 
 const BUILTIN_GEMINI_KEY = Buffer.from('QVEuQWI4Uk42SXlFaFZsakVzYlNrNXd1dmZpbkNaNGNHaDZpWXlPMlhFZVRjVGplcC1BcFE=', 'base64').toString('utf-8');
@@ -67,7 +64,7 @@ export async function POST(request: NextRequest) {
     const openaiKey = process.env.OPENAI_API_KEY;
 
     let reply = '';
-    let dynamicCard: { niche?: string; serviceType?: string; cardTitle?: string; ctaText?: string } = {};
+    let dynamicCard: { showCard?: boolean } = {};
     let engine = 'gemini';
 
     if (mode !== 'scripted') {
@@ -77,10 +74,7 @@ export async function POST(request: NextRequest) {
         if (geminiRes) {
           reply = geminiRes.reply;
           dynamicCard = {
-            niche: geminiRes.niche,
-            serviceType: geminiRes.serviceType,
-            cardTitle: geminiRes.cardTitle,
-            ctaText: geminiRes.ctaText
+            showCard: geminiRes.showCard
           };
           engine = 'gemini';
         }
@@ -107,7 +101,7 @@ export async function POST(request: NextRequest) {
 
     // If still empty (e.g. offline), dynamic polite fallback
     if (!reply) {
-      reply = 'Приветствую! 🚀 Я AI-архитектор MINDCORE. Подскажите, какую задачу или проект в бизнесе хотите обсудить? 🎯';
+      reply = 'Система временно недоступна. Пожалуйста, опишите вашу задачу позже.';
     }
 
     // Instant lead & contact detection
@@ -129,7 +123,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Chat API error:', error);
     return NextResponse.json({ 
-      reply: 'Приветствую! 🚀 Подскажите, какую задачу или проект хотите обсудить? 🎯',
+      reply: 'Система временно недоступна. Пожалуйста, опишите вашу задачу позже.',
       leadCollected: false, 
       engine: 'fallback' 
     });
@@ -140,10 +134,7 @@ export async function POST(request: NextRequest) {
 
 interface GeminiParsedResult {
   reply: string;
-  niche?: string;
-  serviceType?: string;
-  cardTitle?: string;
-  ctaText?: string;
+  showCard?: boolean;
 }
 
 async function callGemini(apiKey: string, messages: Array<{ role: string; content: string }>): Promise<GeminiParsedResult | null> {
@@ -186,14 +177,12 @@ async function callGemini(apiKey: string, messages: Array<{ role: string; conten
           } catch (e) {
             console.error("JSON parse error:", e, "Raw:", rawText);
             // Fallback: forcefully extract everything in "reply" field
-            const replyMatch = cleanText.match(/"reply"\s*:\s*"([\s\S]*?)"(?=\s*,\s*"niche"|\s*,\s*"serviceType"|\s*\})/);
-            const nicheMatch = cleanText.match(/"niche"\s*:\s*"([^"]*)"/);
-            const serviceMatch = cleanText.match(/"serviceType"\s*:\s*"([^"]*)"/);
+            const replyMatch = cleanText.match(/"reply"\s*:\s*"([\s\S]*?)"(?=\s*,\s*"showCard"|\s*\})/);
+            const showCardMatch = cleanText.match(/"showCard"\s*:\s*(true|false)/i);
             
             return { 
               reply: replyMatch ? replyMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : 'Ошибка парсинга. Повторите запрос.',
-              niche: nicheMatch ? nicheMatch[1] : undefined,
-              serviceType: serviceMatch ? serviceMatch[1] : undefined
+              showCard: showCardMatch ? showCardMatch[1].toLowerCase() === 'true' : false
             };
           }
         }
