@@ -128,14 +128,6 @@ export default function AIChat() {
     } finally {
       setIsSubmittingCard(false);
       setIsCardSubmitted(true);
-      setTimeout(() => {
-        addMessage(
-          'assistant',
-          isRu
-            ? 'Спецификацию и контакты зафиксировал. Ведущий архитектор уже подключился. Если хотите дополнить проект деталями или ссылками — можете написать прямо сюда.'
-            : 'Specification and contacts received. The lead architect is reviewing your input. Feel free to add any details or links here.'
-        );
-      }, 400);
     }
   };
 
@@ -367,15 +359,24 @@ export default function AIChat() {
           {/* Interactive Project & Lead Card */}
           {showLeadCard && (
             isCardSubmitted ? (
-              <div className={styles.submittedTicker}>
-                <div className={styles.tickerGlowLine} />
-                <div className={styles.tickerContent}>
-                  <span className={styles.tickerPulseDot} />
-                  <span className={styles.tickerText}>
-                    {isRu 
-                      ? `✓ СПЕЦИФИКАЦИЯ ПЕРЕДАНА · ИНЖЕНЕР СВЯЖЕТСЯ В ТЕЧЕНИЕ 15 МИН В ${messenger.toUpperCase()}`
-                      : `✓ SPECIFICATION SENT · ENGINEER WILL REPLY IN 15 MIN VIA ${messenger.toUpperCase()}`}
-                  </span>
+              <div className={styles.marqueeTicker}>
+                <div className={styles.marqueeTrack}>
+                  <div className={styles.marqueeItem}>
+                    <span className={styles.tickerPulseDot} />
+                    <span>
+                      {isRu 
+                        ? `✓ СПЕЦИФИКАЦИЯ ПЕРЕДАНА · ИНЖЕНЕР СВЯЖЕТСЯ В ТЕЧЕНИЕ 15 МИН В ${messenger.toUpperCase()} ·`
+                        : `✓ SPECIFICATION SENT · ENGINEER WILL REPLY IN 15 MIN VIA ${messenger.toUpperCase()} ·`}
+                    </span>
+                  </div>
+                  <div className={styles.marqueeItem}>
+                    <span className={styles.tickerPulseDot} />
+                    <span>
+                      {isRu 
+                        ? `✓ СПЕЦИФИКАЦИЯ ПЕРЕДАНА · ИНЖЕНЕР СВЯЖЕТСЯ В ТЕЧЕНИЕ 15 МИН В ${messenger.toUpperCase()} ·`
+                        : `✓ SPECIFICATION SENT · ENGINEER WILL REPLY IN 15 MIN VIA ${messenger.toUpperCase()} ·`}
+                    </span>
+                  </div>
                 </div>
               </div>
             ) : (

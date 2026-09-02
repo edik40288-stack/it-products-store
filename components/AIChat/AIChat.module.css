@@ -515,37 +515,47 @@
   color: #737373;
 }
 
-/* Compact submitted status ticker with running scanline */
-.submittedTicker {
+/* True continuous running ticker (бегущая строка) */
+.marqueeTicker {
   position: relative;
   overflow: hidden;
+  width: 100%;
   border-radius: 8px;
-  background: rgba(0, 255, 133, 0.05);
-  border: 1px solid rgba(0, 255, 133, 0.3);
-  padding: 8px 12px;
+  background: rgba(0, 255, 133, 0.06);
+  border: 1px solid rgba(0, 255, 133, 0.35);
+  padding: 8px 0;
   margin: 6px 0;
+  display: flex;
+  align-items: center;
+  mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
   animation: msgIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.tickerGlowLine {
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 50%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #00FF85, #C9A84C, transparent);
-  animation: tickerScan 2.2s infinite linear;
+.marqueeTrack {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 18s linear infinite;
+  gap: 2.5rem;
 }
 
-@keyframes tickerScan {
-  0% { left: -50%; }
-  100% { left: 150%; }
-}
-
-.tickerContent {
+.marqueeItem {
   display: flex;
   align-items: center;
   gap: 8px;
+  white-space: nowrap;
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  font-weight: 600;
+  color: #00FF85;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+@keyframes marqueeScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(-50% - 1.25rem)); }
 }
 
 .tickerPulseDot {
@@ -555,24 +565,12 @@
   background: #00FF85;
   box-shadow: 0 0 8px #00FF85;
   flex-shrink: 0;
-  animation: pulseDot 1.6s infinite ease-in-out;
+  animation: pulseDot 1.4s infinite ease-in-out;
 }
 
 @keyframes pulseDot {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.35; transform: scale(0.8); }
-}
-
-.tickerText {
-  font-family: var(--font-mono, monospace);
-  font-size: 10px;
-  font-weight: 600;
-  color: #00FF85;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 /* Success banner */
