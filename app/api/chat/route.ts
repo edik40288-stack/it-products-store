@@ -26,65 +26,57 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { messages, mode, type, urlOrNiche } = body;
 
-    // Handle instant audit lead submission from Hero form
+    // 1. Handle instant audit lead submission from Hero form
     if (type === 'audit_request') {
       const text = `⚡️ <b>НОВАЯ ЗАЯВКА: АУДИТ ПРОЕКТА</b> ⚡️\n\n🔗 <b>Ссылка / Проект:</b> ${urlOrNiche || 'Не указано'}\n⏱ <b>Время:</b> ${getFormattedTime()}`;
       await sendTelegramMessage(text);
       return NextResponse.json({ success: true });
     }
 
-    const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
-    const model = process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-001';
+    const geminiKey = process.env.GEMINI_API_KEY;
+    const openrouterKey = process.env.OPENROUTER_API_KEY;
+    const openaiKey = process.env.OPENAI_API_KEY;
 
     let reply = '';
-    let isLLMSuccess = false;
+    let engine = 'scripted';
 
-    // 1. If API key exists, call LLM
-    if (apiKey && mode !== 'scripted') {
-      try {
-        const isStandardOpenAI = !process.env.OPENROUTER_API_KEY && Boolean(process.env.OPENAI_API_KEY);
-        const endpoint = isStandardOpenAI 
-          ? 'https://api.openai.com/v1/chat/completions' 
-          : `${OPENROUTER_BASE}/chat/completions`;
-
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-            'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'https://mindcore.studio',
-            'X-Title': 'MINDCORE Studio',
-          },
-          body: JSON.stringify({
-            model,
-            messages: [
-              { role: 'system', content: SYSTEM_PROMPT },
-              ...(messages || []),
-            ],
-            max_tokens: 350,
-            temperature: 0.6,
-          }),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          reply = data.choices?.[0]?.message?.content?.trim() || '';
-          if (reply) isLLMSuccess = true;
-        } else {
-          console.error('LLM API error status:', response.status, await response.text());
+    if (mode !== 'scripted') {
+      // Try Gemini first if key available
+      if (geminiKey) {
+        const geminiReply = await callGemini(geminiKey, messages || []);
+        if (geminiReply) {
+          reply = geminiReply;
+          engine = 'gemini';
         }
-      } catch (llmErr) {
-        console.error('LLM Call failed:', llmErr);
+      }
+
+      // Fallback to OpenRouter if Gemini failed or not present
+      if (!reply && openrouterKey) {
+        const orReply = await callOpenRouter(openrouterKey, process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-001', messages || []);
+        if (orReply) {
+          reply = orReply;
+          engine = 'openrouter';
+        }
+      }
+
+      // Fallback to OpenAI if present
+      if (!reply && openaiKey) {
+        const oaiReply = await callOpenAI(openaiKey, messages || []);
+        if (oaiReply) {
+          reply = oaiReply;
+          engine = 'openai';
+        }
       }
     }
 
-    // 2. Fallback to official scripted response if LLM offline or key not provided yet
-    if (!isLLMSuccess || !reply) {
+    // Fallback to official scripted response if no LLM succeeded
+    if (!reply) {
       const scripted = getScriptedResponse(messages || []);
       reply = scripted.reply;
+      engine = 'scripted';
     }
 
-    // 3. Instant lead & contact detection
+    // 2. Instant lead & contact detection
     const lastUserMsg = messages?.filter((m: { role: string }) => m.role === 'user').slice(-1)[0]?.content || '';
     const contactInfo = extractContactInfo(lastUserMsg);
     const hasLeadConfirmed = detectLeadCollected(messages || [], reply);
@@ -96,14 +88,119 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       reply, 
       leadCollected: hasLeadConfirmed || contactInfo.hasContact,
-      mode: isLLMSuccess ? 'llm' : 'scripted' 
+      engine 
     });
 
   } catch (error) {
     console.error('Chat API error:', error);
     const fallback = getScriptedResponse([]);
-    return NextResponse.json({ reply: fallback.reply, leadCollected: false, mode: 'fallback' });
+    return NextResponse.json({ reply: fallback.reply, leadCollected: false, engine: 'fallback' });
   }
+}
+
+// ─── LLM Engines ─────────────────────────────────────────────────────────────
+
+async function callGemini(apiKey: string, messages: Array<{ role: string; content: string }>): Promise<string | null> {
+  const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+  
+  const contents = messages
+    .filter(m => m.role !== 'system')
+    .map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }]
+    }));
+
+  for (const model of models) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: {
+            parts: [{ text: SYSTEM_PROMPT }]
+          },
+          contents,
+          generationConfig: {
+            temperature: 0.6,
+            maxOutputTokens: 350,
+          }
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) return text.trim();
+      } else {
+        const errText = await res.text();
+        console.error(`Gemini ${model} error:`, res.status, errText);
+      }
+    } catch (err) {
+      console.error(`Gemini call error on ${model}:`, err);
+    }
+  }
+  return null;
+}
+
+async function callOpenRouter(apiKey: string, model: string, messages: Array<{ role: string; content: string }>): Promise<string | null> {
+  try {
+    const res = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'https://mindcore.studio',
+        'X-Title': 'MINDCORE Studio',
+      },
+      body: JSON.stringify({
+        model: model || 'google/gemini-2.0-flash-001',
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          ...messages,
+        ],
+        max_tokens: 350,
+        temperature: 0.6,
+      }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      return data?.choices?.[0]?.message?.content?.trim() || null;
+    }
+  } catch (err) {
+    console.error('OpenRouter call error:', err);
+  }
+  return null;
+}
+
+async function callOpenAI(apiKey: string, messages: Array<{ role: string; content: string }>): Promise<string | null> {
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          ...messages,
+        ],
+        max_tokens: 350,
+        temperature: 0.6,
+      }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      return data?.choices?.[0]?.message?.content?.trim() || null;
+    }
+  } catch (err) {
+    console.error('OpenAI call error:', err);
+  }
+  return null;
 }
 
 // ─── Polite Executive Scripted Fallback ──────────────────────────────────────────
