@@ -69,53 +69,35 @@ export async function POST(request: NextRequest) {
     let engine = 'deepseek';
 
     if (mode !== 'scripted') {
-      // 1. Query DeepSeek First
-      if (deepseekKey) {
-        const dsRes = await callDeepSeek(deepseekKey, messages || []);
-        if (dsRes) {
-          reply = dsRes.reply;
-          dynamicCard = { showCard: dsRes.showCard };
+      let aiRes: GeminiParsedResult | null = null;
+      try {
+        if (deepseekKey) {
           engine = 'deepseek';
-        }
-      }
-
-      // 2. Fallback to Gemini
-      if (!reply && geminiKey) {
-        const geminiRes = await callGemini(geminiKey, messages || []);
-        if (geminiRes) {
-          reply = geminiRes.reply;
-          dynamicCard = {
-            showCard: geminiRes.showCard
-          };
+          aiRes = await callDeepSeek(deepseekKey, messages || []);
+        } else if (geminiKey) {
           engine = 'gemini';
-        }
-      }
-
-      // 3. Fallback to OpenRouter if needed
-      if (!reply && openrouterKey) {
-        const orRes = await callOpenRouter(openrouterKey, process.env.OPENROUTER_MODEL || 'google/gemini-3.7-flash', messages || []);
-        if (orRes) {
-          reply = orRes.reply;
-          dynamicCard = {
-            showCard: orRes.showCard
-          };
+          aiRes = await callGemini(geminiKey, messages || []);
+        } else if (openrouterKey) {
           engine = 'openrouter';
+          aiRes = await callOpenRouter(openrouterKey, process.env.OPENROUTER_MODEL || 'google/gemini-3.7-flash', messages || []);
         }
+      } catch (err) {
+        console.error('AI Engine Error:', err);
       }
 
-      // 3. Fallback to OpenAI if needed
-      if (!reply && openaiKey) {
-        const oaiReply = await callOpenAI(openaiKey, messages || []);
-        if (oaiReply) {
-          reply = oaiReply;
-          engine = 'openai';
-        }
+      if (aiRes) {
+        reply = aiRes.reply;
+        dynamicCard = { showCard: aiRes.showCard };
       }
     }
 
-    // If still empty (e.g. offline), dynamic polite fallback
+    // STRICT 3 SECOND FALLBACK
     if (!reply) {
-      reply = 'Система временно недоступна. Пожалуйста, опишите вашу задачу позже.';
+      reply = 'Добрый день! У нас сейчас огромный завал клиентов. Пожалуйста, заполните карточку ниже — мы свяжемся в ближайшие 48 часов и решим вашу проблему в бизнесе.';
+      dynamicCard = { showCard: true };
+      engine = 'scripted_fallback';
+      // Alert Telegram asynchronously so we don't block the user's response!
+      sendTelegramMessage('🚨 <b>ВНИМАНИЕ: СБОЙ AI API</b> 🚨\nLLM не ответила за 2.5 секунды! Чат переведен в режим жесткого скрипта.').catch(console.error);
     }
 
     // Instant lead & contact detection
@@ -152,7 +134,7 @@ interface GeminiParsedResult {
 }
 
 async function fetchWithTimeout(resource: string, options: RequestInit & { timeout?: number } = {}) {
-  const { timeout = 12000 } = options;
+  const { timeout = 2500 } = options;
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
   try {
@@ -169,7 +151,7 @@ async function fetchWithTimeout(resource: string, options: RequestInit & { timeo
 }
 
 async function callGemini(apiKey: string, messages: Array<{ role: string; content: string }>): Promise<GeminiParsedResult | null> {
-  const models = ['gemini-3.6-flash', 'gemini-3.1-pro-preview', 'gemini-3.6-flash-8b'];
+  const model = 'gemini-3.6-flash';
   
   const contents = messages
     .filter(m => m.role !== 'system')
@@ -178,52 +160,48 @@ async function callGemini(apiKey: string, messages: Array<{ role: string; conten
       parts: [{ text: m.content }]
     }));
 
-  for (const model of models) {
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-      const res = await fetchWithTimeout(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: SYSTEM_PROMPT }]
-          },
-          contents,
-          generationConfig: {
-            responseMimeType: 'application/json',
-            temperature: 0.6,
-            maxOutputTokens: 400,
-          }
-        }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (rawText) {
-          const cleanText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
-          try {
-            const parsed = JSON.parse(cleanText) as GeminiParsedResult;
-            if (parsed.reply) return parsed;
-          } catch (e) {
-            console.error("JSON parse error:", e, "Raw:", rawText);
-            // Fallback: forcefully extract everything in "reply" field
-            const replyMatch = cleanText.match(/"reply"\s*:\s*"([\s\S]*?)"(?=\s*,\s*"showCard"|\s*\})/);
-            const showCardMatch = cleanText.match(/"showCard"\s*:\s*(true|false)/i);
-            
-            return { 
-              reply: replyMatch ? replyMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : 'Ошибка парсинга. Повторите запрос.',
-              showCard: showCardMatch ? showCardMatch[1].toLowerCase() === 'true' : false
-            };
-          }
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    const res = await fetchWithTimeout(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: {
+          parts: [{ text: SYSTEM_PROMPT }]
+        },
+        contents,
+        generationConfig: {
+          responseMimeType: 'application/json',
+          temperature: 0.6,
+          maxOutputTokens: 400,
         }
-      } else {
-        const errText = await res.text();
-        console.error(`Gemini ${model} error:`, res.status, errText);
+      }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (rawText) {
+        const cleanText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+        try {
+          const parsed = JSON.parse(cleanText) as GeminiParsedResult;
+          if (parsed.reply) return parsed;
+        } catch (e) {
+          console.error("JSON parse error:", e, "Raw:", rawText);
+          const replyMatch = cleanText.match(/"reply"\s*:\s*"([\s\S]*?)"(?=\s*,\s*"showCard"|\s*\})/);
+          const showCardMatch = cleanText.match(/"showCard"\s*:\s*(true|false)/i);
+          return { 
+            reply: replyMatch ? replyMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : 'Ошибка парсинга. Повторите запрос.',
+            showCard: showCardMatch ? showCardMatch[1].toLowerCase() === 'true' : false
+          };
+        }
       }
-    } catch (err) {
-      console.error(`Gemini call error on ${model}:`, err);
+    } else {
+      const errText = await res.text();
+      console.error(`Gemini ${model} error:`, res.status, errText);
     }
+  } catch (err) {
+    console.error(`Gemini call error on ${model}:`, err);
   }
   return null;
 }

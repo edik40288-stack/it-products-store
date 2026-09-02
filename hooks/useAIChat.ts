@@ -38,7 +38,7 @@ export function useAIChat() {
 
     try {
       const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), 20000);
+      const id = setTimeout(() => controller.abort(), 4000);
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -119,7 +119,7 @@ export function useAIChat() {
     try {
       const history = [...messages, { role: 'user' as const, content: text, id: 'tmp' }];
       const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), 20000);
+      const id = setTimeout(() => controller.abort(), 4000);
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
