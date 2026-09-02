@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
 // ─── LLM Engines ─────────────────────────────────────────────────────────────
 
 async function callGemini(apiKey: string, messages: Array<{ role: string; content: string }>): Promise<string | null> {
-  const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+  const models = ['gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-2.5-pro'];
   
   const contents = messages
     .filter(m => m.role !== 'system')
@@ -141,7 +141,7 @@ async function callGemini(apiKey: string, messages: Array<{ role: string; conten
           },
           contents,
           generationConfig: {
-            temperature: 0.6,
+            temperature: 0.65,
             maxOutputTokens: 350,
           }
         }),
