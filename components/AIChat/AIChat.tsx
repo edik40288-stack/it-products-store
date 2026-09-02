@@ -243,7 +243,15 @@ export default function AIChat() {
       </div>
 
       {/* Chat panel */}
-      <div className={`${styles.panel} ${isOpen ? styles.panelOpen : ''}`} role="complementary" aria-label="AI Chat Assistant">
+      <div 
+        className={`${styles.panel} ${isOpen ? styles.panelOpen : ''}`} 
+        role="complementary" 
+        aria-label="AI Chat Assistant"
+        data-lenis-prevent="true"
+        data-scroll-ignore="true"
+        onWheel={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className={styles.header}>
           <div className={styles.avatarWrap}>
@@ -259,7 +267,13 @@ export default function AIChat() {
         </div>
 
         {/* Messages */}
-        <div className={styles.messages}>
+        <div 
+          className={styles.messages}
+          data-lenis-prevent="true"
+          data-scroll-ignore="true"
+          onWheel={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+        >
           {messages.map((msg, i) => (
             <div
               key={msg.id}
