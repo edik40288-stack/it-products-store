@@ -59,17 +59,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
+    const deepseekKey = process.env.DEEPSEEK_API_KEY;
     const geminiKey = process.env.GEMINI_API_KEY || BUILTIN_GEMINI_KEY;
     const openrouterKey = process.env.OPENROUTER_API_KEY;
     const openaiKey = process.env.OPENAI_API_KEY;
 
     let reply = '';
     let dynamicCard: { showCard?: boolean } = {};
-    let engine = 'gemini';
+    let engine = 'deepseek';
 
     if (mode !== 'scripted') {
-      // 1. Query Gemini
-      if (geminiKey) {
+      // 1. Query DeepSeek First
+      if (deepseekKey) {
+        const dsRes = await callDeepSeek(deepseekKey, messages || []);
+        if (dsRes) {
+          reply = dsRes.reply;
+          dynamicCard = { showCard: dsRes.showCard };
+          engine = 'deepseek';
+        }
+      }
+
+      // 2. Fallback to Gemini
+      if (!reply && geminiKey) {
         const geminiRes = await callGemini(geminiKey, messages || []);
         if (geminiRes) {
           reply = geminiRes.reply;
@@ -80,7 +91,7 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // 2. Fallback to OpenRouter if needed
+      // 3. Fallback to OpenRouter if needed
       if (!reply && openrouterKey) {
         const orRes = await callOpenRouter(openrouterKey, process.env.OPENROUTER_MODEL || 'google/gemini-3.7-flash', messages || []);
         if (orRes) {
@@ -198,6 +209,55 @@ async function callGemini(apiKey: string, messages: Array<{ role: string; conten
     }
   }
   return null;
+}
+
+async function callDeepSeek(apiKey: string, messages: Array<{ role: string; content: string }>): Promise<GeminiParsedResult | null> {
+  try {
+    const res = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          ...messages,
+        ],
+        response_format: { type: 'json_object' },
+        max_tokens: 350,
+        temperature: 0.6,
+      }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const rawText = data?.choices?.[0]?.message?.content?.trim() || '';
+      if (rawText) {
+        const cleanText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+        try {
+          const parsed = JSON.parse(cleanText) as GeminiParsedResult;
+          if (parsed.reply) return parsed;
+        } catch (e) {
+          const replyMatch = cleanText.match(/"reply"\s*:\s*"([\s\S]*?)"(?=\s*,\s*"showCard"|\s*\})/);
+          const showCardMatch = cleanText.match(/"showCard"\s*:\s*(true|false)/i);
+          return {
+            reply: replyMatch ? replyMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : 'Ошибка парсинга. Повторите запрос.',
+            showCard: showCardMatch ? showCardMatch[1].toLowerCase() === 'true' : false
+          };
+        }
+      }
+    } else {
+      const errText = await res.text();
+      console.error('DeepSeek Error:', res.status, errText);
+    }
+  } catch (err) {
+    console.error('DeepSeek call error:', err);
+  }
+  return null;
+}
+
 async function callOpenRouter(apiKey: string, model: string, messages: Array<{ role: string; content: string }>): Promise<GeminiParsedResult | null> {
   try {
     const res = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
