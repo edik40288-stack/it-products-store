@@ -95,6 +95,7 @@ export default function AIChat() {
   };
 
   // Lead Card local state
+  const [messenger, setMessenger] = useState<'tg' | 'wa' | 'viber'>('tg');
   const [cardName, setCardName] = useState('');
   const [cardCompany, setCardCompany] = useState('');
   const [cardContact, setCardContact] = useState('');
@@ -103,62 +104,30 @@ export default function AIChat() {
 
   const handleCardSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!cardName.trim() || !cardCompany.trim() || !cardContact.trim() || isSubmittingCard) return;
+    if (!cardName.trim() || !cardContact.trim() || isSubmittingCard) return;
 
     setIsSubmittingCard(true);
-    const name = cardName.trim();
-    const company = cardCompany.trim();
-    const contact = cardContact.trim();
 
     const cardData = {
-      name,
-      company,
-      contact,
-      initialQuery: initialQuery || input
+      clientName: cardName.trim(),
+      company: cardCompany.trim(),
+      messenger: messenger === 'tg' ? 'Telegram' : messenger === 'wa' ? 'WhatsApp' : 'Viber',
+      contactHandle: cardContact.trim(),
+      clientInput: initialQuery || input,
+      conversationHistory: messages.map(m => ({ role: m.role, text: m.content }))
     };
 
-    // 1. Send instant lead notification to Telegram in background (non-blocking)
-    fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type: 'lead_card',
-        cardData
-      }),
-    }).catch(console.error);
-
-    // 2. Hide card immediately so conversation flow is seamless
-    setShowLeadCard(false);
-    setIsCardSubmitted(true);
-    setIsSubmittingCard(false);
-
-    // 3. Add lead submission message to chat & show typing
-    addMessage('user', `📋 Заполнил данные: ${name}, фирма «${company}» (${contact})`);
-    setIsTyping(true);
-
-    // 4. Trigger live Gemini response
     try {
-      const promptText = `Клиент заполнил карточку: имя ${name}, фирма «${company}», контакт ${contact}. Если фирма реальная — дай краткий анализ ниши и как ее усилить через AI. Если неизвестная или тестовая — энергично подтверди фиксацию проекта под 0 € и задай живой цепляющий вопрос об узких местах в продажах или обработке заявок, чтобы продолжить диалог!`;
-      const history = [
-        ...messages,
-        { role: 'user' as const, content: promptText, id: Date.now().toString() }
-      ];
-
-      const res = await fetch('/api/chat', {
+      await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: history.map(({ role, content }) => ({ role, content })),
-        }),
+        body: JSON.stringify({ type: 'lead_card', cardData }),
       });
-      const data = await res.json();
-      setIsTyping(false);
-      if (data?.reply) {
-        addMessage('assistant', data.reply);
-      }
-    } catch {
-      setIsTyping(false);
-      addMessage('assistant', 'Заявка зафиксирована! 🚀 Старший архитектор свяжется с вами в течение 48 часов с готовой концепцией 💼');
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSubmittingCard(false);
+      setIsCardSubmitted(true);
     }
   };
 
@@ -369,55 +338,99 @@ export default function AIChat() {
           ))}
 
           {/* Interactive Project & Lead Card */}
-          {showLeadCard && !isCardSubmitted && (
-            <div className={styles.leadCard}>
-              <div className={styles.leadCardHeader}>
-                <div className={styles.leadCardBadge}>
-                  <span className={styles.leadCardDot} />
-                  <span>{locale === 'ru' ? 'КАРТОЧКА ПРОЕКТА // ЭКСПРЕСС-АНАЛИЗ' : 'PROJECT SCOPE CARD'}</span>
+          {/* Interactive Project & Lead Card */}
+          {showLeadCard && (
+            isCardSubmitted ? (
+              <div className={styles.cardSuccessBox}>
+                <div className={styles.cardSuccessTitle}>
+                  <span>✓</span>
+                  <span>{isRu ? 'Спецификация передана' : 'Specification Sent'}</span>
                 </div>
-                <span className={styles.leadCardFree}>{locale === 'ru' ? 'Сайт: 0 €' : 'Web: 0 €'}</span>
+                <div className={styles.cardSuccessText}>
+                  {isRu 
+                    ? `Инженер взял задачу в работу. Ответ по архитектуре придет в течение 15 минут в выбранный ${messenger.toUpperCase()}.`
+                    : `An engineer is reviewing your task. You will receive an architecture plan via ${messenger.toUpperCase()} in 15 minutes.`}
+                </div>
               </div>
-
-              <form onSubmit={handleCardSubmit} className={styles.leadCardForm}>
-                <div className={styles.leadCardFields}>
-                  <input
-                    type="text"
-                    placeholder={locale === 'ru' ? 'Имя Фамилия *' : 'Full Name *'}
-                    value={cardName}
-                    onChange={(e) => setCardName(e.target.value)}
-                    required
-                    className={styles.leadCardInput}
-                  />
-                  <input
-                    type="text"
-                    placeholder={locale === 'ru' ? 'Название фирмы или компании *' : 'Company Name *'}
-                    value={cardCompany}
-                    onChange={(e) => setCardCompany(e.target.value)}
-                    required
-                    className={styles.leadCardInput}
-                  />
-                  <input
-                    type="text"
-                    placeholder={locale === 'ru' ? 'Контакты для связи (Telegram, телефон) *' : 'Telegram / WhatsApp / Phone *'}
-                    value={cardContact}
-                    onChange={(e) => setCardContact(e.target.value)}
-                    required
-                    className={`${styles.leadCardInput} ${styles.leadCardInputFull}`}
-                  />
+            ) : (
+              <div className={styles.leadCard}>
+                <div className={styles.leadCardHeader}>
+                  <span className={styles.leadCardBadge}>{isRu ? 'Спецификация для архитектора' : 'Architecture Specification'}</span>
+                  <span className={styles.leadCardDot}>● {isRu ? 'Текстовая связь' : 'Text-only'}</span>
                 </div>
 
-                <button 
-                  type="submit" 
-                  disabled={isSubmittingCard || !cardName.trim() || !cardCompany.trim() || !cardContact.trim()}
-                  className={styles.leadCardSubmitBtn}
-                >
-                  {isSubmittingCard 
-                    ? (locale === 'ru' ? 'Анализирую компанию...' : 'Analyzing company...') 
-                    : (locale === 'ru' ? 'Отправить на экспресс-анализ 🚀' : 'Run Express Analysis 🚀')}
-                </button>
-              </form>
-            </div>
+                <form onSubmit={handleCardSubmit} className={styles.leadCardForm}>
+                  <div>
+                    <label className={styles.leadCardLabel}>{isRu ? 'Куда отправить расчет архитектуры' : 'Where to send the architecture plan'}</label>
+                    <div className={styles.leadCardTabs}>
+                      {[
+                        { id: 'tg', label: 'Telegram' },
+                        { id: 'wa', label: 'WhatsApp' },
+                        { id: 'viber', label: 'Viber' },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => setMessenger(item.id as 'tg' | 'wa' | 'viber')}
+                          className={`${styles.leadCardTab} ${messenger === item.id ? styles.leadCardTabActive : ''}`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className={styles.leadCardFieldsRow}>
+                      <input
+                        type="text"
+                        required
+                        value={cardName}
+                        onChange={(e) => setCardName(e.target.value)}
+                        placeholder={isRu ? 'Имя и фамилия *' : 'Full Name *'}
+                        className={styles.leadCardInput}
+                      />
+                      <input
+                        type="text"
+                        value={cardCompany}
+                        onChange={(e) => setCardCompany(e.target.value)}
+                        placeholder={isRu ? 'Компания / Ниша' : 'Company / Niche'}
+                        className={styles.leadCardInput}
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      required
+                      value={cardContact}
+                      onChange={(e) => setCardContact(e.target.value)}
+                      placeholder={
+                        messenger === 'tg'
+                          ? (isRu ? '@username или номер в Telegram *' : '@username or Telegram number *')
+                          : messenger === 'wa'
+                          ? (isRu ? 'Номер для WhatsApp *' : 'WhatsApp Number *')
+                          : (isRu ? 'Номер для Viber *' : 'Viber Number *')
+                      }
+                      className={styles.leadCardInput}
+                    />
+                  </div>
+
+                  <div>
+                    <button
+                      type="submit"
+                      disabled={isSubmittingCard || !cardName.trim() || !cardContact.trim()}
+                      className={styles.leadCardSubmitBtn}
+                    >
+                      {isSubmittingCard 
+                        ? (isRu ? 'Отправка...' : 'Sending...') 
+                        : (isRu ? 'Передать задачу инженеру →' : 'Send to Engineer →')}
+                    </button>
+                    <div className={styles.leadCardDisclaimer}>
+                      {isRu ? 'Пишем только в мессенджер. Без холодных звонков.' : 'We only write in messenger. No cold calls.'}
+                    </div>
+                  </div>
+                </form>
+              </div>
+            )
           )}
 
           {isTyping && (
@@ -425,12 +438,6 @@ export default function AIChat() {
               <div className={`${styles.bubble} ${styles.typingBubble}`}>
                 <span /><span /><span />
               </div>
-            </div>
-          )}
-
-          {leadCollected && !showLeadCard && (
-            <div className={styles.successBanner}>
-              {t('success')}
             </div>
           )}
 

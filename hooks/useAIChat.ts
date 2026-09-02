@@ -47,12 +47,12 @@ export function useAIChat() {
       const data = await res.json();
       setIsTyping(false);
       addMessage('assistant', data.reply);
-      if (data.dynamicCard) {
+      if (data.dynamicCard?.niche && data.dynamicCard.niche !== 'Не определена') {
         setDynamicCardConfig(data.dynamicCard);
+        setTimeout(() => {
+          setShowLeadCard(true);
+        }, 600);
       }
-      setTimeout(() => {
-        setShowLeadCard(true);
-      }, 500);
     } catch {
       setIsTyping(false);
       addMessage('assistant', t('error'));
