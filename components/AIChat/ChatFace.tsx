@@ -73,25 +73,13 @@ export default function ChatFace({ emotion, isOpen }: ChatFaceProps) {
         </svg>
       </div>
 
-      {/* Single Active 3D Bot Character */}
-      <video
-        key={activeVideoSrc}
-        ref={(el) => {
-          if (el) {
-            el.muted = true;
-            el.defaultMuted = true;
-            if (el.paused) el.play().catch(() => {});
-          }
-        }}
-        src={`${activeVideoSrc}#t=0.001`}
-        muted
-        playsInline
-        autoPlay
-        loop
-        preload="auto"
+      {/* Animated 3D Character (Immune to iOS Low Power Mode play button) */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        key={emotion}
+        src={`/images/anim/${emotion === 'diplomat' ? 'bot-business' : emotion === 'pout' ? 'bot-sad' : 'bot-greeting'}.webp`}
+        alt="MINDCORE AI"
         className={`${styles.botVideo} ${styles.botVideoActive}`}
-        disablePictureInPicture
-        controls={false}
       />
 
       {/* Subtle glossy glass ring overlay */}
