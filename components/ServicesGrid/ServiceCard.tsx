@@ -16,6 +16,17 @@ const SERVICE_VIDEOS: Record<string, string> = {
   'security': '/videos/security.mp4',
 };
 
+const SERVICE_POSTERS: Record<string, string> = {
+  'development': '/images/posters/development.webp',
+  'ai-agents': '/images/posters/ai-agents.webp',
+  'crm': '/images/posters/crm.webp',
+  'llm-integrations': '/images/posters/llm-api.webp',
+  'automation': '/images/posters/automation.webp',
+  'analytics': '/images/posters/analytics.webp',
+  'redesign': '/images/posters/redesign.webp',
+  'security': '/images/posters/security.webp',
+};
+
 interface ServiceCardProps {
   item: ServiceItem;
   onClick: (item: ServiceItem) => void;
@@ -112,8 +123,19 @@ export default function ServiceCard({ item, onClick }: ServiceCardProps) {
         ref={cardRef}
         className={`${styles.card} ${isHovered ? styles.cardHovered : ''}`}
       >
-        {/* Holographic 3D Visual with Lazy Intersection Loading */}
+        {/* Holographic 3D Visual with Instant Offline Poster & Lazy Video */}
         <div className={styles.visualWrap}>
+          {/* Instant 15KB WebP Poster (Zero delay, offline resilient) */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={SERVICE_POSTERS[item.id] || '/images/posters/development.webp'}
+            alt=""
+            aria-hidden="true"
+            className={`${styles.cardPoster} ${isVideoLoaded ? styles.cardPosterFaded : ''}`}
+            loading="lazy"
+            decoding="async"
+          />
+
           {isInView && (
             <video
               ref={(el) => {
@@ -132,6 +154,7 @@ export default function ServiceCard({ item, onClick }: ServiceCardProps) {
               loop
               preload="metadata"
               onPlaying={() => setIsVideoLoaded(true)}
+              onError={() => setIsVideoLoaded(false)}
               disablePictureInPicture
               controls={false}
             />

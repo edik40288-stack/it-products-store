@@ -86,7 +86,25 @@
   -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.9) 10%, black 100%);
 }
 
+.cardPoster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 14px;
+  opacity: 0.9;
+  transition: opacity 0.5s ease;
+  z-index: 1;
+}
+
+.cardPosterFaded {
+  opacity: 0;
+}
+
 .cardVideo {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -95,6 +113,7 @@
   transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform, opacity;
   pointer-events: none;
+  z-index: 2;
 }
 
 .cardVideoLoaded {
@@ -112,6 +131,7 @@
   pointer-events: none;
   background: linear-gradient(to right, rgba(12, 14, 20, 0.92) 0%, rgba(12, 14, 20, 0.2) 25%, transparent 60%);
   border-radius: 14px;
+  z-index: 3;
 }
 
 .cardHovered .visualWrap {
@@ -264,6 +284,15 @@
     opacity: 1 !important;
     mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
+  }
+
+  .cardPoster {
+    border-radius: 20px 20px 0 0;
+    opacity: 1 !important;
+  }
+
+  .cardPosterFaded {
+    opacity: 0 !important;
   }
 
   .cardVideo {

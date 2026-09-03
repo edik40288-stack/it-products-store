@@ -56,7 +56,16 @@ export default function ChatFace({ emotion, isOpen }: ChatFaceProps) {
 
   return (
     <div className={styles.videoFaceContainer}>
-      {/* Fallback golden icon if video is blocked */}
+      {/* Instant 8KB 3D WebP Poster: Zero delay, offline-proof */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={`/images/posters/${emotion === 'diplomat' ? 'bot-business' : emotion === 'pout' ? 'bot-sad' : 'bot-greeting'}.webp`}
+        alt="MINDCORE AI"
+        className={styles.botPoster}
+        loading="eager"
+      />
+
+      {/* Fallback golden icon if video & image blocked */}
       <div className={styles.avatarFallback}>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect width="18" height="12" x="3" y="6" rx="2" />

@@ -62,7 +62,13 @@ export function useAIChat() {
 
     } catch {
       setIsTyping(false);
-      addMessage('assistant', 'Сбой связи с сервером. Пожалуйста, попробуйте еще раз.');
+      const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
+      addMessage(
+        'assistant',
+        isOffline
+          ? (locale === 'ru' ? '⚠️ Прервалось подключение к интернету. Вы можете связаться с нами в Telegram: @mindcore_studio' : '⚠️ Internet connection lost. Reach us on Telegram: @mindcore_studio')
+          : 'Сбой связи с сервером. Пожалуйста, попробуйте еще раз.'
+      );
     }
   }, [addMessage]);
 
@@ -145,7 +151,15 @@ export function useAIChat() {
       if (data.leadCollected) setLeadCollected(true);
     } catch {
       setIsTyping(false);
-      addMessage('assistant', t('error'));
+      const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
+      addMessage(
+        'assistant',
+        isOffline
+          ? (locale === 'ru' 
+              ? '⚠️ Прервалось соединение с интернетом. Вы можете написать напрямую архитектору в Telegram: @mindcore_studio' 
+              : '⚠️ Network connection lost. You can reach out directly via Telegram: @mindcore_studio')
+          : t('error')
+      );
     }
   };
 
