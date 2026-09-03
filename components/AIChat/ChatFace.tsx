@@ -47,8 +47,12 @@ export default function ChatFace({ emotion, isOpen }: ChatFaceProps) {
   }
 
   const isGreetingActive = emotion === 'happy' || emotion === 'idle' || emotion === 'finished';
-  const isBusinessActive = emotion === 'diplomat';
-  const isSadActive = emotion === 'pout';
+  const activeVideoSrc = 
+    emotion === 'diplomat' 
+      ? '/videos/bot-business.mp4' 
+      : emotion === 'pout' 
+        ? '/videos/bot-sad.mp4' 
+        : '/videos/bot-greeting.mp4';
 
   return (
     <div className={styles.videoFaceContainer}>
@@ -60,61 +64,25 @@ export default function ChatFace({ emotion, isOpen }: ChatFaceProps) {
         </svg>
       </div>
 
-      {/* 1. Greeting / Smiling Resting 3D Character */}
+      {/* Single Active 3D Bot Character */}
       <video
+        key={activeVideoSrc}
         ref={(el) => {
-          (greetingRef as any).current = el;
           if (el) {
             el.muted = true;
             el.defaultMuted = true;
             if (el.paused) el.play().catch(() => {});
           }
         }}
-        src="/videos/bot-greeting.mp4#t=0.001"
+        src={`${activeVideoSrc}#t=0.001`}
         muted
         playsInline
         autoPlay
         loop
         preload="auto"
-        className={`${styles.botVideo} ${isGreetingActive ? styles.botVideoActive : ''}`}
-      />
-
-      {/* 2. Business / Diplomat 3D Character */}
-      <video
-        ref={(el) => {
-          (businessRef as any).current = el;
-          if (el) {
-            el.muted = true;
-            el.defaultMuted = true;
-            if (el.paused) el.play().catch(() => {});
-          }
-        }}
-        src="/videos/bot-business.mp4#t=0.001"
-        muted
-        playsInline
-        autoPlay
-        loop
-        preload="auto"
-        className={`${styles.botVideo} ${isBusinessActive ? styles.botVideoActive : ''}`}
-      />
-
-      {/* 3. Pouting / Sad 3D Character */}
-      <video
-        ref={(el) => {
-          (sadRef as any).current = el;
-          if (el) {
-            el.muted = true;
-            el.defaultMuted = true;
-            if (el.paused) el.play().catch(() => {});
-          }
-        }}
-        src="/videos/bot-sad.mp4#t=0.001"
-        muted
-        playsInline
-        autoPlay
-        loop
-        preload="auto"
-        className={`${styles.botVideo} ${isSadActive ? styles.botVideoActive : ''}`}
+        className={`${styles.botVideo} ${styles.botVideoActive}`}
+        disablePictureInPicture
+        controls={false}
       />
 
       {/* Subtle glossy glass ring overlay */}

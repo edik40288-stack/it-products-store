@@ -5,37 +5,16 @@ import { ServiceItem } from '@/types';
 import styles from './ServiceCard.module.css';
 import { useWebGL } from '@/context/WebGLContext';
 
-import CodeVisual from './visuals/CodeVisual';
-import ChatVisual from './visuals/ChatVisual';
-import DashboardVisual from './visuals/DashboardVisual';
-import LLMVisual from './visuals/LLMVisual';
-import GearsVisual from './visuals/GearsVisual';
-import RadarVisual from './visuals/RadarVisual';
-import SplitVisual from './visuals/SplitVisual';
-import ScannerVisual from './visuals/ScannerVisual';
-
-function renderServiceVisual(id: string, isHovered: boolean, mouseX: number, mouseY: number) {
-  switch (id) {
-    case 'development':
-      return <CodeVisual hovered={isHovered} mouseX={mouseX} mouseY={mouseY} />;
-    case 'ai-agents':
-      return <ChatVisual hovered={isHovered} mouseX={mouseX} mouseY={mouseY} />;
-    case 'crm':
-      return <DashboardVisual hovered={isHovered} mouseX={mouseX} mouseY={mouseY} />;
-    case 'llm-integrations':
-      return <LLMVisual hovered={isHovered} mouseX={mouseX} mouseY={mouseY} />;
-    case 'automation':
-      return <GearsVisual hovered={isHovered} mouseX={mouseX} mouseY={mouseY} />;
-    case 'analytics':
-      return <RadarVisual hovered={isHovered} mouseX={mouseX} mouseY={mouseY} />;
-    case 'redesign':
-      return <SplitVisual hovered={isHovered} mouseX={mouseX} mouseY={mouseY} />;
-    case 'security':
-      return <ScannerVisual hovered={isHovered} mouseX={mouseX} mouseY={mouseY} />;
-    default:
-      return <CodeVisual hovered={isHovered} mouseX={mouseX} mouseY={mouseY} />;
-  }
-}
+const SERVICE_VIDEOS: Record<string, string> = {
+  'development': '/videos/development.mp4',
+  'ai-agents': '/videos/ai-agents.mp4',
+  'crm': '/videos/crm.mp4',
+  'llm-integrations': '/videos/llm-api.mp4',
+  'automation': '/videos/automation.mp4',
+  'analytics': '/videos/analytics.mp4',
+  'redesign': '/videos/redesign.mp4',
+  'security': '/videos/security.mp4',
+};
 
 interface ServiceCardProps {
   item: ServiceItem;
@@ -44,39 +23,78 @@ interface ServiceCardProps {
 
 export default function ServiceCard({ item, onClick }: ServiceCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [isInView, setIsInView] = useState(false);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
+  
   const cardRef = useRef<HTMLElement>(null);
-  const { registerCard, unregisterCard, updateCardMouse, setCardHover } = useWebGL();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const webGL = useWebGL();
 
   useEffect(() => {
-    if (cardRef.current) {
-      registerCard(item.id, cardRef.current, item.id);
+    if (cardRef.current && webGL) {
+      webGL.registerCard(item.id, cardRef.current, item.id);
     }
     return () => {
-      unregisterCard(item.id);
+      if (webGL) webGL.unregisterCard(item.id);
     };
-  }, [item.id, registerCard, unregisterCard]);
+  }, [item.id, webGL]);
 
   useEffect(() => {
-    setCardHover(item.id, isHovered);
-  }, [isHovered, item.id, setCardHover]);
+    if (webGL) webGL.setCardHover(item.id, isHovered);
+  }, [isHovered, item.id, webGL]);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
+  // Lazy-load & decode video only when card approaches viewport (250px margin)
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        setIsInView(entries[0].isIntersecting);
+      },
+      { rootMargin: '250px 0px 250px 0px', threshold: 0.02 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // Control video play/pause based on in-view status
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (isInView) {
+      video.muted = true;
+      video.play().catch(() => {});
+    } else {
+      video.pause();
+    }
+  }, [isInView]);
+
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+  }, []);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
-    // Normalized coordinates from 0 to 1
     const relX = (e.clientX - rect.left) / rect.width;
     const relY = (e.clientY - rect.top) / rect.height;
     setMousePos({ x: relX, y: relY });
-    updateCardMouse(item.id, relX, relY, e.clientX, e.clientY);
-  }, [item.id, updateCardMouse]);
+    if (webGL) {
+      webGL.updateCardMouse(item.id, relX, relY, e.clientX, e.clientY);
+    }
+  }, [item.id, webGL]);
 
-  const handleMouseEnter = useCallback(() => setIsHovered(true), []);
-  const handleMouseLeave = useCallback(() => {
-    setIsHovered(false);
-    setMousePos({ x: 0.5, y: 0.5 });
-  }, []);
-  const handleClick = useCallback(() => onClick(item), [item, onClick]);
+  const handleClick = useCallback(() => {
+    onClick(item);
+  }, [item, onClick]);
 
   return (
     <div 
@@ -94,9 +112,31 @@ export default function ServiceCard({ item, onClick }: ServiceCardProps) {
         ref={cardRef}
         className={`${styles.card} ${isHovered ? styles.cardHovered : ''}`}
       >
-        {/* Holographic 3D Visual */}
+        {/* Holographic 3D Visual with Lazy Intersection Loading */}
         <div className={styles.visualWrap}>
-          {renderServiceVisual(item.id, isHovered, mousePos.x, mousePos.y)}
+          {isInView && (
+            <video
+              ref={(el) => {
+                (videoRef as any).current = el;
+                if (el) {
+                  el.muted = true;
+                  el.defaultMuted = true;
+                  if (el.paused) el.play().catch(() => {});
+                }
+              }}
+              src={`${SERVICE_VIDEOS[item.id] || '/videos/development.mp4'}#t=0.001`}
+              className={`${styles.cardVideo} ${isVideoLoaded ? styles.cardVideoLoaded : ''}`}
+              muted
+              playsInline
+              autoPlay
+              loop
+              preload="metadata"
+              onPlaying={() => setIsVideoLoaded(true)}
+              disablePictureInPicture
+              controls={false}
+            />
+          )}
+          <div className={styles.videoOverlay} />
         </div>
 
         <div className={styles.overlay} />
