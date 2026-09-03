@@ -2,6 +2,7 @@
   padding: 8rem 2.5rem 6rem;
   max-width: 1400px;
   margin: 0 auto;
+  scroll-margin-top: 100px;
 }
 
 .header {
@@ -78,7 +79,10 @@
 
 /* Mobile */
 @media (max-width: 768px) {
-  .section { padding: 3.5rem 1.25rem 3rem; }
+  .section { 
+    padding: 5.5rem 1.25rem 3rem; 
+    scroll-margin-top: 85px;
+  }
   .grid {
     display: flex;
     flex-direction: column;

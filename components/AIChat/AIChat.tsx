@@ -128,8 +128,20 @@ export default function AIChat() {
     } finally {
       setIsSubmittingCard(false);
       setIsCardSubmitted(true);
+      addMessage('assistant', isRu 
+        ? `✓ Спецификация принята! Главный архитектор изучит задачу и напишет вам в ${messenger === 'tg' ? 'Telegram' : messenger === 'wa' ? 'WhatsApp' : 'Viber'} в течение 15 минут.` 
+        : `✓ Specification received! Our lead architect will review and contact you via ${messenger.toUpperCase()} within 15 minutes.`
+      );
     }
   };
+
+  // Auto-detect when user confirms in chat that they filled the form
+  useEffect(() => {
+    const lastUser = messages.filter(m => m.role === 'user').slice(-1)[0]?.content?.toLowerCase() || '';
+    if (/(заполнил|заполнила|готово|отправил|отправила|все сделал|done|sent)/i.test(lastUser)) {
+      setIsCardSubmitted(true);
+    }
+  }, [messages]);
 
   // Proactive calling message step: 0 = hidden, 1 = hello, 2 = business, 3 = pout
   const [promptStep, setPromptStep] = useState<number>(0);
@@ -387,27 +399,19 @@ export default function AIChat() {
           ))}
 
           {/* Interactive Project & Lead Card */}
-          {/* Interactive Project & Lead Card */}
           {showLeadCard && (
             isCardSubmitted ? (
-              <div className={styles.marqueeTicker}>
-                <div className={styles.marqueeTrack}>
-                  <div className={styles.marqueeItem}>
-                    <span className={styles.tickerPulseDot} />
-                    <span>
-                      {isRu 
-                        ? `✓ СПЕЦИФИКАЦИЯ ПЕРЕДАНА · ИНЖЕНЕР СВЯЖЕТСЯ В ТЕЧЕНИЕ 15 МИН В ${messenger.toUpperCase()} ·`
-                        : `✓ SPECIFICATION SENT · ENGINEER WILL REPLY IN 15 MIN VIA ${messenger.toUpperCase()} ·`}
-                    </span>
-                  </div>
-                  <div className={styles.marqueeItem}>
-                    <span className={styles.tickerPulseDot} />
-                    <span>
-                      {isRu 
-                        ? `✓ СПЕЦИФИКАЦИЯ ПЕРЕДАНА · ИНЖЕНЕР СВЯЖЕТСЯ В ТЕЧЕНИЕ 15 МИН В ${messenger.toUpperCase()} ·`
-                        : `✓ SPECIFICATION SENT · ENGINEER WILL REPLY IN 15 MIN VIA ${messenger.toUpperCase()} ·`}
-                    </span>
-                  </div>
+              <div className={styles.submittedPill}>
+                <span className={styles.submittedCheck}>✓</span>
+                <div className={styles.submittedContent}>
+                  <p className={styles.submittedTitle}>
+                    {isRu ? 'Спецификация принята архитектором' : 'Specification Received'}
+                  </p>
+                  <p className={styles.submittedSubtitle}>
+                    {isRu 
+                      ? `Изучаем проект. Инженер напишет вам в ${messenger.toUpperCase()} в течение 15 минут.`
+                      : `Lead architect will contact you via ${messenger.toUpperCase()} within 15 minutes.`}
+                  </p>
                 </div>
               </div>
             ) : (
@@ -528,7 +532,7 @@ export default function AIChat() {
             ref={inputRef}
             type="text"
             className={`${styles.input} ${isListening ? styles.inputListening : ''}`}
-            placeholder={isListening ? (isRu ? 'Слушаю ваш голос... 🎙️' : 'Listening... 🎙️') : (isRu ? 'Напишите задачу или скажите голосом...' : 'Type or speak your message...')}
+            placeholder={isListening ? (isRu ? 'Слушаю... 🎙️' : 'Listening... 🎙️') : (isRu ? 'Ваша задача...' : 'Your request...')}
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}

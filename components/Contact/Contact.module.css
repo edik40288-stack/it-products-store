@@ -2,6 +2,7 @@
   padding: 6rem 2.5rem 2rem;
   max-width: 1400px;
   margin: 0 auto;
+  scroll-margin-top: 100px;
 }
 
 .container {
@@ -217,7 +218,10 @@
 }
 
 @media (max-width: 768px) {
-  .section { padding: 4rem 1.25rem 1.5rem; }
-  .container { padding: 3.5rem 1.5rem 2.5rem; }
+  .section { 
+    padding: 6rem 1.25rem 2rem; 
+    scroll-margin-top: 85px;
+  }
+  .container { padding: 2.75rem 1.25rem 2rem; }
   .channelsGrid { grid-template-columns: 1fr; gap: 1rem; }
 }
