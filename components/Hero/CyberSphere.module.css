@@ -26,9 +26,11 @@
 @media (max-width: 900px) {
   .container {
     right: 50%;
-    transform: translate(50%, -20%);
-    width: clamp(250px, 60vw, 400px);
-    opacity: 0.5;
+    top: 50%;
+    transform: translate(50%, -35%);
+    width: clamp(280px, 75vw, 420px);
+    opacity: 0.85;
+    filter: drop-shadow(0 0 35px rgba(0, 240, 255, 0.25));
     pointer-events: none !important;
     touch-action: auto !important;
   }

@@ -739,9 +739,11 @@
     bottom: max(1rem, env(safe-area-inset-bottom, 1rem));
   }
   .callingBubble {
-    max-width: calc(100vw - 2.5rem);
-    right: 0.5rem;
-    bottom: 5.25rem;
+    max-width: 250px;
+    right: 0;
+    bottom: calc(100% + 12px);
+    padding: 10px 14px;
+    border-radius: 16px 16px 4px 16px;
   }
   .inputArea {
     padding: 0.65rem 0.75rem max(0.65rem, env(safe-area-inset-bottom, 0.65rem));
