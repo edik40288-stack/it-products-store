@@ -387,25 +387,12 @@ export default function AIChat() {
         <div className={styles.header}>
           <div className={styles.avatarWrap}>
             <div className={styles.avatar}>
-              <video
-                ref={(el) => {
-                  if (el) {
-                    el.muted = true;
-                    el.defaultMuted = true;
-                    if (el.paused) el.play().catch(() => {});
-                  }
-                }}
-                src="/videos/bot-greeting.mp4#t=0.001"
-                muted
-                playsInline
-                autoPlay
-                loop
-                preload="auto"
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/anim/bot-greeting.webp"
+                alt="MINDCORE AI"
                 className={styles.headerBotVideo}
-                onLoadedData={(e) => {
-                  e.currentTarget.muted = true;
-                  e.currentTarget.play().catch(() => {});
-                }}
+                loading="eager"
               />
               <div className={styles.avatarFallback}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

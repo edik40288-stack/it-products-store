@@ -32,15 +32,23 @@ export default function CyberSphere({
     const container = containerRef.current;
     if (!canvas || !container) return;
 
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
     // ─── RENDERER ───
     const renderer = new THREE.WebGLRenderer({
       canvas,
       alpha: true,
-      antialias: true,
+      antialias: !isMobile,
       powerPreference: 'high-performance',
     });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(isMobile ? 1.0 : Math.min(window.devicePixelRatio, 1.5));
     renderer.setClearColor(0x000000, 0);
+
+    let isVisible = true;
+    const observer = new IntersectionObserver(([entry]) => {
+      isVisible = entry.isIntersecting;
+    }, { threshold: 0.05 });
+    observer.observe(container);
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
@@ -313,6 +321,7 @@ export default function CyberSphere({
 
     const animate = () => {
       rafId = requestAnimationFrame(animate);
+      if (!isVisible) return;
       const delta = Math.min(clock.getDelta(), 0.1);
       const time = clock.getElapsedTime();
       const props = propsRef.current;
@@ -408,6 +417,7 @@ export default function CyberSphere({
       window.removeEventListener('pointercancel', onPointerUp);
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(rafId);
+      observer.disconnect();
 
       renderer.dispose();
       geo.dispose();
