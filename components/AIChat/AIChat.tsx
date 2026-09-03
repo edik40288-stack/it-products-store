@@ -202,6 +202,26 @@ export default function AIChat() {
     return () => document.removeEventListener('open-ai-chat', handler);
   }, [setIsOpen]);
 
+  // Lock background scroll on mobile/desktop when chat panel is open
+  useEffect(() => {
+    if (isOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+    } else {
+      const scrollY = document.body.style.top;
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
+    }
+  }, [isOpen]);
+
   // Prompt messages
   const getPromptText = () => {
     if (promptStep === 1) {
@@ -245,7 +265,7 @@ export default function AIChat() {
 
   return (
     <>
-      <div className={styles.triggerWrap}>
+      <div className={`${styles.triggerWrap} ${isOpen ? styles.triggerWrapHidden : ''}`}>
         {/* Proactive Calling Message Cloud */}
         {promptStep > 0 && !isOpen && (
           <div 
