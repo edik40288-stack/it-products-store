@@ -241,7 +241,13 @@
   transform: translateX(0) translateZ(0);
 }
 
-@media (max-width: 768px) {
+@media (hover: none), (max-width: 768px) {
+  .cardWrapper {
+    z-index: 1 !important;
+  }
+  .cardWrapper:hover {
+    z-index: 1 !important;
+  }
   .card {
     display: flex;
     flex-direction: column;
@@ -249,6 +255,14 @@
     border-radius: 20px;
     background: rgba(14, 16, 24, 0.75);
     border: 1px solid rgba(255, 255, 255, 0.09);
+    transform: none !important;
+    transition: border-color 0.25s ease !important;
+  }
+
+  .card:hover,
+  .cardHovered {
+    transform: none !important;
+    z-index: 1 !important;
   }
 
   .visualWrap {

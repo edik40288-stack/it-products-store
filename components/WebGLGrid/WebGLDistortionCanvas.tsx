@@ -11,6 +11,18 @@ export default function WebGLDistortionCanvas() {
   useEffect(() => {
     if (!canvasRef.current) return;
 
+    // Disable WebGL mesh distortion on touch devices:
+    // Touch scrolling compositor lags behind requestAnimationFrame, causing severe jitter/jumping
+    const isTouch = typeof window !== 'undefined' && 
+      ('ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth < 1024);
+
+    if (isTouch) {
+      if (canvasRef.current) {
+        canvasRef.current.style.display = 'none';
+      }
+      return;
+    }
+
     // 1. Setup Three.js
     const renderer = new THREE.WebGLRenderer({
       canvas: canvasRef.current,

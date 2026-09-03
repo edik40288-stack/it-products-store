@@ -77,13 +77,14 @@
 }
 
 /* Mobile */
-@media (max-width: 640px) {
-  .section { padding: 4rem 1.25rem 3rem; }
+@media (max-width: 768px) {
+  .section { padding: 3.5rem 1.25rem 3rem; }
   .grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
   }
   .grid > * {
-    grid-column: 1 / -1 !important;
+    width: 100% !important;
   }
 }
