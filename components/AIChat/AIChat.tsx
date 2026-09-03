@@ -234,6 +234,60 @@ export default function AIChat() {
     }
   }, [isOpen]);
 
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // Sync mobile chat panel with iOS visualViewport when virtual keyboard opens/closes
+  useEffect(() => {
+    if (!isOpen || typeof window === 'undefined') return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const handleVisualViewportChange = () => {
+      const panel = panelRef.current;
+      if (!panel) return;
+      if (window.innerWidth <= 768) {
+        panel.style.height = `${vv.height}px`;
+        panel.style.top = `${vv.offsetTop}px`;
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        panel.style.height = '';
+        panel.style.top = '';
+      }
+    };
+
+    vv.addEventListener('resize', handleVisualViewportChange);
+    vv.addEventListener('scroll', handleVisualViewportChange);
+    handleVisualViewportChange();
+
+    return () => {
+      vv.removeEventListener('resize', handleVisualViewportChange);
+      vv.removeEventListener('scroll', handleVisualViewportChange);
+      if (panelRef.current) {
+        panelRef.current.style.height = '';
+        panelRef.current.style.top = '';
+      }
+    };
+  }, [isOpen]);
+
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    e.target.style.height = 'auto';
+    e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
+  };
+
+  const handleSend = () => {
+    sendMessage();
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto';
+    }
+  };
+
+  const handleInputFocus = () => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 150);
+  };
+
   // Prompt messages
   const getPromptText = () => {
     if (promptStep === 1) {
@@ -320,6 +374,7 @@ export default function AIChat() {
 
       {/* Chat panel */}
       <div 
+        ref={panelRef}
         className={`${styles.panel} ${isOpen ? styles.panelOpen : ''}`} 
         role="complementary" 
         aria-label="AI Chat Assistant"
@@ -528,19 +583,20 @@ export default function AIChat() {
             )}
           </button>
 
-          <input
+          <textarea
             ref={inputRef}
-            type="text"
+            rows={1}
             className={`${styles.input} ${isListening ? styles.inputListening : ''}`}
             placeholder={isListening ? (isRu ? 'Слушаю... 🎙️' : 'Listening... 🎙️') : (isRu ? 'Ваша задача...' : 'Your request...')}
             value={input}
-            onChange={e => setInput(e.target.value)}
+            onChange={handleTextareaChange}
             onKeyDown={handleKeyDown}
+            onFocus={handleInputFocus}
             disabled={isTyping}
           />
           <button
             className={styles.sendBtn}
-            onClick={sendMessage}
+            onClick={handleSend}
             disabled={isTyping || !input.trim()}
             aria-label={t('send')}
           >

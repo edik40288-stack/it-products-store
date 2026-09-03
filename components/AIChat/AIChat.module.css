@@ -738,6 +738,7 @@
 /* Input */
 .inputArea {
   display: flex;
+  align-items: flex-end;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -753,8 +754,15 @@
   padding: 0.65rem 0.95rem;
   color: #fff;
   font-family: inherit;
-  font-size: 0.84rem;
+  font-size: 0.88rem;
+  line-height: 1.4;
   outline: none;
+  resize: none;
+  overflow-y: auto;
+  min-height: 40px;
+  max-height: 120px;
+  word-break: break-word;
+  white-space: pre-wrap;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
@@ -815,18 +823,20 @@
     flex-direction: column !important;
     background: #080a12 !important;
     box-shadow: none !important;
+    overscroll-behavior: contain !important;
   }
 
   .header {
     padding: max(0.85rem, env(safe-area-inset-top)) 1rem 0.85rem;
     border-radius: 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(12, 14, 22, 0.96);
+    background: rgba(12, 14, 22, 0.98);
     flex-shrink: 0;
   }
 
   .messages {
-    flex: 1;
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
@@ -838,18 +848,21 @@
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 0.75rem 0.85rem max(0.75rem, env(safe-area-inset-bottom));
+    padding: 0.65rem 0.85rem max(0.65rem, env(safe-area-inset-bottom));
     background: #0a0c16;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     z-index: 10;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     gap: 0.5rem;
+    flex-shrink: 0;
   }
 
   .input {
     font-size: 16px; /* Prevents iOS Safari auto-zoom */
     padding: 0.65rem 0.85rem;
+    min-height: 42px;
+    max-height: 100px;
   }
 
   .sendBtn {

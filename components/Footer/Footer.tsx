@@ -9,20 +9,8 @@ export default function Footer() {
 
   return (
     <footer className={styles.footer}>
-      {/* Background video */}
-      <div className={styles.videoBg} aria-hidden="true">
-        <div className={styles.videoOverlay} />
-        <video
-          className={styles.video}
-          autoPlay
-          muted
-          loop
-          playsInline
-          poster="/video/footer-poster.jpg"
-        >
-          <source src="/video/footer-bg.mp4" type="video/mp4" />
-        </video>
-      </div>
+      {/* Background ambient glow */}
+      <div className={styles.ambientGlow} aria-hidden="true" />
 
       <div className={styles.content}>
         {/* Main slogan */}

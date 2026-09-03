@@ -14,7 +14,7 @@ export function useAIChat() {
   const [isPulsing, setIsPulsing] = useState(true);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const addMessage = useCallback((role: 'user' | 'assistant', content: string) => {
     setMessages(prev => [...prev, { role, content, id: Date.now().toString() }]);
@@ -163,7 +163,7 @@ export function useAIChat() {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
