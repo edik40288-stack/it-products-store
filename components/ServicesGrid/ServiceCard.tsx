@@ -123,42 +123,29 @@ export default function ServiceCard({ item, onClick }: ServiceCardProps) {
         ref={cardRef}
         className={`${styles.card} ${isHovered ? styles.cardHovered : ''}`}
       >
-        {/* Holographic 3D Visual with Instant Offline Poster & Lazy Video */}
+        {/* Holographic 3D Visual with native poster & autoplay */}
         <div className={styles.visualWrap}>
-          {/* Instant 15KB WebP Poster (Zero delay, offline resilient) */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={SERVICE_POSTERS[item.id] || '/images/posters/development.webp'}
-            alt=""
-            aria-hidden="true"
-            className={`${styles.cardPoster} ${isVideoLoaded ? styles.cardPosterFaded : ''}`}
-            loading="lazy"
-            decoding="async"
-          />
-
-          {isInView && (
-            <video
-              ref={(el) => {
-                (videoRef as any).current = el;
-                if (el) {
-                  el.muted = true;
-                  el.defaultMuted = true;
-                  if (el.paused) el.play().catch(() => {});
+          <video
+            ref={(el) => {
+              if (el) {
+                el.muted = true;
+                el.defaultMuted = true;
+                if (el.paused) {
+                  el.play().catch(() => {});
                 }
-              }}
-              src={`${SERVICE_VIDEOS[item.id] || '/videos/development.mp4'}#t=0.001`}
-              className={`${styles.cardVideo} ${isVideoLoaded ? styles.cardVideoLoaded : ''}`}
-              muted
-              playsInline
-              autoPlay
-              loop
-              preload="metadata"
-              onPlaying={() => setIsVideoLoaded(true)}
-              onError={() => setIsVideoLoaded(false)}
-              disablePictureInPicture
-              controls={false}
-            />
-          )}
+              }
+            }}
+            src={`${SERVICE_VIDEOS[item.id] || '/videos/development.mp4'}#t=0.001`}
+            poster={SERVICE_POSTERS[item.id] || '/images/posters/development.webp'}
+            className={styles.cardVideo}
+            muted
+            playsInline
+            autoPlay
+            loop
+            preload="auto"
+            disablePictureInPicture
+            controls={false}
+          />
           <div className={styles.videoOverlay} />
         </div>
 
