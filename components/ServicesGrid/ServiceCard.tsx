@@ -16,6 +16,17 @@ const SERVICE_ANIMS: Record<string, string> = {
   'security': '/images/anim/security.webp',
 };
 
+const SERVICE_POSTERS: Record<string, string> = {
+  'development': '/images/posters/development.webp',
+  'ai-agents': '/images/posters/ai-agents.webp',
+  'crm': '/images/posters/crm.webp',
+  'llm-integrations': '/images/posters/llm-api.webp',
+  'automation': '/images/posters/automation.webp',
+  'analytics': '/images/posters/analytics.webp',
+  'redesign': '/images/posters/redesign.webp',
+  'security': '/images/posters/security.webp',
+};
+
 interface ServiceCardProps {
   item: ServiceItem;
   onClick: (item: ServiceItem) => void;
@@ -82,13 +93,23 @@ export default function ServiceCard({ item, onClick }: ServiceCardProps) {
       >
         {/* Holographic 3D Animated Visual (100% immune to iOS Low Power Mode play button) */}
         <div className={styles.visualWrap}>
+          {/* Instant crisp static poster: zero delay, no black flashes */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={SERVICE_POSTERS[item.id] || '/images/posters/development.webp'}
+            alt=""
+            aria-hidden="true"
+            className={styles.cardPoster}
+            loading="eager"
+            decoding="async"
+          />
+          {/* Animated visual: runs at 24fps */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={SERVICE_ANIMS[item.id] || '/images/anim/development.webp'}
             alt=""
             aria-hidden="true"
             className={styles.cardVideo}
-            loading="lazy"
             decoding="async"
           />
           <div className={styles.videoOverlay} />

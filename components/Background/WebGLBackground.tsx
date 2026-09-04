@@ -14,13 +14,16 @@ export default function WebGLBackground() {
   useEffect(() => {
     if (!mountRef.current) return;
 
+    // Completely disable full-screen WebGL shader on mobile/touch to eliminate lag and stutter
+    const isMobile = typeof window !== 'undefined' && 
+      (window.innerWidth < 768 || 'ontouchstart' in window || navigator.maxTouchPoints > 0);
+    if (isMobile) return;
+
     // Scene setup
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
     const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: "high-performance" });
     
-    // Crucial performance fix: hardcap pixel ratio at a lower value to fix lag
-    // Using 0.5 or 0.25 drastically reduces fragment shader load on full screen
     renderer.setPixelRatio(0.35); 
     renderer.setSize(window.innerWidth, window.innerHeight);
     mountRef.current.appendChild(renderer.domElement);
@@ -60,11 +63,16 @@ export default function WebGLBackground() {
     };
     window.addEventListener('resize', handleResize, { passive: true });
 
-    // Intersection observer to pause rendering when scrolled past hero
+    // Observe #hero instead of fixed container to actually pause offscreen!
     const observer = new IntersectionObserver((entries) => {
       isVisible.current = entries[0].isIntersecting;
     });
-    observer.observe(mountRef.current);
+    const heroEl = document.getElementById('hero');
+    if (heroEl) {
+      observer.observe(heroEl);
+    } else {
+      observer.observe(mountRef.current);
+    }
 
     // Animation loop
     let frameId: number;

@@ -28,7 +28,9 @@ export default function AIChat() {
     dynamicCardConfig,
     initialQuery,
     addMessage,
-    setIsTyping
+    setIsTyping,
+    leadContext,
+    setLeadContext
   } = useAIChat();
 
   // Voice Input Speech Recognition state
@@ -117,6 +119,8 @@ export default function AIChat() {
       conversationHistory: messages.map(m => ({ role: m.role, text: m.content }))
     };
 
+    setLeadContext(cardData);
+
     try {
       await fetch('/api/chat', {
         method: 'POST',
@@ -128,10 +132,21 @@ export default function AIChat() {
     } finally {
       setIsSubmittingCard(false);
       setIsCardSubmitted(true);
+      setShowLeadCard(false);
+
+      const mName = messenger === 'tg' ? 'Telegram' : messenger === 'wa' ? 'WhatsApp' : 'Viber';
       addMessage('assistant', isRu 
-        ? `✓ Спецификация принята! Главный архитектор изучит задачу и напишет вам в ${messenger === 'tg' ? 'Telegram' : messenger === 'wa' ? 'WhatsApp' : 'Viber'} в течение 15 минут.` 
-        : `✓ Specification received! Our lead architect will review and contact you via ${messenger.toUpperCase()} within 15 minutes.`
+        ? `✓ Данные переданы ведущему архитектору! Инженер уже изучает проект и свяжется с вами в ${mName} в течение 15 минут.` 
+        : `✓ Project details sent to lead architect! Our engineer is reviewing and will contact you via ${mName} within 15 minutes.`
       );
+
+      // Follow up with gentle, conversational discovery question:
+      setTimeout(() => {
+        addMessage('assistant', isRu
+          ? `А пока технари изучают проект, можно уточню пару моментов для лучшего результата: какая у вас ниша и что сейчас больше всего напрягает в процессах прямо сейчас?`
+          : `While our engineers review your project, may I ask: what is your industry/niche, and what is currently the biggest operational bottleneck in your business?`
+        );
+      }, 1200);
     }
   };
 

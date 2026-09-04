@@ -155,7 +155,7 @@ export default function CyberSphere({
     ringsGroup.add(ring2);
 
     // ─── 3. PARTICLE CLOUD (Inside Master Group so it rotates with sphere) ───
-    const particleCount = 380;
+    const particleCount = isMobile ? 100 : 380;
     const pPositions = new Float32Array(particleCount * 3);
     const pBaseRadii = new Float32Array(particleCount);
     const pSpeeds = new Float32Array(particleCount);
@@ -255,6 +255,8 @@ export default function CyberSphere({
 
     // ─── POINTER / DRAG LISTENERS ───
     const onPointerDown = (e: PointerEvent) => {
+      // NEVER hijack pointer or scroll on mobile/touch screens
+      if (isMobile || e.pointerType === 'touch') return;
       isDragging = true;
       lastPointerX = e.clientX;
       lastPointerY = e.clientY;
@@ -336,16 +338,11 @@ export default function CyberSphere({
 
       // 2. Physics & Drag Momentum
       if (!isDragging) {
-        // Apply friction to momentum
+        // Apply friction to user momentum
         sphereRotY += velocityX;
         sphereRotX += velocityY;
         velocityX *= 0.93;
         velocityY *= 0.93;
-
-        // Base continuous ambient planetary rotation
-        sphereRotY += delta * 0.25;
-        sphereRotX += delta * 0.08;
-        sphereRotZ += delta * 0.05;
       }
 
       // Parallax mouse tilt
@@ -360,10 +357,10 @@ export default function CyberSphere({
       currentParallaxX += (targetParallaxX - currentParallaxX) * 0.08;
       currentParallaxY += (targetParallaxY - currentParallaxY) * 0.08;
 
-      // Apply master orientation
-      masterSphere.rotation.x = sphereRotX + currentParallaxX;
-      masterSphere.rotation.y = sphereRotY + currentParallaxY;
-      masterSphere.rotation.z = sphereRotZ;
+      // Apply master orientation - continuous time-based rotation eliminates stuttering/jitter
+      masterSphere.rotation.x = time * 0.1 + sphereRotX + currentParallaxX;
+      masterSphere.rotation.y = time * 0.25 + sphereRotY + currentParallaxY;
+      masterSphere.rotation.z = time * 0.04 + sphereRotZ;
 
       // Idle levitation
       masterSphere.position.y = Math.sin(time * 1.5) * 0.08;

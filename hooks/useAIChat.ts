@@ -30,6 +30,7 @@ export function useAIChat() {
     niche?: string;
     serviceType?: string;
   }>({});
+  const [leadContext, setLeadContext] = useState<any>(null);
 
   const sendQueryDirectly = useCallback(async (text: string) => {
     addMessage('user', text);
@@ -135,6 +136,7 @@ export function useAIChat() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: history.map(({ role, content }) => ({ role, content })),
+          leadContext: leadContext || undefined,
         }),
         signal: controller.signal
       });
@@ -189,6 +191,8 @@ export function useAIChat() {
     dynamicCardConfig,
     initialQuery,
     addMessage,
-    sendQueryDirectly
+    sendQueryDirectly,
+    leadContext,
+    setLeadContext
   };
 }
