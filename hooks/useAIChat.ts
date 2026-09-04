@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Message } from '@/types';
-import { CHAT_GREETING_EN, CHAT_GREETING_RU } from '@/data/constants';
+import { CHAT_GREETING_EN, CHAT_GREETING_RU, CHAT_GREETING_RO } from '@/data/constants';
 import { useLocale, useTranslations } from 'next-intl';
 
 export function useAIChat() {
@@ -20,7 +20,7 @@ export function useAIChat() {
     setMessages(prev => [...prev, { role, content, id: Date.now().toString() }]);
   }, []);
 
-  const greeting = locale === 'ru' ? CHAT_GREETING_RU : CHAT_GREETING_EN;
+  const greeting = locale === 'ru' ? CHAT_GREETING_RU : locale === 'ro' ? CHAT_GREETING_RO : CHAT_GREETING_EN;
   const hasEventOpenedRef = useRef(false);
   const [showLeadCard, setShowLeadCard] = useState(false);
   const [initialQuery, setInitialQuery] = useState('');
@@ -45,6 +45,7 @@ export function useAIChat() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [{ role: 'user', content: text }],
+          locale: locale || 'en'
         }),
         signal: controller.signal
       });
@@ -67,11 +68,19 @@ export function useAIChat() {
       addMessage(
         'assistant',
         isOffline
-          ? (locale === 'ru' ? '⚠️ Прервалось подключение к интернету. Вы можете связаться с нами в Telegram: @mindcore_studio' : '⚠️ Internet connection lost. Reach us on Telegram: @mindcore_studio')
-          : 'Сбой связи с сервером. Пожалуйста, попробуйте еще раз.'
+          ? (locale === 'ru' 
+              ? '⚠️ Прервалось подключение к интернету. Вы можете связаться с нами в Telegram: @mindcore_studio' 
+              : locale === 'ro'
+              ? '⚠️ Conexiunea la internet s-a întrerupt. Ne puteți contacta pe Telegram: @mindcore_studio'
+              : '⚠️ Internet connection lost. Reach us on Telegram: @mindcore_studio')
+          : (locale === 'ru'
+              ? 'Сбой связи с сервером. Пожалуйста, попробуйте еще раз.'
+              : locale === 'ro'
+              ? 'Eroare de conexiune cu serverul. Vă rugăm să încercați din nou.'
+              : 'Server communication error. Please try again.')
       );
     }
-  }, [addMessage]);
+  }, [addMessage, locale]);
 
   // Open chat via event
   useEffect(() => {
@@ -137,6 +146,7 @@ export function useAIChat() {
         body: JSON.stringify({
           messages: history.map(({ role, content }) => ({ role, content })),
           leadContext: leadContext || undefined,
+          locale: locale || 'en'
         }),
         signal: controller.signal
       });
@@ -159,6 +169,8 @@ export function useAIChat() {
         isOffline
           ? (locale === 'ru' 
               ? '⚠️ Прервалось соединение с интернетом. Вы можете написать напрямую архитектору в Telegram: @mindcore_studio' 
+              : locale === 'ro'
+              ? '⚠️ Conexiunea la internet s-a întrerupt. Puteți scrie direct arhitectului pe Telegram: @mindcore_studio'
               : '⚠️ Network connection lost. You can reach out directly via Telegram: @mindcore_studio')
           : t('error')
       );

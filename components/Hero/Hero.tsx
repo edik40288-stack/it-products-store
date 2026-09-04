@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import styles from './Hero.module.css';
 import CyberSphere from './CyberSphere';
 
@@ -9,6 +9,7 @@ const TOPIC_COLORS = ['#00F0FF', '#00FF9D', '#B534FF'];
 
 export default function Hero() {
   const t = useTranslations('hero');
+  const locale = useLocale();
   
   const TOPICS = useMemo(() => [
     { text: t('topic0'), color: TOPIC_COLORS[0] },
@@ -186,7 +187,7 @@ export default function Hero() {
                 <input
                   ref={inputRef}
                   type="text"
-                  placeholder={isMobile ? 'Сайт или задача...' : t('placeholder')}
+                  placeholder={isMobile ? (locale === 'ru' ? 'Сайт или задача...' : locale === 'ro' ? 'Site sau proiect...' : 'Website or project...') : t('placeholder')}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onFocus={() => setIsInputFocused(true)}

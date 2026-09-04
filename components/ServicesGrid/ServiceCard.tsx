@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useState, useRef, useEffect } from 'react';
+import { useLocale } from 'next-intl';
 import { ServiceItem } from '@/types';
 import styles from './ServiceCard.module.css';
 import { useWebGL } from '@/context/WebGLContext';
@@ -33,6 +34,7 @@ interface ServiceCardProps {
 }
 
 export default function ServiceCard({ item, onClick }: ServiceCardProps) {
+  const locale = useLocale();
   const [isHovered, setIsHovered] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
   
@@ -128,7 +130,9 @@ export default function ServiceCard({ item, onClick }: ServiceCardProps) {
           <p className={styles.subtitle}>{item.subtitle}</p>
           <div className={styles.footer}>
             <span className={styles.duration}>⏱ {item.duration}</span>
-            <span className={styles.cta}>Explore →</span>
+            <span className={styles.cta}>
+              {locale === 'ru' ? 'Подробнее →' : locale === 'ro' ? 'Detalii →' : 'Explore →'}
+            </span>
           </div>
         </div>
       </article>

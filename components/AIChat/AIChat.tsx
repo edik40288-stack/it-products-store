@@ -10,6 +10,7 @@ export default function AIChat() {
   const t = useTranslations('chat');
   const locale = useLocale();
   const isRu = locale === 'ru';
+  const isRo = locale === 'ro';
 
   const {
     isOpen,
@@ -76,7 +77,13 @@ export default function AIChat() {
 
   const toggleListening = () => {
     if (!recognitionRef.current) {
-      alert(locale === 'ru' ? 'Голосовой ввод не поддерживается в этом браузере. Рекомендуем Google Chrome или Safari.' : 'Voice input is not supported in this browser. Please use Chrome or Safari.');
+      alert(
+        locale === 'ru' 
+          ? 'Голосовой ввод не поддерживается в этом браузере. Рекомендуем Google Chrome или Safari.' 
+          : locale === 'ro'
+          ? 'Introducerea vocală nu este suportată în acest browser. Vă recomandăm Chrome sau Safari.'
+          : 'Voice input is not supported in this browser. Please use Chrome or Safari.'
+      );
       return;
     }
 
@@ -128,12 +135,13 @@ export default function AIChat() {
         body: JSON.stringify({
           name: cardName.trim(),
           contact: cardContact.trim(),
-          messenger
+          messenger,
+          locale
         }),
       });
       const valData = await valRes.json();
       if (!valData.valid) {
-        setCardError(valData.error || (isRu ? 'Укажите реальный контакт для связи' : 'Please provide a valid contact'));
+        setCardError(valData.error || (isRu ? 'Укажите реальный контакт для связи' : isRo ? 'Indicați un contact real pentru legătură' : 'Please provide a valid contact'));
         setIsSubmittingCard(false);
         return;
       }
@@ -141,7 +149,7 @@ export default function AIChat() {
       console.warn('Validation error:', err);
     }
 
-    const finalDescription = cardDescription.trim() || initialQuery || input || 'Не указано';
+    const finalDescription = cardDescription.trim() || initialQuery || input || (isRu ? 'Не указано' : isRo ? 'Nespecificat' : 'Not specified');
     const cardData = {
       clientName: cardName.trim(),
       company: cardCompany.trim(),
@@ -158,7 +166,7 @@ export default function AIChat() {
       await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'lead_card', cardData }),
+        body: JSON.stringify({ type: 'lead_card', cardData, locale }),
       });
     } catch (err) {
       console.error(err);
@@ -171,6 +179,8 @@ export default function AIChat() {
       const mName = messenger === 'tg' ? 'Telegram' : messenger === 'wa' ? 'WhatsApp' : 'Viber';
       addMessage('assistant', isRu 
         ? `✓ Данные переданы ведущему архитектору! Инженер уже изучает проект и свяжется с вами в ${mName} в течение 24 часов.` 
+        : isRo
+        ? `✓ Detaliile au fost transmise arhitectului șef! Inginerul analizează proiectul și vă va contacta pe ${mName} în decurs de 24 de ore.`
         : `✓ Project details sent to lead architect! Our engineer is reviewing and will contact you via ${mName} within 24 hours.`
       );
 
@@ -178,6 +188,8 @@ export default function AIChat() {
       setTimeout(() => {
         addMessage('assistant', isRu
           ? `А пока технари изучают проект, можно уточню пару моментов для лучшего результата: какая у вас ниша и что сейчас больше всего напрягает в процессах прямо сейчас?`
+          : isRo
+          ? `În timp ce echipa tehnică analizează proiectul, aș putea preciza câteva detalii: care este domeniul afacerii și ce procese operaționale vă creează cele mai mari bătăi de cap în prezent?`
           : `While our engineers review your project, may I ask: what is your industry/niche, and what is currently the biggest operational bottleneck in your business?`
         );
       }, 1200);
@@ -187,7 +199,7 @@ export default function AIChat() {
   // Auto-detect when user confirms in chat that they filled the form
   useEffect(() => {
     const lastUser = messages.filter(m => m.role === 'user').slice(-1)[0]?.content?.toLowerCase() || '';
-    if (/(заполнил|заполнила|готово|отправил|отправила|все сделал|done|sent)/i.test(lastUser)) {
+    if (/(заполнил|заполнила|готово|отправил|отправила|все сделал|done|sent|trimis|gata|completat)/i.test(lastUser)) {
       setIsCardSubmitted(true);
     }
   }, [messages]);
@@ -427,7 +439,13 @@ export default function AIChat() {
             onClick={handleOpenChat}
             role="button"
             tabIndex={0}
-            title={locale === 'ru' ? 'Нажмите, чтобы открыть чат' : 'Click to start chat'}
+            title={
+              locale === 'ru' 
+                ? 'Нажмите, чтобы открыть чат' 
+                : locale === 'ro'
+                ? 'Apăsați pentru a deschide chatul'
+                : 'Click to start chat'
+            }
           >
             <span className={styles.bubbleDot} />
             <span className={styles.bubbleText}>
@@ -530,11 +548,13 @@ export default function AIChat() {
                 <span className={styles.submittedCheck}>✓</span>
                 <div className={styles.submittedContent}>
                   <p className={styles.submittedTitle}>
-                    {isRu ? 'Спецификация принята архитектором' : 'Specification Received'}
+                    {isRu ? 'Спецификация принята архитектором' : isRo ? 'Specificația a fost primită de arhitect' : 'Specification Received'}
                   </p>
                   <p className={styles.submittedSubtitle}>
                     {isRu 
                       ? `Изучаем проект. Инженер напишет вам в ${messenger.toUpperCase()} в течение 24 часов.`
+                      : isRo
+                      ? `Analizăm proiectul. Inginerul vă va contacta pe ${messenger.toUpperCase()} în decurs de 24 de ore.`
                       : `Lead architect will contact you via ${messenger.toUpperCase()} within 24 hours.`}
                   </p>
                 </div>
@@ -542,13 +562,19 @@ export default function AIChat() {
             ) : (
               <div className={styles.leadCard}>
                 <div className={styles.leadCardHeader}>
-                  <span className={styles.leadCardBadge}>{isRu ? 'Спецификация для архитектора' : 'Architecture Specification'}</span>
-                  <span className={styles.leadCardDot}>● {isRu ? 'Текстовая связь' : 'Text-only'}</span>
+                  <span className={styles.leadCardBadge}>
+                    {isRu ? 'Спецификация для архитектора' : isRo ? 'Specificație pentru arhitect' : 'Architecture Specification'}
+                  </span>
+                  <span className={styles.leadCardDot}>
+                    ● {isRu ? 'Текстовая связь' : isRo ? 'Doar mesaje' : 'Text-only'}
+                  </span>
                 </div>
 
                 <form onSubmit={handleCardSubmit} className={styles.leadCardForm}>
                   <div>
-                    <label className={styles.leadCardLabel}>{isRu ? 'Куда отправить расчет архитектуры' : 'Where to send the architecture plan'}</label>
+                    <label className={styles.leadCardLabel}>
+                      {isRu ? 'Куда отправить расчет архитектуры' : isRo ? 'Unde să trimitem planul de arhitectură' : 'Where to send the architecture plan'}
+                    </label>
                     <div className={styles.leadCardTabs}>
                       {[
                         { id: 'tg', label: 'Telegram' },
@@ -580,14 +606,14 @@ export default function AIChat() {
                           setCardName(e.target.value);
                           if (cardError) setCardError(null);
                         }}
-                        placeholder={isRu ? 'Имя и фамилия *' : 'Full Name *'}
+                        placeholder={isRu ? 'Имя и фамилия *' : isRo ? 'Nume și prenume *' : 'Full Name *'}
                         className={styles.leadCardInput}
                       />
                       <input
                         type="text"
                         value={cardCompany}
                         onChange={(e) => setCardCompany(e.target.value)}
-                        placeholder={isRu ? 'Компания / Ниша' : 'Company / Niche'}
+                        placeholder={isRu ? 'Компания / Ниша' : isRo ? 'Companie / Nișă' : 'Company / Niche'}
                         className={styles.leadCardInput}
                       />
                     </div>
@@ -601,10 +627,10 @@ export default function AIChat() {
                       }}
                       placeholder={
                         messenger === 'tg'
-                          ? (isRu ? '@username или номер в Telegram *' : '@username or Telegram number *')
+                          ? (isRu ? '@username или номер в Telegram *' : isRo ? '@username sau număr Telegram *' : '@username or Telegram number *')
                           : messenger === 'wa'
-                          ? (isRu ? 'Номер для WhatsApp *' : 'WhatsApp Number *')
-                          : (isRu ? 'Номер для Viber *' : 'Viber Number *')
+                          ? (isRu ? 'Номер для WhatsApp *' : isRo ? 'Număr WhatsApp *' : 'WhatsApp Number *')
+                          : (isRu ? 'Номер для Viber *' : isRo ? 'Număr Viber *' : 'Viber Number *')
                       }
                       className={styles.leadCardInput}
                     />
@@ -612,7 +638,13 @@ export default function AIChat() {
                       rows={2}
                       value={cardDescription}
                       onChange={(e) => setCardDescription(e.target.value)}
-                      placeholder={isRu ? 'Описание задачи (какой сайт, бот, проект или ссылка)' : 'Project description (website, bot, system or link)'}
+                      placeholder={
+                        isRu 
+                          ? 'Описание задачи (какой сайт, бот, проект или ссылка)' 
+                          : isRo 
+                          ? 'Descrierea proiectului (site, bot, sistem sau link)' 
+                          : 'Project description (website, bot, system or link)'
+                      }
                       className={styles.leadCardTextarea}
                     />
                   </div>
@@ -634,11 +666,15 @@ export default function AIChat() {
                       className={styles.leadCardSubmitBtn}
                     >
                       {isSubmittingCard 
-                        ? (isRu ? 'Проверка и отправка...' : 'Checking and sending...') 
-                        : (isRu ? 'Передать задачу инженеру →' : 'Send to Engineer →')}
+                        ? (isRu ? 'Проверка и отправка...' : isRo ? 'Verificare și trimitere...' : 'Checking and sending...') 
+                        : (isRu ? 'Передать задачу инженеру →' : isRo ? 'Trimite sarcina inginerului →' : 'Send to Engineer →')}
                     </button>
                     <div className={styles.leadCardDisclaimer}>
-                      {isRu ? 'Пишем только в мессенджер. Без холодных звонков.' : 'We only write in messenger. No cold calls.'}
+                      {isRu 
+                        ? 'Пишем только в мессенджер. Без холодных звонков.' 
+                        : isRo 
+                        ? 'Scriem doar în mesagerie. Fără apeluri reci.' 
+                        : 'We only write in messenger. No cold calls.'}
                     </div>
                   </div>
                 </form>
@@ -663,7 +699,11 @@ export default function AIChat() {
             type="button"
             className={`${styles.micBtn} ${isListening ? styles.micBtnActive : ''}`}
             onClick={toggleListening}
-            title={isListening ? (isRu ? 'Остановить запись' : 'Stop recording') : (isRu ? 'Голосовой ввод' : 'Voice input')}
+            title={
+              isListening 
+                ? (isRu ? 'Остановить запись' : isRo ? 'Oprește înregistrarea' : 'Stop recording') 
+                : (isRu ? 'Голосовой ввод' : isRo ? 'Introducere vocală' : 'Voice input')
+            }
             aria-label="Voice input"
           >
             {isListening ? (
@@ -683,7 +723,11 @@ export default function AIChat() {
             ref={inputRef}
             rows={1}
             className={`${styles.input} ${isListening ? styles.inputListening : ''}`}
-            placeholder={isListening ? (isRu ? 'Слушаю... 🎙️' : 'Listening... 🎙️') : (isRu ? 'Ваша задача...' : 'Your request...')}
+            placeholder={
+              isListening 
+                ? (isRu ? 'Слушаю... 🎙️' : isRo ? 'Ascult... 🎙️' : 'Listening... 🎙️') 
+                : (isRu ? 'Ваша задача...' : isRo ? 'Sarcina dvs...' : 'Your request...')
+            }
             value={input}
             onChange={handleTextareaChange}
             onKeyDown={handleKeyDown}

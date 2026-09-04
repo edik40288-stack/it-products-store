@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useLocale } from 'next-intl';
 import { ServiceItem } from '@/types';
 import styles from './ServiceDetail.module.css';
 
@@ -11,6 +12,7 @@ interface ServiceDetailProps {
 }
 
 export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
+  const locale = useLocale();
   const [mounted, setMounted] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -69,7 +71,7 @@ export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
             </span>
             <span className={styles.divider}>/</span>
             <span className={styles.stackText}>
-              {item.stack || `Стек: ${item.tags.join(' • ')}`}
+              {item.stack || `${locale === 'ru' ? 'Стек: ' : 'Stack: '}${item.tags.join(' • ')}`}
             </span>
           </div>
 
@@ -78,13 +80,13 @@ export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
           </button>
         </div>
 
-        {/* Заголовок и суть услуги */}
+        {/* Header */}
         <div className={styles.headerSection}>
           <h2 className={styles.title}>{item.title}</h2>
           <p className={styles.description}>{item.description}</p>
         </div>
 
-        {/* Технические параметры надежности (3 колонки) */}
+        {/* Metrics Grid */}
         {item.metrics && item.metrics.length >= 3 && (
           <div className={styles.metricsGrid}>
             <div className={styles.metricCol}>
@@ -93,7 +95,7 @@ export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
             </div>
             <div className={`${styles.metricCol} ${styles.metricBordered}`}>
               <div className={`${styles.metricTitle} ${item.metrics[1].highlight ? styles.metricHighlight : ''}`}>
-                {item.metrics[1].title}
+                 {item.metrics[1].title}
               </div>
               <div className={styles.metricDesc}>{item.metrics[1].desc}</div>
             </div>
@@ -104,7 +106,7 @@ export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
           </div>
         )}
 
-        {/* Что конкретно настраивается (2 карточки) */}
+        {/* Features */}
         {item.features && item.features.length > 0 && (
           <div className={styles.featuresList}>
             {item.features.map((feat, idx) => (
@@ -116,13 +118,13 @@ export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
           </div>
         )}
 
-        {/* Футер */}
+        {/* Footer */}
         <div className={styles.footerSection}>
           <span className={styles.footerNote}>
-            {item.footerNote || 'Анализируем текущий стек и проектируем схему интеграций'}
+            {item.footerNote || (locale === 'ru' ? 'Анализируем текущий стек и проектируем схему интеграций' : locale === 'ro' ? 'Analizăm stack-ul actual și proiectăm schema de integrare' : 'Analyzing current stack and designing integration roadmap')}
           </span>
           <button className={styles.ctaBtn} onClick={handleDiscuss}>
-            {item.ctaText || 'Обсудить задачу →'}
+            {item.ctaText || (locale === 'ru' ? 'Обсудить задачу →' : locale === 'ro' ? 'Discută sarcina →' : 'Discuss project →')}
           </button>
         </div>
       </div>
