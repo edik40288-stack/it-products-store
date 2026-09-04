@@ -30,7 +30,12 @@ const SYSTEM_PROMPT = `Ты — Senior AI-консультант премиал�
 - "Где вы находитесь / откуда вы?": "Мы работаем распределенно с клиентами по всему миру (Европа, США, СНГ), а ключевая разработка ведется на современном стеке. Консультации и ведение проектов проходят онлайн в удобном мессенджере." ("showCard": true)
 - Грубость, мат или спам: Не обижайся, ответь сдержанно и солидно: "Я на связи для решения конкретных бизнес- и IT-задач. Если есть проект для разработки или автоматизации — готов помочь." ("showCard": false)
 
-4. ПОСЛЕ ТОГО КАК КЛИЕНТ ЗАПОЛНИЛ КАРТОЧКУ (или ввел контакты):
+4. ЗАЩИТА ОТ НЕСУЩЕСТВУЮЩИХ КОНТАКТОВ И ФЕЙКОВЫХ ДАННЫХ:
+- Если клиент пишет несуществующий Telegram-аккаунт, случайный набор букв/цифр вместо ника или некорректный телефон (менее 9 цифр, без кода страны, "123", "asdf"):
+- Ответь прямо и доброжелательно: "Похоже, в указанном контакте опечатка или такого аккаунта нет. Пожалуйста, укажите реальный действующий контакт (Telegram, WhatsApp или номер с кодом страны), чтобы инженер смог отправить вам смету и расчет."
+- В этом случае СТРОГО покажи карточку: "showCard": true.
+
+5. ПОСЛЕ ТОГО КАК КЛИЕНТ ЗАПОЛНИЛ КАРТОЧКУ (или ввел контакты):
 Контакты уже у архитекторов. Веди легкий диалог по болям бизнеса:
 - Вопрос 1: "А пока технари изучают проект, можно уточню для лучшего результата: какая у вас ниша и с чем сейчас больше всего сложностей в процессах прямо сейчас?"
 - Вопрос 2: "Понял вас! А как у вас сейчас обстоят дела со звонками и заявками — много времени уходит на ручную обработку или часть клиентов теряется?"
@@ -142,17 +147,23 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const contactInfo = extractContactInfo(lastUserMsg);
+    const contactInfo = await extractContactInfo(lastUserMsg);
     const hasLeadConfirmed = detectLeadCollected(messages || [], reply);
 
-    if (contactInfo.hasContact || contactInfo.hasLink || hasLeadConfirmed) {
+    if (contactInfo.isInvalidTg) {
+      reply = `Похоже, в указанном контакте @${contactInfo.invalidValue || ''} опечатка или такого аккаунта в Telegram не существует. Пожалуйста, проверьте правильность написания или укажите номер телефона, чтобы мы могли отправить вам смету.`;
+      dynamicCard = { showCard: true };
+    } else if (contactInfo.isInvalidPhone) {
+      reply = 'Номер телефона указан некорректно или содержит опечатку. Пожалуйста, напишите действующий номер с кодом страны (например, +7... или +373...), чтобы инженер мог связаться с вами.';
+      dynamicCard = { showCard: true };
+    } else if (contactInfo.hasContact || contactInfo.hasLink || hasLeadConfirmed) {
       await sendLeadToTelegram(messages || [], reply, contactInfo);
     }
 
     return NextResponse.json({ 
       reply, 
       dynamicCard,
-      leadCollected: hasLeadConfirmed || contactInfo.hasContact,
+      leadCollected: !contactInfo.isInvalidTg && !contactInfo.isInvalidPhone && (hasLeadConfirmed || contactInfo.hasContact),
       engine 
     });
 
@@ -399,9 +410,43 @@ function detectLanguage(text: string): 'ru' | 'ro' | 'en' {
   return 'en';
 }
 
-function extractContactInfo(text: string) {
+function isDummyPhone(digitsOnly: string): boolean {
+  if (digitsOnly.length < 9 || digitsOnly.length > 15) return true;
+  if (/^(\d)\1+$/.test(digitsOnly)) return true;
+  if (digitsOnly.includes('12345678') || digitsOnly.includes('98765432') || digitsOnly.includes('01234567')) return true;
+  return false;
+}
+
+function isDummyUsername(username: string): boolean {
+  const clean = username.toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (clean.length < 5) return true;
+  if (/^([a-z0-9])\1+$/.test(clean)) return true;
+  const commonDummies = ['asdfg', 'asdfgh', 'qwerty', 'qwertyuiop', '12345', '123456', 'telegram', 'username'];
+  if (commonDummies.includes(clean)) return true;
+  return false;
+}
+
+async function verifyTelegramUsername(username: string): Promise<boolean> {
+  const token = process.env.TELEGRAM_BOT_TOKEN || BUILTIN_TG_TOKEN;
+  if (!token) return true;
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const res = await fetch(`https://api.telegram.org/bot${token}/getChat?chat_id=@${username}`, {
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    const data = await res.json();
+    if (!data.ok && (data.error_code === 400 || data.description?.includes('chat not found'))) {
+      return false;
+    }
+  } catch {}
+  return true;
+}
+
+async function extractContactInfo(text: string) {
   const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i;
-  const tgRegex = /(?:@|(?:https?:\/\/)?t\.me\/)([a-zA-Z0-9_]{4,})/i;
+  const tgRegex = /(?:@|(?:https?:\/\/)?t\.me\/)([a-zA-Z0-9_]{3,})/i;
   const phoneRegex = /(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{2,4}/;
   const linkRegex = /((?:https?:\/\/|www\.)[^\s]+|[a-zA-Z0-9-]+\.(?:com|ru|io|ai|md|dev|org|net|app|pro|co)\b[^\s]*)/i;
 
@@ -410,16 +455,49 @@ function extractContactInfo(text: string) {
   const phoneMatch = text.match(phoneRegex);
   const linkMatch = text.match(linkRegex);
 
+  let isInvalidTg = false;
+  let isInvalidPhone = false;
+  let invalidValue = '';
+
   const contactParts: string[] = [];
   if (emailMatch) contactParts.push(`📧 ${emailMatch[1]}`);
-  if (tgMatch) contactParts.push(`✈️ @${tgMatch[1]}`);
-  if (phoneMatch && phoneMatch[0].length >= 8) contactParts.push(`📞 ${phoneMatch[0]}`);
+
+  if (tgMatch) {
+    const cleanTg = tgMatch[1];
+    if (cleanTg.length < 5 || isDummyUsername(cleanTg)) {
+      isInvalidTg = true;
+      invalidValue = cleanTg;
+    } else {
+      const exists = await verifyTelegramUsername(cleanTg);
+      if (!exists) {
+        isInvalidTg = true;
+        invalidValue = cleanTg;
+      } else {
+        contactParts.push(`✈️ @${cleanTg}`);
+      }
+    }
+  }
+
+  if (phoneMatch) {
+    const digitsOnly = phoneMatch[0].replace(/\D/g, '');
+    if (digitsOnly.length < 9 || digitsOnly.length > 15 || isDummyPhone(digitsOnly)) {
+      if (digitsOnly.length >= 3) {
+        isInvalidPhone = true;
+        invalidValue = phoneMatch[0];
+      }
+    } else {
+      contactParts.push(`📞 ${phoneMatch[0]}`);
+    }
+  }
 
   return {
     hasContact: contactParts.length > 0,
     hasLink: Boolean(linkMatch),
     contactStr: contactParts.join(' | '),
-    linkStr: linkMatch ? linkMatch[0] : ''
+    linkStr: linkMatch ? linkMatch[0] : '',
+    isInvalidTg,
+    isInvalidPhone,
+    invalidValue
   };
 }
 

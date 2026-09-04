@@ -552,6 +552,26 @@
   color: #737373;
 }
 
+.cardErrorAlert {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+  color: #fca5a5;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  animation: msgIn 0.2s ease-out;
+}
+
+.cardErrorAlert svg {
+  flex-shrink: 0;
+  stroke: #ef4444;
+}
+
 /* True continuous running ticker (бегущая строка) */
 .marqueeTicker {
   position: relative;

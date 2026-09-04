@@ -101,6 +101,7 @@ export default function AIChat() {
   const [cardName, setCardName] = useState('');
   const [cardCompany, setCardCompany] = useState('');
   const [cardContact, setCardContact] = useState('');
+  const [cardError, setCardError] = useState<string | null>(null);
   const [isCardSubmitted, setIsCardSubmitted] = useState(false);
   const [isSubmittingCard, setIsSubmittingCard] = useState(false);
 
@@ -108,7 +109,29 @@ export default function AIChat() {
     e.preventDefault();
     if (!cardName.trim() || !cardContact.trim() || isSubmittingCard) return;
 
+    setCardError(null);
     setIsSubmittingCard(true);
+
+    // Validate real contact existence & format
+    try {
+      const valRes = await fetch('/api/validate-contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: cardName.trim(),
+          contact: cardContact.trim(),
+          messenger
+        }),
+      });
+      const valData = await valRes.json();
+      if (!valData.valid) {
+        setCardError(valData.error || (isRu ? 'Укажите реальный контакт для связи' : 'Please provide a valid contact'));
+        setIsSubmittingCard(false);
+        return;
+      }
+    } catch (err) {
+      console.warn('Validation error:', err);
+    }
 
     const cardData = {
       clientName: cardName.trim(),
@@ -133,6 +156,7 @@ export default function AIChat() {
       setIsSubmittingCard(false);
       setIsCardSubmitted(true);
       setShowLeadCard(false);
+      setCardError(null);
 
       const mName = messenger === 'tg' ? 'Telegram' : messenger === 'wa' ? 'WhatsApp' : 'Viber';
       addMessage('assistant', isRu 
@@ -490,7 +514,10 @@ export default function AIChat() {
                         <button
                           key={item.id}
                           type="button"
-                          onClick={() => setMessenger(item.id as 'tg' | 'wa' | 'viber')}
+                          onClick={() => {
+                            setMessenger(item.id as 'tg' | 'wa' | 'viber');
+                            if (cardError) setCardError(null);
+                          }}
                           className={`${styles.leadCardTab} ${messenger === item.id ? styles.leadCardTabActive : ''}`}
                         >
                           {item.label}
@@ -505,7 +532,10 @@ export default function AIChat() {
                         type="text"
                         required
                         value={cardName}
-                        onChange={(e) => setCardName(e.target.value)}
+                        onChange={(e) => {
+                          setCardName(e.target.value);
+                          if (cardError) setCardError(null);
+                        }}
                         placeholder={isRu ? 'Имя и фамилия *' : 'Full Name *'}
                         className={styles.leadCardInput}
                       />
@@ -521,7 +551,10 @@ export default function AIChat() {
                       type="text"
                       required
                       value={cardContact}
-                      onChange={(e) => setCardContact(e.target.value)}
+                      onChange={(e) => {
+                        setCardContact(e.target.value);
+                        if (cardError) setCardError(null);
+                      }}
                       placeholder={
                         messenger === 'tg'
                           ? (isRu ? '@username или номер в Telegram *' : '@username or Telegram number *')
@@ -534,13 +567,23 @@ export default function AIChat() {
                   </div>
 
                   <div>
+                    {cardError && (
+                      <div className={styles.cardErrorAlert}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <circle cx="12" cy="12" r="10" />
+                          <line x1="12" y1="8" x2="12" y2="12" />
+                          <line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                        <span>{cardError}</span>
+                      </div>
+                    )}
                     <button
                       type="submit"
                       disabled={isSubmittingCard || !cardName.trim() || !cardContact.trim()}
                       className={styles.leadCardSubmitBtn}
                     >
                       {isSubmittingCard 
-                        ? (isRu ? 'Отправка...' : 'Sending...') 
+                        ? (isRu ? 'Проверка и отправка...' : 'Checking and sending...') 
                         : (isRu ? 'Передать задачу инженеру →' : 'Send to Engineer →')}
                     </button>
                     <div className={styles.leadCardDisclaimer}>
