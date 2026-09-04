@@ -161,9 +161,11 @@ export async function POST(request: NextRequest) {
       const followUpText = `💬 <b>ДОПОЛНЕНИЕ К ЗАЯВКЕ (${clientName || 'Клиент'} | ${company || 'Компания не указана'} | ${messenger || 'TG'}: ${contactHandle || ''}):</b>\n\n` +
         `<blockquote>${lastUserMsg}</blockquote>\n⏱ <b>Время:</b> ${getFormattedTime()}`;
       sendTelegramMessage(followUpText).catch(console.error);
+      const followUpDialogue = (messages || []).map((m: { role: string; content?: string }) => `${m.role === 'user' ? 'Клиент' : 'AI'}: ${m.content}`).concat(`AI: ${reply}`).join('\n');
       sendGoogleSheetsFollowUp({
         contactHandle: contactHandle || '',
-        followUp: lastUserMsg
+        followUp: lastUserMsg,
+        dialogue: followUpDialogue
       }).catch(console.error);
       dynamicCard = { ...dynamicCard, showCard: false };
     } else {
@@ -636,6 +638,7 @@ async function sendGoogleSheetsLead(data: {
 async function sendGoogleSheetsFollowUp(data: {
   contactHandle?: string;
   followUp: string;
+  dialogue?: string;
 }) {
   const webhookUrl = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
   if (!webhookUrl) return;
@@ -645,7 +648,8 @@ async function sendGoogleSheetsFollowUp(data: {
       action: 'follow_up',
       timestamp: getFormattedTime(),
       contact: data.contactHandle || '',
-      followUp: data.followUp
+      followUp: data.followUp,
+      dialogue: data.dialogue || ''
     };
 
     await fetch(webhookUrl, {
