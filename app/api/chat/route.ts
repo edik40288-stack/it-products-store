@@ -60,11 +60,13 @@ export async function POST(request: NextRequest) {
 
     // 1. Handle interactive project card submission
     if (type === 'lead_card') {
-      const { clientName, company, messenger, contactHandle, clientInput, conversationHistory } = cardData || {};
+      const { clientName, company, description, messenger, contactHandle, clientInput, conversationHistory } = cardData || {};
+      const taskDescription = description || clientInput || "Не указано";
       
       const payload = {
         leadSource: "Mindcore Instant Hero Bar",
-        clientInput: clientInput || "Не указано",
+        taskDescription,
+        clientInput: taskDescription,
         messenger: messenger || "Telegram",
         contactHandle: contactHandle || "Не указан",
         clientName: clientName || "Не указано",
@@ -74,6 +76,11 @@ export async function POST(request: NextRequest) {
       };
 
       const htmlText = `🚨 <b>НОВАЯ СПЕЦИФИКАЦИЯ ОТ АРХИТЕКТОРА</b> 🚨\n\n` +
+        `👤 <b>Клиент:</b> ${clientName || 'Не указано'}\n` +
+        `🏢 <b>Компания / Ниша:</b> ${company || 'Не указано'}\n` +
+        `💬 <b>Связь:</b> ${messenger || 'Telegram'} (<code>${contactHandle || 'Не указан'}</code>)\n` +
+        `📝 <b>Описание задачи:</b> ${taskDescription}\n` +
+        `⏱ <b>Время:</b> ${getFormattedTime()}\n\n` +
         `<pre><code>${JSON.stringify(payload, null, 2)}</code></pre>`;
 
       await sendTelegramMessage(htmlText);
@@ -82,7 +89,7 @@ export async function POST(request: NextRequest) {
         company: company || 'Не указано',
         messenger: messenger || 'Telegram',
         contactHandle: contactHandle || 'Не указан',
-        clientInput: clientInput || 'Не указано',
+        clientInput: taskDescription,
         dialogue: (conversationHistory || []).map((m: { role: string; text?: string; content?: string }) => `${m.role === 'user' ? 'Клиент' : 'AI'}: ${m.text || m.content}`).join('\n')
       });
       return NextResponse.json({ success: true });
@@ -610,6 +617,7 @@ async function sendGoogleSheetsLead(data: {
       company: data.company || 'Не указано',
       messenger: data.messenger || 'Telegram',
       contact: data.contactHandle || 'Не указан',
+      description: data.clientInput || 'Не указано',
       request: data.clientInput || 'Не указано',
       dialogue: data.dialogue || '',
       status: 'Новый'

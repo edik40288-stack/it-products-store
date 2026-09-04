@@ -101,9 +101,17 @@ export default function AIChat() {
   const [cardName, setCardName] = useState('');
   const [cardCompany, setCardCompany] = useState('');
   const [cardContact, setCardContact] = useState('');
+  const [cardDescription, setCardDescription] = useState('');
   const [cardError, setCardError] = useState<string | null>(null);
   const [isCardSubmitted, setIsCardSubmitted] = useState(false);
   const [isSubmittingCard, setIsSubmittingCard] = useState(false);
+
+  // Sync description with initial query if present
+  useEffect(() => {
+    if (initialQuery && !cardDescription) {
+      setCardDescription(initialQuery);
+    }
+  }, [initialQuery]);
 
   const handleCardSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,12 +141,14 @@ export default function AIChat() {
       console.warn('Validation error:', err);
     }
 
+    const finalDescription = cardDescription.trim() || initialQuery || input || 'Не указано';
     const cardData = {
       clientName: cardName.trim(),
       company: cardCompany.trim(),
+      description: finalDescription,
       messenger: messenger === 'tg' ? 'Telegram' : messenger === 'wa' ? 'WhatsApp' : 'Viber',
       contactHandle: cardContact.trim(),
-      clientInput: initialQuery || input,
+      clientInput: finalDescription,
       conversationHistory: messages.map(m => ({ role: m.role, text: m.content }))
     };
 
@@ -563,6 +573,13 @@ export default function AIChat() {
                           : (isRu ? 'Номер для Viber *' : 'Viber Number *')
                       }
                       className={styles.leadCardInput}
+                    />
+                    <textarea
+                      rows={2}
+                      value={cardDescription}
+                      onChange={(e) => setCardDescription(e.target.value)}
+                      placeholder={isRu ? 'Описание задачи (какой сайт, бот, проект или ссылка)' : 'Project description (website, bot, system or link)'}
+                      className={styles.leadCardTextarea}
                     />
                   </div>
 

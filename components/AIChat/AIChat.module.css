@@ -515,6 +515,31 @@
   border-color: rgba(255, 255, 255, 0.3);
 }
 
+.leadCardTextarea {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  color: #ffffff;
+  outline: none;
+  transition: border-color 0.2s;
+  resize: vertical;
+  min-height: 52px;
+  font-family: inherit;
+  margin-top: 0.5rem;
+  box-sizing: border-box;
+}
+
+.leadCardTextarea::placeholder {
+  color: #525252;
+}
+
+.leadCardTextarea:focus {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
 .leadCardSubmitBtn {
   width: 100%;
   border-radius: 0.75rem;
