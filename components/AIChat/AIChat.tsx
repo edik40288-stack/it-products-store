@@ -196,7 +196,35 @@ export default function AIChat() {
   const [promptStep, setPromptStep] = useState<number>(0);
   const [emotionState, setEmotionState] = useState<EmotionType>('idle');
   const [isBubbleDismissed, setIsBubbleDismissed] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
   const lifecycleCompletedRef = useRef(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Smooth scroll awareness: hide bubble while actively scrolling so it never obstructs content
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        if (sessionStorage.getItem('ai_bubble_dismissed') === '1') {
+          setIsBubbleDismissed(true);
+          return;
+        }
+      } catch {}
+    }
+
+    const handleScroll = () => {
+      setIsScrolling(true);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+      scrollTimeoutRef.current = setTimeout(() => {
+        setIsScrolling(false);
+      }, 400);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
+  }, []);
 
   // Exact step timing: runs ONCE on initial site load only
   useEffect(() => {
@@ -337,28 +365,28 @@ export default function AIChat() {
     }, 150);
   };
 
-  // Prompt messages
+  // Prompt messages (concise, polite, unobtrusive)
   const getPromptText = () => {
     if (promptStep === 1) {
       return locale === 'ru' 
-        ? 'Здравствуйте! Могу помочь с расчетом проекта или консультацией 💬' 
+        ? 'Здравствуйте! Помогу с расчетом проекта или консультацией 💬' 
         : locale === 'ro'
-        ? 'Bună ziua! Vă pot ajuta cu estimarea proiectului sau consultanță 💬'
-        : 'Hello! I can assist you with project estimation or technical scoping 💬';
+        ? 'Bună! Vă pot ajuta cu estimarea proiectului sau consultanță 💬'
+        : 'Hello! I can help with project estimation or tech scoping 💬';
     }
     if (promptStep === 2) {
       return locale === 'ru' 
-        ? 'Подскажу по стеку, срокам и окупаемости внедрения AI-систем 👔' 
+        ? 'Подскажу по стеку, срокам и окупаемости AI-систем 👔' 
         : locale === 'ro'
         ? 'Vă pot oferi detalii despre tehnologii, termene și integrare AI 👔'
         : 'I can advise on tech stacks, timelines, and AI implementation 👔';
     }
     if (promptStep === 3) {
       return locale === 'ru' 
-        ? 'Буду рад ответить на любые технические вопросы. Обращайтесь!' 
+        ? 'Задайте вопрос инженеру — изучим вашу задачу ⚡️' 
         : locale === 'ro'
-        ? 'Voi fi bucuros să răspund la orice întrebare tehnică. Vă stau la dispoziție!'
-        : 'Ready to answer any technical questions whenever you need.';
+        ? 'Adresați o întrebare inginerului în chat ⚡️'
+        : 'Ask our engineering team in chat anytime ⚡️';
     }
     return '';
   };
@@ -368,6 +396,11 @@ export default function AIChat() {
     setIsOpen(true);
     setPromptStep(0);
     setEmotionState('finished');
+    if (typeof window !== 'undefined') {
+      try {
+        sessionStorage.setItem('ai_bubble_dismissed', '1');
+      } catch {}
+    }
   };
 
   const handleDismissBubble = (e: React.MouseEvent) => {
@@ -376,37 +409,38 @@ export default function AIChat() {
     setIsBubbleDismissed(true);
     setPromptStep(0);
     setEmotionState('finished');
+    if (typeof window !== 'undefined') {
+      try {
+        sessionStorage.setItem('ai_bubble_dismissed', '1');
+      } catch {}
+    }
   };
 
   return (
     <>
       <div className={`${styles.triggerWrap} ${isOpen ? styles.triggerWrapHidden : ''}`}>
-        {/* Proactive Calling Message Cloud */}
+        {/* Proactive Calling Message Capsule (Slim, Non-Intrusive, Scroll-Aware) */}
         {promptStep > 0 && !isOpen && (
           <div 
             key={promptStep}
-            className={styles.callingBubble}
+            className={`${styles.callingBubble} ${isScrolling ? styles.callingBubbleScrolled : ''}`}
             onClick={handleOpenChat}
             role="button"
             tabIndex={0}
+            title={locale === 'ru' ? 'Нажмите, чтобы открыть чат' : 'Click to start chat'}
           >
-            <div className={styles.bubbleHeader}>
-              <span className={styles.bubbleAuthor}>MINDCORE AI</span>
-              <button 
-                className={styles.bubbleClose} 
-                onClick={handleDismissBubble}
-                aria-label="Close message"
-              >
-                ✕
-              </button>
-            </div>
-            <div className={styles.bubbleText}>
+            <span className={styles.bubbleDot} />
+            <span className={styles.bubbleText}>
               {getPromptText()}
-            </div>
-            <div className={styles.bubbleCta}>
-              <span>{locale === 'ru' ? 'Нажмите, чтобы открыть чат' : 'Click to start chat'}</span>
-              <span>→</span>
-            </div>
+            </span>
+            <button 
+              type="button"
+              className={styles.bubbleClose} 
+              onClick={handleDismissBubble}
+              aria-label="Close message"
+            >
+              ✕
+            </button>
           </div>
         )}
 
