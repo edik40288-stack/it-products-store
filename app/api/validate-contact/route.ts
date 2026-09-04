@@ -132,33 +132,37 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const token = process.env.TELEGRAM_BOT_TOKEN || BUILTIN_TG_TOKEN;
-    if (token) {
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000);
+    // Real Telegram Existence Verification via t.me public resolver
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
 
-        const tgRes = await fetch(`https://api.telegram.org/bot${token}/getChat?chat_id=@${cleanUsername}`, {
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
+      const res = await fetch(`https://t.me/${cleanUsername}`, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
 
-        const tgData = await tgRes.json();
-        if (!tgData.ok) {
-          if (tgData.error_code === 400 || tgData.description?.includes('chat not found')) {
-            return NextResponse.json({
-              valid: false,
-              error: isRu
-                ? `Такого аккаунта (@${cleanUsername}) в Telegram не существует. Проверьте правильность или укажите номер телефона.`
-                : isRo
-                ? `Contul (@${cleanUsername}) nu există în Telegram. Verificați corectitudinea sau introduceți un număr de telefon.`
-                : `Telegram username (@${cleanUsername}) was not found. Please check spelling or provide your phone number.`
-            });
-          }
+      if (res.ok) {
+        const html = await res.text();
+        const hasPageTitle = html.includes('tgme_page_title');
+        const ogTitleMatch = html.match(/<meta property="og:title" content="([^"]+)">/);
+        const ogTitle = ogTitleMatch ? ogTitleMatch[1] : '';
+        const isNotFound = ogTitle.startsWith(`Telegram: Contact @${cleanUsername}`) || !hasPageTitle;
+
+        if (isNotFound) {
+          return NextResponse.json({
+            valid: false,
+            error: isRu
+              ? `Такого аккаунта (@${cleanUsername}) в Telegram не существует. Проверьте правильность или укажите номер телефона.`
+              : isRo
+              ? `Contul (@${cleanUsername}) nu există în Telegram. Verificați corectitudinea sau introduceți un număr de telefon.`
+              : `Telegram username (@${cleanUsername}) was not found. Please check spelling or provide your phone number.`
+          });
         }
-      } catch (err) {
-        console.warn('Telegram live lookup timeout or error, bypassing live check:', err);
       }
+    } catch (err) {
+      console.warn('Telegram live lookup timeout or error, bypassing live check:', err);
     }
 
     return NextResponse.json({ valid: true });

@@ -593,20 +593,27 @@ function isDummyUsername(username: string): boolean {
 }
 
 async function verifyTelegramUsername(username: string): Promise<boolean> {
-  const token = process.env.TELEGRAM_BOT_TOKEN || BUILTIN_TG_TOKEN;
-  if (!token) return true;
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3500);
-    const res = await fetch(`https://api.telegram.org/bot${token}/getChat?chat_id=@${username}`, {
+
+    const res = await fetch(`https://t.me/${username}`, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
       signal: controller.signal
     });
     clearTimeout(timeoutId);
-    const data = await res.json();
-    if (!data.ok && (data.error_code === 400 || data.description?.includes('chat not found'))) {
-      return false;
+
+    if (res.ok) {
+      const html = await res.text();
+      const hasPageTitle = html.includes('tgme_page_title');
+      const ogTitleMatch = html.match(/<meta property="og:title" content="([^"]+)">/);
+      const ogTitle = ogTitleMatch ? ogTitleMatch[1] : '';
+      const isNotFound = ogTitle.startsWith(`Telegram: Contact @${username}`) || !hasPageTitle;
+      if (isNotFound) return false;
     }
-  } catch {}
+  } catch (err) {
+    console.warn('Telegram live lookup timeout or error, bypassing live check:', err);
+  }
   return true;
 }
 
