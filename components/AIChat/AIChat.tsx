@@ -136,8 +136,8 @@ export default function AIChat() {
 
       const mName = messenger === 'tg' ? 'Telegram' : messenger === 'wa' ? 'WhatsApp' : 'Viber';
       addMessage('assistant', isRu 
-        ? `✓ Данные переданы ведущему архитектору! Инженер уже изучает проект и свяжется с вами в ${mName} в течение 15 минут.` 
-        : `✓ Project details sent to lead architect! Our engineer is reviewing and will contact you via ${mName} within 15 minutes.`
+        ? `✓ Данные переданы ведущему архитектору! Инженер уже изучает проект и свяжется с вами в ${mName} в течение 24 часов.` 
+        : `✓ Project details sent to lead architect! Our engineer is reviewing and will contact you via ${mName} within 24 hours.`
       );
 
       // Follow up with gentle, conversational discovery question:
@@ -466,8 +466,8 @@ export default function AIChat() {
                   </p>
                   <p className={styles.submittedSubtitle}>
                     {isRu 
-                      ? `Изучаем проект. Инженер напишет вам в ${messenger.toUpperCase()} в течение 15 минут.`
-                      : `Lead architect will contact you via ${messenger.toUpperCase()} within 15 minutes.`}
+                      ? `Изучаем проект. Инженер напишет вам в ${messenger.toUpperCase()} в течение 24 часов.`
+                      : `Lead architect will contact you via ${messenger.toUpperCase()} within 24 hours.`}
                   </p>
                 </div>
               </div>
