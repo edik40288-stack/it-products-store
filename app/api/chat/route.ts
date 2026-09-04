@@ -77,6 +77,14 @@ export async function POST(request: NextRequest) {
         `<pre><code>${JSON.stringify(payload, null, 2)}</code></pre>`;
 
       await sendTelegramMessage(htmlText);
+      await sendGoogleSheetsLead({
+        clientName: clientName || 'Не указано',
+        company: company || 'Не указано',
+        messenger: messenger || 'Telegram',
+        contactHandle: contactHandle || 'Не указан',
+        clientInput: clientInput || 'Не указано',
+        dialogue: (conversationHistory || []).map((m: { role: string; text?: string; content?: string }) => `${m.role === 'user' ? 'Клиент' : 'AI'}: ${m.text || m.content}`).join('\n')
+      });
       return NextResponse.json({ success: true });
     }
 
@@ -84,6 +92,14 @@ export async function POST(request: NextRequest) {
     if (type === 'audit_request') {
       const text = `⚡️ <b>НОВАЯ ЗАЯВКА: АУДИТ ПРОЕКТА</b> ⚡️\n\n🔗 <b>Ссылка / Проект:</b> ${urlOrNiche || 'Не указано'}\n⏱ <b>Время:</b> ${getFormattedTime()}`;
       await sendTelegramMessage(text);
+      await sendGoogleSheetsLead({
+        clientName: 'Экспресс-аудит (Hero)',
+        company: 'Hero Bar',
+        messenger: 'Hero Bar',
+        contactHandle: 'В диалоге на сайте',
+        clientInput: urlOrNiche,
+        dialogue: `Запрос аудита для: ${urlOrNiche}`
+      });
       return NextResponse.json({ success: true });
     }
 
@@ -138,6 +154,10 @@ export async function POST(request: NextRequest) {
       const followUpText = `💬 <b>ДОПОЛНЕНИЕ К ЗАЯВКЕ (${clientName || 'Клиент'} | ${company || 'Компания не указана'} | ${messenger || 'TG'}: ${contactHandle || ''}):</b>\n\n` +
         `<blockquote>${lastUserMsg}</blockquote>\n⏱ <b>Время:</b> ${getFormattedTime()}`;
       sendTelegramMessage(followUpText).catch(console.error);
+      sendGoogleSheetsFollowUp({
+        contactHandle: contactHandle || '',
+        followUp: lastUserMsg
+      }).catch(console.error);
       dynamicCard = { ...dynamicCard, showCard: false };
     } else {
       // 2. Before card submission: if user mentioned website, bot, service, price or sent a link, IMMEDIATELY show card!
@@ -158,6 +178,14 @@ export async function POST(request: NextRequest) {
       dynamicCard = { showCard: true };
     } else if (contactInfo.hasContact || contactInfo.hasLink || hasLeadConfirmed) {
       await sendLeadToTelegram(messages || [], reply, contactInfo);
+      await sendGoogleSheetsLead({
+        clientName: 'Лид из чата',
+        company: 'Чат',
+        messenger: contactInfo.contactStr.includes('✈️') ? 'Telegram' : contactInfo.contactStr.includes('📞') ? 'Телефон' : 'Контакт',
+        contactHandle: contactInfo.contactStr,
+        clientInput: contactInfo.linkStr || lastUserMsg,
+        dialogue: (messages || []).map((m: { role: string; content: string }) => `${m.role === 'user' ? 'Клиент' : 'AI'}: ${m.content}`).join('\n')
+      });
     }
 
     return NextResponse.json({ 
@@ -562,4 +590,64 @@ async function sendLeadToTelegram(
 
   await sendTelegramMessage(text);
 }
+
+async function sendGoogleSheetsLead(data: {
+  clientName?: string;
+  company?: string;
+  messenger?: string;
+  contactHandle?: string;
+  clientInput?: string;
+  dialogue?: string;
+}) {
+  const webhookUrl = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
+  if (!webhookUrl) return;
+
+  try {
+    const payload = {
+      action: 'new_lead',
+      timestamp: getFormattedTime(),
+      name: data.clientName || 'Не указано',
+      company: data.company || 'Не указано',
+      messenger: data.messenger || 'Telegram',
+      contact: data.contactHandle || 'Не указан',
+      request: data.clientInput || 'Не указано',
+      dialogue: data.dialogue || '',
+      status: 'Новый'
+    };
+
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch (err) {
+    console.error('Error sending lead to Google Sheets:', err);
+  }
+}
+
+async function sendGoogleSheetsFollowUp(data: {
+  contactHandle?: string;
+  followUp: string;
+}) {
+  const webhookUrl = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
+  if (!webhookUrl) return;
+
+  try {
+    const payload = {
+      action: 'follow_up',
+      timestamp: getFormattedTime(),
+      contact: data.contactHandle || '',
+      followUp: data.followUp
+    };
+
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch (err) {
+    console.error('Error sending follow-up to Google Sheets:', err);
+  }
+}
+
 
