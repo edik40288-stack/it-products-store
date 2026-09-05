@@ -1,8 +1,8 @@
-// MINDCORE — Site Configuration
+// VORTICORE — Site Configuration
 // Edit this file to update static site content without touching components
 
 export const siteConfig = {
-  name: 'MINDCORE',
+  name: 'VORTICORE',
   tagline: 'A booster rocket for digital product teams',
   email: 'edik40288@gmail.com',
   telegram: 'https://t.me/kraeved111',
@@ -24,7 +24,7 @@ export const siteConfig = {
   // Social links
   social: {
     telegram: 'https://t.me/kraeved111',
-    github: 'https://github.com/mindcore-studio',
+    github: 'https://github.com/vorticore-studio',
   },
 
   // Supported locales

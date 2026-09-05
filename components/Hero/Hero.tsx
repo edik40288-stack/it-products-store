@@ -143,7 +143,7 @@ export default function Hero() {
       {/* Typography Block */}
       <div className={`${styles.content} ${hasStarted ? styles.contentVisible : ''}`}>
         <div className={styles.eyebrow}>
-          <span>MINDCORE</span>
+          <span>VORTICORE</span>
           <span>//</span>
           <span>{t('systemOnline')}</span>
         </div>

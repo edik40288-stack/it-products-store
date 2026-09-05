@@ -133,17 +133,17 @@
     ]
   },
   "chat": {
-    "greeting": "Welcome! I am the MINDCORE Studio AI Consultant. I can assist you with project estimation, technical scoping, or a digital audit for your business. What challenge are you looking to solve?",
+    "greeting": "Welcome! I am the Vorticore Studio AI Consultant. I can assist you with project estimation, technical scoping, or a digital audit for your business. What challenge are you looking to solve?",
     "placeholder": "Type your message or project requirements...",
     "send": "Send",
-    "typing": "MINDCORE AI is typing...",
+    "typing": "Vorticore AI is typing...",
     "qualify": {
       "task": "Understood. Are you interested in full-cycle web engineering, autonomous AI agents, or business process automation?",
       "stage": "What stage is the project at — conceptual design from scratch, existing product, or scaling an active system?",
       "budget": "What is your target timeline and estimated budget range?",
       "contact": "Thank you for the information! Could you please share your name and preferred contact method (Telegram, WhatsApp, or Email) for our lead engineer?"
     },
-    "success": "Thank you for reaching out! Your inquiry has been forwarded to MINDCORE senior engineering leads. We will connect with you shortly.",
+    "success": "Thank you for reaching out! Your inquiry has been forwarded to Vorticore senior engineering leads. We will connect with you shortly.",
     "error": "Connection error. You can contact us directly via Telegram @kraeved111 or email edik40288@gmail.com",
     "contextGreeting": "Welcome! I am ready to provide in-depth technical consultation regarding **{context}**. Please describe your core requirements.",
     "auditGreeting": "Welcome! Analyzing your project details. Where would you prefer to receive the comprehensive audit and technical scoping report (Telegram, WhatsApp, or Email)?",
@@ -176,9 +176,9 @@
   },
   "footer": {
     "slogan": "A booster rocket for digital product teams",
-    "email": "newbusiness@mindcore.studio",
+    "email": "newbusiness@vorticore.studio",
     "locations": "New York · Copenhagen · Chisinau",
-    "rights": "© 2024 MINDCORE Studio. All rights reserved."
+    "rights": "© 2024 Vorticore Studio. All rights reserved."
   },
   "Cases": {
     "label": "Selected Works",

@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       template: `%s | ${siteConfig.name}`,
     },
     description: `${siteConfig.tagline}. We build AI agents, custom software, automation systems, and premium digital products worldwide & remote.`,
-    keywords: ['AI development', 'chatbots', 'automation', 'LLM integration', 'web development', 'MINDCORE'],
+    keywords: ['AI development', 'chatbots', 'automation', 'LLM integration', 'web development', 'Vorticore'],
     openGraph: {
       type: 'website',
       locale: locale === 'ru' ? 'ru_RU' : locale === 'ro' ? 'ro_RO' : 'en_US',

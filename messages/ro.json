@@ -133,17 +133,17 @@
     ]
   },
   "chat": {
-    "greeting": "Bună ziua! Sunt consultantul AI al studioului MINDCORE. Vă pot ajuta cu estimarea bugetului, arhitectura tehnică sau un audit pentru proiectul dumneavoastră. Ce obiectiv doriți să realizați?",
+    "greeting": "Bună ziua! Sunt consultantul AI al studioului Vorticore. Vă pot ajuta cu estimarea bugetului, arhitectura tehnică sau un audit pentru proiectul dumneavoastră. Ce obiectiv doriți să realizați?",
     "placeholder": "Scrieți întrebarea sau descrierea proiectului...",
     "send": "Trimite",
-    "typing": "MINDCORE AI răspunde...",
+    "typing": "Vorticore AI răspunde...",
     "qualify": {
       "task": "Înțeles. Vă interesează dezvoltare web completă, integrare de agenți AI sau automatizarea proceselor?",
       "stage": "În ce etapă se află proiectul — concept de la zero, produs existent sau scalare?",
       "budget": "Care este bugetul estimativ și termenul dorit de livrare?",
       "contact": "Vă mulțumesc pentru detalii. Vă rog să indicați numele și un canal convenabil de contact (Telegram, WhatsApp sau Email)."
     },
-    "success": "Vă mulțumim pentru solicitare! Detaliile au fost transmise inginerilor MINDCORE. Vă vom contacta în cel mai scurt timp.",
+    "success": "Vă mulțumim pentru solicitare! Detaliile au fost transmise inginerilor Vorticore. Vă vom contacta în cel mai scurt timp.",
     "error": "Eroare de conexiune. Ne puteți contacta direct pe Telegram @kraeved111 sau email edik40288@gmail.com",
     "contextGreeting": "Bună ziua! Vă pot oferi consultanță tehnică detaliată pentru **{context}**. Descrieți, vă rog, cerințele dumneavoastră.",
     "auditGreeting": "Bună ziua! Analizez cererea dumneavoastră. Unde vă este mai convenabil să primiți raportul detaliat (Telegram, WhatsApp sau Email)?",
@@ -176,9 +176,9 @@
   },
   "footer": {
     "slogan": "A booster rocket for digital product teams",
-    "email": "newbusiness@mindcore.studio",
+    "email": "newbusiness@vorticore.studio",
     "locations": "New York · Copenhagen · Chisinau",
-    "rights": "© 2024 MINDCORE Studio. Toate drepturile rezervate."
+    "rights": "© 2024 Vorticore Studio. Toate drepturile rezervate."
   },
   "Cases": {
     "label": "Lucrări Selectate",

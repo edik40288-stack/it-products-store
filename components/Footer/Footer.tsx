@@ -35,7 +35,7 @@ export default function Footer() {
         <div className={styles.bottomBar}>
           <div className={styles.bottomLeft}>
             <div className={styles.brandRow}>
-              <span className={styles.brand}>MINDCORE<span className={styles.brandDot}>.</span></span>
+              <span className={styles.brand}>VORTICORE<span className={styles.brandDot}>.</span></span>
               <span className={styles.brandTagline}>// AI & DIGITAL PRODUCTION</span>
             </div>
             <span className={styles.copyright}>© {year} All rights reserved.</span>

@@ -67,7 +67,7 @@ export default function ServiceDetail({ item, onClose }: ServiceDetailProps) {
         <div className={styles.topBar}>
           <div className={styles.metaLeft}>
             <span className={styles.categoryBadge}>
-              {item.categoryBadge || 'MINDCORE // WORKFLOW AUTOMATION'}
+              {item.categoryBadge || 'VORTICORE // WORKFLOW AUTOMATION'}
             </span>
             <span className={styles.divider}>/</span>
             <span className={styles.stackText}>

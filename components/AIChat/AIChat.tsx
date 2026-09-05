@@ -228,7 +228,7 @@ export default function AIChat() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/images/anim/bot-greeting.webp"
-                alt="MINDCORE AI"
+                alt="Vorticore AI"
                 className={styles.headerBotVideo}
                 loading="eager"
               />
@@ -242,7 +242,7 @@ export default function AIChat() {
             <div className={styles.onlineDot} />
           </div>
           <div className={styles.headerInfo}>
-            <span className={styles.headerName}>MINDCORE AI</span>
+            <span className={styles.headerName}>VORTICORE AI</span>
             {isTyping && <span className={styles.headerStatus}>{t('typing')}</span>}
           </div>
           <button

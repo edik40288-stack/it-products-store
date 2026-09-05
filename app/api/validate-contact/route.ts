@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const BUILTIN_TG_TOKEN = Buffer.from('ODg1Mjg3OTc4OTpBQUdFVEptYUxMc1ZseXhJMGRlSVc0Y29mWXd3LUR0ZW5zaw==', 'base64').toString('utf-8');
+import { checkRateLimit } from '@/lib/rateLimit';
+import { isAllowedOrigin, sanitizeString } from '@/lib/security';
 
 function isDummyPhone(digitsOnly: string): boolean {
   if (digitsOnly.length < 9 || digitsOnly.length > 15) return true;
@@ -20,12 +20,34 @@ function isDummyUsername(username: string): boolean {
 
 export async function POST(request: NextRequest) {
   try {
-    const { messenger, contact, name, locale } = await request.json();
+    // 1. Cross-Origin validation (CSRF shield)
+    if (!isAllowedOrigin(request)) {
+      return NextResponse.json({ error: 'Access denied: unauthorized origin' }, { status: 403 });
+    }
+
+    // 2. Anti-DDoS Rate Limiting (20 checks / minute per IP)
+    const rateLimit = checkRateLimit(request, { limit: 20, windowMs: 60000 });
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { valid: false, error: 'Too many requests. Please wait a moment.' },
+        { 
+          status: 429, 
+          headers: { 'Retry-After': String(rateLimit.retryAfterSec) } 
+        }
+      );
+    }
+
+    const body = await request.json();
+    const messenger = sanitizeString(body.messenger, 30);
+    const contact = sanitizeString(body.contact, 100);
+    const name = body.name !== undefined ? sanitizeString(body.name, 80) : undefined;
+    const locale = sanitizeString(body.locale, 10);
+
     const isRo = locale === 'ro';
     const isRu = locale === 'ru';
 
     if (name !== undefined) {
-      const trimmedName = String(name || '').trim();
+      const trimmedName = name.trim();
       const hasLetters = /[a-zA-Zа-яА-ЯёЁăîâșțĂÎÂȘȚ]/.test(trimmedName);
       if (trimmedName.length < 2 || !hasLetters) {
         return NextResponse.json({
@@ -39,7 +61,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const rawContact = String(contact || '').trim();
+    const rawContact = contact.trim();
     if (!rawContact) {
       return NextResponse.json({
         valid: false,

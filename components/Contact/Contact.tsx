@@ -10,10 +10,10 @@ export default function Contact() {
   const isRo = locale === 'ro';
 
   const badgeText = isRu 
-    ? 'MINDCORE // ПРЯМЫЕ КОНТАКТЫ' 
+    ? 'VORTICORE // ПРЯМЫЕ КОНТАКТЫ' 
     : isRo 
-    ? 'MINDCORE // CANALE DIRECTE' 
-    : 'MINDCORE // DIRECT CHANNELS';
+    ? 'VORTICORE // CANALE DIRECTE' 
+    : 'VORTICORE // DIRECT CHANNELS';
 
   return (
     <section className={styles.section} id="contact">

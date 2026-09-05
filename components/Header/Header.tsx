@@ -92,7 +92,7 @@ export default function Header({ locale }: HeaderProps) {
       <header className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}>
         {/* Logo */}
         <Link href={`/${locale}`} className={styles.logo} onClick={() => setMenuOpen(false)}>
-          <span className={styles.logoText}>MINDCORE</span>
+          <span className={styles.logoText}>VORTICORE</span>
           <span className={styles.logoDot}>.</span>
         </Link>
 
@@ -143,7 +143,7 @@ export default function Header({ locale }: HeaderProps) {
           <div className={styles.navHeader}>
             <div className={styles.navBadge}>
               <span className={styles.navBadgeDot} />
-              <span>MINDCORE // STUDIO NAVIGATION</span>
+              <span>VORTICORE // STUDIO NAVIGATION</span>
             </div>
             <button className={styles.navCloseBtn} onClick={() => setMenuOpen(false)} aria-label="Close menu">
               ✕
@@ -191,7 +191,7 @@ export default function Header({ locale }: HeaderProps) {
               </a>
             </div>
             <span className={styles.navFooterCopyright}>
-              © {new Date().getFullYear()} MINDCORE. All rights reserved.
+              © {new Date().getFullYear()} VORTICORE. All rights reserved.
             </span>
           </div>
         </div>

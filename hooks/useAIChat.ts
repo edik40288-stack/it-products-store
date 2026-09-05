@@ -69,10 +69,10 @@ export function useAIChat() {
         'assistant',
         isOffline
           ? (locale === 'ru' 
-              ? '⚠️ Прервалось подключение к интернету. Вы можете связаться с нами в Telegram: @mindcore_studio' 
+              ? '⚠️ Прервалось подключение к интернету. Вы можете связаться с нами в Telegram: @vorticore_studio' 
               : locale === 'ro'
-              ? '⚠️ Conexiunea la internet s-a întrerupt. Ne puteți contacta pe Telegram: @mindcore_studio'
-              : '⚠️ Internet connection lost. Reach us on Telegram: @mindcore_studio')
+              ? '⚠️ Conexiunea la internet s-a întrerupt. Ne puteți contacta pe Telegram: @vorticore_studio'
+              : '⚠️ Internet connection lost. Reach us on Telegram: @vorticore_studio')
           : (locale === 'ru'
               ? 'Сбой связи с сервером. Пожалуйста, попробуйте еще раз.'
               : locale === 'ro'
@@ -168,10 +168,10 @@ export function useAIChat() {
         'assistant',
         isOffline
           ? (locale === 'ru' 
-              ? '⚠️ Прервалось соединение с интернетом. Вы можете написать напрямую архитектору в Telegram: @mindcore_studio' 
+              ? '⚠️ Прервалось соединение с интернетом. Вы можете написать напрямую архитектору в Telegram: @vorticore_studio' 
               : locale === 'ro'
-              ? '⚠️ Conexiunea la internet s-a întrerupt. Puteți scrie direct arhitectului pe Telegram: @mindcore_studio'
-              : '⚠️ Network connection lost. You can reach out directly via Telegram: @mindcore_studio')
+              ? '⚠️ Conexiunea la internet s-a întrerupt. Puteți scrie direct arhitectului pe Telegram: @vorticore_studio'
+              : '⚠️ Network connection lost. You can reach out directly via Telegram: @vorticore_studio')
           : t('error')
       );
     }

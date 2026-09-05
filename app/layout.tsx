@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'MINDCORE Studio',
+  title: 'Vorticore Studio',
   description: 'A booster rocket for digital product teams',
 };
 

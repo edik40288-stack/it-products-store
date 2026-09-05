@@ -60,7 +60,7 @@ export default function ChatFace({ emotion, isOpen }: ChatFaceProps) {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={`/images/posters/${emotion === 'diplomat' ? 'bot-business' : emotion === 'pout' ? 'bot-sad' : 'bot-greeting'}.webp`}
-        alt="MINDCORE AI"
+        alt="Vorticore AI"
         className={styles.botPoster}
         loading="eager"
       />
@@ -78,7 +78,7 @@ export default function ChatFace({ emotion, isOpen }: ChatFaceProps) {
       <img
         key={emotion}
         src={`/images/anim/${emotion === 'diplomat' ? 'bot-business' : emotion === 'pout' ? 'bot-sad' : 'bot-greeting'}.webp`}
-        alt="MINDCORE AI"
+        alt="Vorticore AI"
         className={`${styles.botVideo} ${styles.botVideoActive}`}
       />
 

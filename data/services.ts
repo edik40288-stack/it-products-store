@@ -10,7 +10,7 @@ export const SERVICES_RU: ServiceData[] = [
     subtitle: 'От 0 до релиза и поддержки',
     tags: ['React', 'Next.js', 'Node.js', 'PostgreSQL'],
     duration: '4–16 недель',
-    categoryBadge: 'MINDCORE // FULL-STACK PRODUCTION',
+    categoryBadge: 'VORTICORE // FULL-STACK PRODUCTION',
     stack: 'Стек: Next.js • TypeScript • Node.js • PostgreSQL • Docker',
     description: 'Проектируем и создаем масштабируемые веб-платформы, SaaS-сервисы и мобильные веб-приложения с нуля. Обеспечиваем чистую архитектуру, высокую скорость отклика и бесшовный деплой.',
     metrics: [
@@ -37,7 +37,7 @@ export const SERVICES_RU: ServiceData[] = [
     subtitle: 'Умная коммуникация 24/7',
     tags: ['GPT-4o', 'Claude 3.5', 'Python', 'LangChain'],
     duration: '2–6 недель',
-    categoryBadge: 'MINDCORE // CONVERSATIONAL AI & AGENTS',
+    categoryBadge: 'VORTICORE // CONVERSATIONAL AI & AGENTS',
     stack: 'Стек: GPT-4o • Claude 3.5 • Python • LangChain • Vector DB',
     description: 'Создаем кастомных ИИ-ассистентов с обучением на базе знаний вашего бизнеса. Агенты квалифицируют входящий трафик, отвечают на сложные вопросы и закрывают заявки в мессенджерах и на сайте.',
     metrics: [
@@ -64,7 +64,7 @@ export const SERVICES_RU: ServiceData[] = [
     subtitle: 'Ваша бизнес-логика — автоматизирована',
     tags: ['PostgreSQL', 'Node.js', 'React', 'Redis'],
     duration: '6–20 недель',
-    categoryBadge: 'MINDCORE // CUSTOM ENTERPRISE SYSTEMS',
+    categoryBadge: 'VORTICORE // CUSTOM ENTERPRISE SYSTEMS',
     stack: 'Стек: PostgreSQL • Node.js • React • Tailwind • Redis',
     description: 'Разрабатываем индивидуальные системы управления продажами, клиентами и проектами. Без ограничений коробочного софта и абонентской платы за каждого сотрудника.',
     metrics: [
@@ -91,7 +91,7 @@ export const SERVICES_RU: ServiceData[] = [
     subtitle: 'Подключите ИИ к вашему стеку',
     tags: ['OpenAI', 'Anthropic', 'Pinecone', 'FastAPI'],
     duration: '1–4 недели',
-    categoryBadge: 'MINDCORE // LLM & AI ARCHITECTURE',
+    categoryBadge: 'VORTICORE // LLM & AI ARCHITECTURE',
     stack: 'Стек: OpenAI • Anthropic • Pinecone • FastAPI • Embeddings',
     description: 'Подключаем передовые нейросети к существующим базам данных, корпоративным приложениям и сайтам. Автоматизируем анализ документов, генерацию контента и обработку данных.',
     metrics: [
@@ -118,7 +118,7 @@ export const SERVICES_RU: ServiceData[] = [
     subtitle: 'Умные потоки вместо ручного труда',
     tags: ['API', 'Webhooks', 'n8n', 'Python'],
     duration: '1–6 недель',
-    categoryBadge: 'MINDCORE // WORKFLOW AUTOMATION',
+    categoryBadge: 'VORTICORE // WORKFLOW AUTOMATION',
     stack: 'Стек: API • Webhooks • n8n • Python',
     description: 'Проектируем отказоустойчивые сценарии передачи данных между сайтом, CRM, платежными шлюзами и складским учетом. Убираем необходимость ручного сведения таблиц и баз данных.',
     metrics: [
@@ -145,7 +145,7 @@ export const SERVICES_RU: ServiceData[] = [
     subtitle: 'Превращаем данные в решения',
     tags: ['GA4', 'BigQuery', 'SQL', 'PowerBI'],
     duration: '1–3 недели',
-    categoryBadge: 'MINDCORE // DATA & CONVERSION AUDIT',
+    categoryBadge: 'VORTICORE // DATA & CONVERSION AUDIT',
     stack: 'Стек: GA4 • BigQuery • SQL • PowerBI • Metrika',
     description: 'Находим скрытые точки потери трафика, настраиваем сквозное отслеживание каждого доллара и строим понятные дашборды для принятия управленческих решений.',
     metrics: [
@@ -172,7 +172,7 @@ export const SERVICES_RU: ServiceData[] = [
     subtitle: 'До → премиальное После',
     tags: ['Figma', 'Design Systems', 'WebGL', 'Motion'],
     duration: '3–10 недель',
-    categoryBadge: 'MINDCORE // UI/UX & PRODUCT DESIGN',
+    categoryBadge: 'VORTICORE // UI/UX & PRODUCT DESIGN',
     stack: 'Стек: Figma • Design Systems • WebGL • Framer Motion',
     description: 'Трансформируем устаревшие интерфейсы в высококонверсионные цифровые продукты с безупречной эстетикой, кинематографичной микроанимацией и адаптивностью.',
     metrics: [
@@ -199,7 +199,7 @@ export const SERVICES_RU: ServiceData[] = [
     subtitle: 'Найдите уязвимости до атакующих',
     tags: ['OWASP', 'Pentesting', 'SSL/TLS', 'Cloudflare'],
     duration: '1–2 недели',
-    categoryBadge: 'MINDCORE // CYBERSECURITY & COMPLIANCE',
+    categoryBadge: 'VORTICORE // CYBERSECURITY & COMPLIANCE',
     stack: 'Стек: OWASP • Pentesting • Burp Suite • SSL/TLS • Cloudflare',
     description: 'Выявляем критические уязвимости веб-приложений, API и серверов до того, как ими воспользуются злоумышленники. Защищаем базы данных и пользовательские данные.',
     metrics: [
@@ -229,7 +229,7 @@ export const SERVICES_EN: ServiceData[] = [
     subtitle: 'From 0 to release & support',
     tags: ['React', 'Next.js', 'Node.js', 'PostgreSQL'],
     duration: '4–16 weeks',
-    categoryBadge: 'MINDCORE // FULL-STACK PRODUCTION',
+    categoryBadge: 'VORTICORE // FULL-STACK PRODUCTION',
     stack: 'Stack: Next.js • TypeScript • Node.js • PostgreSQL • Docker',
     description: 'We engineer and build scalable web platforms, SaaS apps, and mobile web systems from scratch with clean architecture, sub-second latency, and automated deployment.',
     metrics: [
@@ -256,7 +256,7 @@ export const SERVICES_EN: ServiceData[] = [
     subtitle: '24/7 intelligent customer engagement',
     tags: ['GPT-4o', 'Claude 3.5', 'Python', 'LangChain'],
     duration: '2–6 weeks',
-    categoryBadge: 'MINDCORE // CONVERSATIONAL AI & AGENTS',
+    categoryBadge: 'VORTICORE // CONVERSATIONAL AI & AGENTS',
     stack: 'Stack: GPT-4o • Claude 3.5 • Python • LangChain • Vector DB',
     description: 'Custom AI assistants fine-tuned on your business knowledge base. They qualify leads, solve complex client queries, and close deals in messaging apps and web chat 24/7.',
     metrics: [
@@ -283,7 +283,7 @@ export const SERVICES_EN: ServiceData[] = [
     subtitle: 'Your business logic, automated',
     tags: ['PostgreSQL', 'Node.js', 'React', 'Redis'],
     duration: '6–20 weeks',
-    categoryBadge: 'MINDCORE // CUSTOM ENTERPRISE SYSTEMS',
+    categoryBadge: 'VORTICORE // CUSTOM ENTERPRISE SYSTEMS',
     stack: 'Stack: PostgreSQL • Node.js • React • Tailwind • Redis',
     description: 'Tailor-made software that models your exact business logic — eliminating generic SaaS constraints and per-seat monthly license fees forever.',
     metrics: [
@@ -310,7 +310,7 @@ export const SERVICES_EN: ServiceData[] = [
     subtitle: 'Plug AI into your existing stack',
     tags: ['OpenAI', 'Anthropic', 'Pinecone', 'FastAPI'],
     duration: '1–4 weeks',
-    categoryBadge: 'MINDCORE // LLM & AI ARCHITECTURE',
+    categoryBadge: 'VORTICORE // LLM & AI ARCHITECTURE',
     stack: 'Stack: OpenAI • Anthropic • Pinecone • FastAPI • Embeddings',
     description: 'Connect state-of-the-art LLMs into your databases, internal apps, and consumer portals. Automate document ingestion, intelligent search, and data processing.',
     metrics: [
@@ -337,7 +337,7 @@ export const SERVICES_EN: ServiceData[] = [
     subtitle: 'Replace manual work with intelligent flows',
     tags: ['API', 'Webhooks', 'n8n', 'Python'],
     duration: '1–6 weeks',
-    categoryBadge: 'MINDCORE // WORKFLOW AUTOMATION',
+    categoryBadge: 'VORTICORE // WORKFLOW AUTOMATION',
     stack: 'Stack: API • Webhooks • n8n • Python',
     description: 'We architect resilient data pipelines between your website, CRM, payment gateways, and warehouse inventory. Eliminate manual spreadsheets and human data entry.',
     metrics: [
@@ -364,7 +364,7 @@ export const SERVICES_EN: ServiceData[] = [
     subtitle: 'Turn data into decisions',
     tags: ['GA4', 'BigQuery', 'SQL', 'PowerBI'],
     duration: '1–3 weeks',
-    categoryBadge: 'MINDCORE // DATA & CONVERSION AUDIT',
+    categoryBadge: 'VORTICORE // DATA & CONVERSION AUDIT',
     stack: 'Stack: GA4 • BigQuery • SQL • PowerBI • Metrika',
     description: 'Identify hidden traffic leaks, configure end-to-end attribution for every dollar spent, and construct intuitive executive dashboards for data-driven decisions.',
     metrics: [
@@ -391,7 +391,7 @@ export const SERVICES_EN: ServiceData[] = [
     subtitle: 'Before → premium After',
     tags: ['Figma', 'Design Systems', 'WebGL', 'Motion'],
     duration: '3–10 weeks',
-    categoryBadge: 'MINDCORE // UI/UX & PRODUCT DESIGN',
+    categoryBadge: 'VORTICORE // UI/UX & PRODUCT DESIGN',
     stack: 'Stack: Figma • Design Systems • WebGL • Framer Motion',
     description: 'We transform outdated interfaces into high-converting digital flagships with cinematic micro-interactions, dark luxury aesthetics, and perfect responsiveness.',
     metrics: [
@@ -418,7 +418,7 @@ export const SERVICES_EN: ServiceData[] = [
     subtitle: 'Find vulnerabilities before attackers do',
     tags: ['OWASP', 'Pentesting', 'SSL/TLS', 'Cloudflare'],
     duration: '1–2 weeks',
-    categoryBadge: 'MINDCORE // CYBERSECURITY & COMPLIANCE',
+    categoryBadge: 'VORTICORE // CYBERSECURITY & COMPLIANCE',
     stack: 'Stack: OWASP • Pentesting • Burp Suite • SSL/TLS • Cloudflare',
     description: 'We uncover critical vulnerabilities in web applications, APIs, and cloud infrastructure before bad actors exploit them. Safeguard user data and maintain compliance.',
     metrics: [
@@ -448,7 +448,7 @@ export const SERVICES_RO: ServiceData[] = [
     subtitle: 'De la 0 la lansare și suport',
     tags: ['React', 'Next.js', 'Node.js', 'PostgreSQL'],
     duration: '4–16 săptămâni',
-    categoryBadge: 'MINDCORE // FULL-STACK PRODUCTION',
+    categoryBadge: 'VORTICORE // FULL-STACK PRODUCTION',
     stack: 'Stack: Next.js • TypeScript • Node.js • PostgreSQL • Docker',
     description: 'Proiectăm și construim platforme web scalabile, servicii SaaS și aplicații web de la zero, asigurând arhitectură curată, viteză maximă și deploy automatizat.',
     metrics: [
@@ -475,7 +475,7 @@ export const SERVICES_RO: ServiceData[] = [
     subtitle: 'Implicare inteligentă 24/7',
     tags: ['GPT-4o', 'Claude 3.5', 'Python', 'LangChain'],
     duration: '2–6 săptămâni',
-    categoryBadge: 'MINDCORE // CONVERSATIONAL AI & AGENTS',
+    categoryBadge: 'VORTICORE // CONVERSATIONAL AI & AGENTS',
     stack: 'Stack: GPT-4o • Claude 3.5 • Python • LangChain • Vector DB',
     description: 'Dezvoltăm asistenți AI personalizați, antrenați pe baza de cunoștințe a afacerii tale. Ei califică lead-urile, răspund la întrebări complexe și închid vânzări 24/7.',
     metrics: [
@@ -502,7 +502,7 @@ export const SERVICES_RO: ServiceData[] = [
     subtitle: 'Logica afacerii tale, automatizată',
     tags: ['PostgreSQL', 'Node.js', 'React', 'Redis'],
     duration: '6–20 săptămâni',
-    categoryBadge: 'MINDCORE // CUSTOM ENTERPRISE SYSTEMS',
+    categoryBadge: 'VORTICORE // CUSTOM ENTERPRISE SYSTEMS',
     stack: 'Stack: PostgreSQL • Node.js • React • Tailwind • Redis',
     description: 'Dezvoltăm soluții software personalizate pentru gestiunea vânzărilor, clienților și comenzilor — fără limitările soluțiilor prefabricate și fără taxe lunare per utilizator.',
     metrics: [
@@ -529,7 +529,7 @@ export const SERVICES_RO: ServiceData[] = [
     subtitle: 'Conectează AI la stack-ul tău',
     tags: ['OpenAI', 'Anthropic', 'Pinecone', 'FastAPI'],
     duration: '1–4 săptămâni',
-    categoryBadge: 'MINDCORE // LLM & AI ARCHITECTURE',
+    categoryBadge: 'VORTICORE // LLM & AI ARCHITECTURE',
     stack: 'Stack: OpenAI • Anthropic • Pinecone • FastAPI • Embeddings',
     description: 'Conectăm rețele neuronale avansate la bazele de date și aplicațiile interne existente. Automatizăm analiza documentelor, sinteza informației și procesarea datelor.',
     metrics: [
@@ -556,7 +556,7 @@ export const SERVICES_RO: ServiceData[] = [
     subtitle: 'Înlocuiește munca manuală cu fluxuri inteligente',
     tags: ['API', 'Webhooks', 'n8n', 'Python'],
     duration: '1–6 săptămâni',
-    categoryBadge: 'MINDCORE // WORKFLOW AUTOMATION',
+    categoryBadge: 'VORTICORE // WORKFLOW AUTOMATION',
     stack: 'Stack: API • Webhooks • n8n • Python',
     description: 'Proiectăm scenarii sigure de transfer al datelor între site, CRM, procesatori de plăți și gestiunea stocurilor. Eliminăm complet introducerea manuală a datelor.',
     metrics: [
@@ -583,7 +583,7 @@ export const SERVICES_RO: ServiceData[] = [
     subtitle: 'Transformă datele în decizii',
     tags: ['GA4', 'BigQuery', 'SQL', 'PowerBI'],
     duration: '1–3 săptămâni',
-    categoryBadge: 'MINDCORE // DATA & CONVERSION AUDIT',
+    categoryBadge: 'VORTICORE // DATA & CONVERSION AUDIT',
     stack: 'Stack: GA4 • BigQuery • SQL • PowerBI • Metrika',
     description: 'Identificăm punctele invizibile de pierdere a clienților, setăm urmărirea exactă a fiecărui leu investit și construim panouri clare de monitorizare în timp real.',
     metrics: [
@@ -610,7 +610,7 @@ export const SERVICES_RO: ServiceData[] = [
     subtitle: 'Înainte → După premium',
     tags: ['Figma', 'Design Systems', 'WebGL', 'Motion'],
     duration: '3–10 săptămâni',
-    categoryBadge: 'MINDCORE // UI/UX & PRODUCT DESIGN',
+    categoryBadge: 'VORTICORE // UI/UX & PRODUCT DESIGN',
     stack: 'Stack: Figma • Design Systems • WebGL • Framer Motion',
     description: 'Transformăm interfețele învechite în experiențe digitale de top, cu o estetică impecabilă, micro-animații fluide și conversie maximă pe toate dispozitivele.',
     metrics: [
@@ -637,7 +637,7 @@ export const SERVICES_RO: ServiceData[] = [
     subtitle: 'Găsește vulnerabilitățile înaintea atacatorilor',
     tags: ['OWASP', 'Pentesting', 'SSL/TLS', 'Cloudflare'],
     duration: '1–2 săptămâni',
-    categoryBadge: 'MINDCORE // CYBERSECURITY & COMPLIANCE',
+    categoryBadge: 'VORTICORE // CYBERSECURITY & COMPLIANCE',
     stack: 'Stack: OWASP • Pentesting • Burp Suite • SSL/TLS • Cloudflare',
     description: 'Descoperim vulnerabilitățile critice din aplicațiile web, API-uri și servere înainte ca acestea să fie exploatate. Protejăm bazele de date și datele confidențiale.',
     metrics: [
