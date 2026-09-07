@@ -24,6 +24,7 @@ export const siteConfig = {
   // Social links
   social: {
     telegram: 'https://t.me/kraeved111',
+    instagram: 'https://instagram.com/vorticore_studio',
     github: 'https://github.com/vorticore-studio',
   },
 

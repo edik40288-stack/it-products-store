@@ -50,6 +50,10 @@ export default function Footer() {
               WhatsApp
             </a>
             <span className={styles.footerDivider}>•</span>
+            <a href="https://instagram.com/vorticore_studio" target="_blank" rel="noopener noreferrer" className={styles.footerLink}>
+              Instagram
+            </a>
+            <span className={styles.footerDivider}>•</span>
             <a href="mailto:edik40288@gmail.com" className={styles.footerLink}>
               Email
             </a>
