@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import styles from '../AIChat.module.css';
 
 interface Message {
@@ -22,9 +22,24 @@ export function ChatMessages({
   messagesEndRef,
   children
 }: ChatMessagesProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Smooth scroll container to bottom when messages or typing updates
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({
+        top: containerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  }, [messages, isTyping, children]);
+
   return (
     <div
-      className={styles.messagesArea}
+      ref={containerRef}
+      className={styles.messages}
+      data-lenis-prevent="true"
+      data-scroll-ignore="true"
       onWheel={(e) => e.stopPropagation()}
       onTouchMove={(e) => e.stopPropagation()}
     >

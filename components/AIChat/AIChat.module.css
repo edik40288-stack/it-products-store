@@ -228,7 +228,9 @@
   padding: 1rem 1.25rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(12, 14, 20, 0.98);
+  position: relative;
+  z-index: 10;
 }
 
 .avatarWrap {
@@ -322,7 +324,8 @@
 }
 
 /* Messages */
-.messages {
+.messages,
+.messagesArea {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto !important;
@@ -334,19 +337,25 @@
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
-.messages::-webkit-scrollbar {
+.messages::-webkit-scrollbar,
+.messagesArea::-webkit-scrollbar {
   width: 6px;
 }
-.messages::-webkit-scrollbar-track {
+.messages::-webkit-scrollbar-track,
+.messagesArea::-webkit-scrollbar-track {
   background: transparent;
 }
-.messages::-webkit-scrollbar-thumb {
+.messages::-webkit-scrollbar-thumb,
+.messagesArea::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 3px;
 }
-.messages::-webkit-scrollbar-thumb:hover {
+.messages::-webkit-scrollbar-thumb:hover,
+.messagesArea::-webkit-scrollbar-thumb:hover {
   background: rgba(201, 168, 76, 0.5);
 }
 
@@ -427,6 +436,7 @@
   backdrop-filter: blur(12px);
   animation: msgIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   margin-top: 0.25rem;
+  flex-shrink: 0;
 }
 
 .leadCardHeader {
@@ -504,6 +514,7 @@
 
 .leadCardInput {
   width: 100%;
+  box-sizing: border-box;
   border-radius: 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.02);
@@ -795,7 +806,9 @@
   padding: 0.75rem 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(12, 14, 20, 0.98);
+  position: relative;
+  z-index: 10;
 }
 
 .input {
@@ -901,10 +914,11 @@
     flex-shrink: 0;
   }
 
-  .messages {
+  .messages,
+  .messagesArea {
     flex: 1 1 auto;
     min-height: 0;
-    overflow-y: auto;
+    overflow-y: auto !important;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     padding: 1rem 0.85rem;

@@ -59,7 +59,10 @@ export default function AIChat() {
 
   // Scroll to bottom when new messages arrive or typing status changes
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (panelRef.current && panelRef.current.scrollTop !== 0) {
+      panelRef.current.scrollTop = 0;
+    }
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [messages, isTyping, showLeadCard]);
 
   // Listen for external open triggers (e.g. Hero audit button)
@@ -108,7 +111,7 @@ export default function AIChat() {
       if (window.innerWidth <= 768) {
         panel.style.height = `${vv.height}px`;
         panel.style.top = `${vv.offsetTop}px`;
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       } else {
         panel.style.height = '';
         panel.style.top = '';
@@ -220,6 +223,11 @@ export default function AIChat() {
         data-scroll-ignore="true"
         onWheel={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}
+        onScroll={(e) => {
+          if (e.currentTarget.scrollTop !== 0) {
+            e.currentTarget.scrollTop = 0;
+          }
+        }}
       >
         {/* Header */}
         <div className={styles.header}>
@@ -283,7 +291,7 @@ export default function AIChat() {
           onToggleListening={toggleListening}
           onFocus={() => {
             setTimeout(() => {
-              messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+              messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }, 150);
           }}
         />
