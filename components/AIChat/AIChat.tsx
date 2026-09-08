@@ -148,10 +148,10 @@ export default function AIChat() {
     addMessage(
       'assistant',
       isRu
-        ? `✓ Данные переданы ведущему архитектору! Инженер уже изучает проект и свяжется с вами в ${messengerName} в течение 24 часов.`
+        ? `✓ Благодарим за доверие к Vorticore! Все детали переданы ведущему архитектору. Инженер изучит специфику проекта и свяжется с вами в ${messengerName} в течение 24 часов.`
         : isRo
-        ? `✓ Detaliile au fost transmise arhitectului șef! Inginerul analizează proiectul și vă va contacta pe ${messengerName} în decurs de 24 de ore.`
-        : `✓ Project details sent to lead architect! Our engineer is reviewing and will contact you via ${messengerName} within 24 hours.`
+        ? `✓ Vă mulțumim pentru încrederea acordată studioului Vorticore! Detaliile au fost transmise arhitectului șef. Inginerul va analiza proiectul și vă va contacta pe ${messengerName} în decurs de 24 de ore.`
+        : `✓ Thank you for trusting Vorticore! All project details have been handed over to our lead architect. An engineer will review your project and contact you via ${messengerName} within 24 hours.`
     );
 
     setTimeout(() => {
