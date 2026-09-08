@@ -351,10 +351,10 @@ export async function POST(request: NextRequest) {
         openrouter: !!openrouterKey,
       });
 
-      // Waterfall:
-      // 1. Experiential Labs (Free DeepSeek V4 Flash)
-      // 2. Experiential Labs (Free Qwen 3.8 27B)
-      // 3. Experiential Labs (Free GPT-5.6 Luna)
+      // Waterfall (Optimized for sub-3s latency):
+      // 1. Experiential Labs (Free GPT-5.6 Luna — ultra-fast 1.5-2.8s latency)
+      // 2. Experiential Labs (Free DeepSeek V4 Flash — 3-4s fallback)
+      // 3. Experiential Labs (Free Qwen 3.8 Flash — 4-5s fallback)
       // 4. Direct DeepSeek API
       // 5. Gemini API
       // 6. OpenRouter API
@@ -362,16 +362,16 @@ export async function POST(request: NextRequest) {
       
       if (experientialKey) {
         engineAttempts.push({
+          name: 'experiential_gpt_luna',
+          fn: () => callExperiential(experientialKey, 'gpt-5.6-luna', messages || [], systemPrompt)
+        });
+        engineAttempts.push({
           name: 'experiential_deepseek',
           fn: () => callExperiential(experientialKey, 'deepseek-v4-flash', messages || [], systemPrompt)
         });
         engineAttempts.push({
-          name: 'experiential_qwen',
-          fn: () => callExperiential(experientialKey, 'qwen3.8-27b', messages || [], systemPrompt)
-        });
-        engineAttempts.push({
-          name: 'experiential_gpt_luna',
-          fn: () => callExperiential(experientialKey, 'gpt-5.6-luna', messages || [], systemPrompt)
+          name: 'experiential_qwen_flash',
+          fn: () => callExperiential(experientialKey, 'qwen3.8-flash', messages || [], systemPrompt)
         });
       }
       if (deepseekKey) {
@@ -614,10 +614,10 @@ async function callExperiential(apiKey: string, model: string, rawMessages: Arra
           ...formattedMessages,
         ],
         response_format: { type: 'json_object' },
-        max_tokens: 650,
+        max_tokens: 350,
         temperature: 0.3,
       }),
-      timeout: 18000
+      timeout: 7000
     });
 
     if (res.ok) {
