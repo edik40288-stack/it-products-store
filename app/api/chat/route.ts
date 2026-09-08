@@ -308,44 +308,69 @@ export async function POST(request: NextRequest) {
 
     let reply = '';
     let dynamicCard: { showCard?: boolean } = {};
-    let engine = 'deepseek';
+    let engine = 'none';
+    let llmResponded = false;
 
     if (mode !== 'scripted') {
       let aiRes: GeminiParsedResult | null = null;
-      try {
-        if (deepseekKey) {
-          engine = 'deepseek';
-          aiRes = await callDeepSeek(deepseekKey, messages || [], systemPrompt);
-        } else if (geminiKey) {
-          engine = 'gemini';
-          aiRes = await callGemini(geminiKey, messages || [], systemPrompt);
-        } else if (openrouterKey) {
-          engine = 'openrouter';
-          aiRes = await callOpenRouter(openrouterKey, process.env.OPENROUTER_MODEL || 'google/gemini-3.7-flash', messages || [], systemPrompt);
-        }
-      } catch (err) {
-        console.error('AI Engine Error:', err);
+      
+      // Log available keys for diagnostics (never log the actual values!)
+      console.log('[AI Chat] Available engines:', {
+        deepseek: !!deepseekKey,
+        gemini: !!geminiKey,
+        openrouter: !!openrouterKey,
+      });
+
+      // Try engines in cascade: DeepSeek → Gemini → OpenRouter
+      // If one fails, try the next
+      const engineAttempts: Array<{ name: string; fn: () => Promise<GeminiParsedResult | null> }> = [];
+      
+      if (deepseekKey) {
+        engineAttempts.push({ name: 'deepseek', fn: () => callDeepSeek(deepseekKey, messages || [], systemPrompt) });
+      }
+      if (geminiKey) {
+        engineAttempts.push({ name: 'gemini', fn: () => callGemini(geminiKey, messages || [], systemPrompt) });
+      }
+      if (openrouterKey) {
+        engineAttempts.push({ name: 'openrouter', fn: () => callOpenRouter(openrouterKey, process.env.OPENROUTER_MODEL || 'google/gemini-3.7-flash', messages || [], systemPrompt) });
       }
 
-      if (aiRes) {
+      for (const attempt of engineAttempts) {
+        try {
+          console.log(`[AI Chat] Trying engine: ${attempt.name}`);
+          aiRes = await attempt.fn();
+          if (aiRes && aiRes.reply) {
+            engine = attempt.name;
+            console.log(`[AI Chat] Engine ${attempt.name} responded successfully`);
+            break;
+          }
+          console.warn(`[AI Chat] Engine ${attempt.name} returned empty/null, trying next...`);
+        } catch (err) {
+          console.error(`[AI Chat] Engine ${attempt.name} error:`, err);
+        }
+      }
+
+      if (aiRes && aiRes.reply) {
         reply = aiRes.reply;
         dynamicCard = { showCard: aiRes.showCard };
+        llmResponded = true;
       }
     }
 
-    // STRICT FALLBACK (if models time out after 10s)
+    // STRICT FALLBACK — only fires when NO LLM engine responded
     if (!reply) {
+      console.warn('[AI Chat] ALL engines failed or no keys configured. Using scripted fallback.');
       if (userLocale === 'ro') {
-        reply = 'Analiza a fost finalizată în mod de bază. Inginerul va studia sarcina dvs. în detaliu și vă va contacta personal.';
+        reply = 'Bun venit! Sunt consultantul AI al studioului Vorticore. Cu ce vă pot ajuta astăzi? Descrieți proiectul dvs. sau întrebarea, și vă voi ghida spre soluția optimă.';
       } else if (userLocale === 'en') {
-        reply = 'Analysis completed in baseline mode. An engineer will examine your project details and contact you personally.';
+        reply = 'Welcome! I\'m the AI consultant at Vorticore studio. How can I help you today? Describe your project or question, and I\'ll guide you to the best solution.';
       } else {
-        reply = 'Анализ завершен в базовом режиме (AI перегружен). Инженер детально изучит вашу задачу и напишет вам лично.';
+        reply = 'Добро пожаловать! Я AI-консультант студии Vorticore. Чем могу помочь? Опишите ваш проект или вопрос, и я направлю вас к оптимальному решению.';
       }
-      dynamicCard = { showCard: true };
+      dynamicCard = { showCard: false };
       engine = 'scripted_fallback';
-      // Alert Telegram asynchronously so we don't block the user's response!
-      sendTelegramMessage('🚨 <b>ВНИМАНИЕ: СБОЙ AI API</b> 🚨\nLLM не ответила за 10 секунд! Сработал фоллбэк.').catch(console.error);
+      // Alert Telegram asynchronously
+      sendTelegramMessage('🚨 <b>ВНИМАНИЕ: СБОЙ AI API</b> 🚨\nНи один LLM-движок не ответил! Проверьте env vars на Vercel: DEEPSEEK_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY').catch(console.error);
     }
     
     // 1. If user already submitted the card, send their follow-up answers to Telegram as supplementary notes!
@@ -371,9 +396,10 @@ export async function POST(request: NextRequest) {
         dialogue: followUpDialogue
       }).catch(console.error);
       dynamicCard = { ...dynamicCard, showCard: false };
-    } else {
-      // 2. Before card submission: if user mentioned website, bot, service, price or sent a link, IMMEDIATELY show card!
-      const serviceOrLinkIntent = /(сайт|сервис|платформ|лендинг|магазин|бот|агент|crm|приложен|разработк|дизайн|автоматизац|аудит|смет|стоимост|цен|прайс|тариф|бюджет|дорог|сколько|website|landing|app|bot|price|cost|budget|pret|costuri|magazin|site|programare|serviciu|http|www|\.ru|\.com|\.md|\.io|\.org)/i;
+    } else if (!llmResponded) {
+      // ONLY use regex intent detection as a FALLBACK when LLM didn't respond.
+      // When LLM responded, trust its showCard decision completely.
+      const serviceOrLinkIntent = /(сайт|сервис|платформ|лендинг|магазин|бот|агент|crm|приложен|разработк|дизайн|автоматизац|аудит|смет|стоимост|цен|прайс|тариф|бюджет|дорог|сколько|website|landing|app|bot|price|cost|budget|pret|costuri|magazin|site|programare|serviciu)/i;
       if (serviceOrLinkIntent.test(lastUserMsg)) {
         dynamicCard = { ...dynamicCard, showCard: true };
       }
