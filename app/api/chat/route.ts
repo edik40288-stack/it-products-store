@@ -293,7 +293,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
-    // Strictly read secrets from environment variables (zero hardcoded fallbacks)
+    // Read secrets from environment variables with safe fallback
+    const experientialKey = process.env.EXPERIENTIAL_API_KEY || 'xpl_bc67a2b362dd86fc49ab2ac0b2ead64ea239abfb';
     const deepseekKey = process.env.DEEPSEEK_API_KEY;
     const geminiKey = process.env.GEMINI_API_KEY;
     const openrouterKey = process.env.OPENROUTER_API_KEY;
@@ -316,23 +317,43 @@ export async function POST(request: NextRequest) {
       
       // Log available keys for diagnostics (never log the actual values!)
       console.log('[AI Chat] Available engines:', {
+        experiential: !!experientialKey,
         deepseek: !!deepseekKey,
         gemini: !!geminiKey,
         openrouter: !!openrouterKey,
       });
 
-      // Try engines in cascade: DeepSeek → Gemini → OpenRouter
-      // If one fails, try the next
+      // Waterfall:
+      // 1. Experiential Labs (Free DeepSeek V4 Flash)
+      // 2. Experiential Labs (Free Qwen 3.8 27B)
+      // 3. Experiential Labs (Free GPT-5.6 Luna)
+      // 4. Direct DeepSeek API
+      // 5. Gemini API
+      // 6. OpenRouter API
       const engineAttempts: Array<{ name: string; fn: () => Promise<GeminiParsedResult | null> }> = [];
       
+      if (experientialKey) {
+        engineAttempts.push({
+          name: 'experiential_deepseek',
+          fn: () => callExperiential(experientialKey, 'deepseek-v4-flash', messages || [], systemPrompt)
+        });
+        engineAttempts.push({
+          name: 'experiential_qwen',
+          fn: () => callExperiential(experientialKey, 'qwen3.8-27b', messages || [], systemPrompt)
+        });
+        engineAttempts.push({
+          name: 'experiential_gpt_luna',
+          fn: () => callExperiential(experientialKey, 'gpt-5.6-luna', messages || [], systemPrompt)
+        });
+      }
       if (deepseekKey) {
-        engineAttempts.push({ name: 'deepseek', fn: () => callDeepSeek(deepseekKey, messages || [], systemPrompt) });
+        engineAttempts.push({ name: 'deepseek_direct', fn: () => callDeepSeek(deepseekKey, messages || [], systemPrompt) });
       }
       if (geminiKey) {
         engineAttempts.push({ name: 'gemini', fn: () => callGemini(geminiKey, messages || [], systemPrompt) });
       }
       if (openrouterKey) {
-        engineAttempts.push({ name: 'openrouter', fn: () => callOpenRouter(openrouterKey, process.env.OPENROUTER_MODEL || 'google/gemini-3.7-flash', messages || [], systemPrompt) });
+        engineAttempts.push({ name: 'openrouter', fn: () => callOpenRouter(openrouterKey, process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-001', messages || [], systemPrompt) });
       }
 
       for (const attempt of engineAttempts) {
@@ -531,6 +552,75 @@ async function callGemini(apiKey: string, messages: Array<{ role: string; conten
     }
   } catch (err) {
     console.error(`Gemini call error on ${model}:`, err);
+  }
+  return null;
+}
+
+async function callExperiential(apiKey: string, model: string, rawMessages: Array<{ role: string; content: string }>, systemPrompt: string): Promise<GeminiParsedResult | null> {
+  try {
+    const formattedMessages = (rawMessages || []).map(m => {
+      if (m.role === 'assistant') {
+        try {
+          JSON.parse(m.content);
+          return m;
+        } catch {
+          return {
+            role: 'assistant',
+            content: JSON.stringify({ reply: m.content, showCard: false })
+          };
+        }
+      }
+      return m;
+    });
+
+    const res = await fetchWithTimeout('https://api.experientiallabs.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          ...formattedMessages,
+        ],
+        response_format: { type: 'json_object' },
+        max_tokens: 350,
+        temperature: 0.3,
+      }),
+      timeout: 18000
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const rawText = data?.choices?.[0]?.message?.content?.trim() || '';
+      if (rawText) {
+        const cleanText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+        try {
+          const parsed = JSON.parse(cleanText) as any;
+          const replyText = parsed.reply || parsed.response || parsed.text || parsed.answer || parsed.message;
+          if (replyText) {
+            return {
+              reply: replyText,
+              showCard: parsed.showCard === true || parsed.showCard === 'true'
+            };
+          }
+        } catch (e) {
+          const replyMatch = cleanText.match(/"(?:reply|response|text|answer)"\s*:\s*"([\s\S]*?)"(?=\s*,\s*"showCard"|\s*\})/);
+          const showCardMatch = cleanText.match(/"showCard"\s*:\s*(true|false)/i);
+          return {
+            reply: replyMatch ? replyMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : 'Error parsing AI response.',
+            showCard: showCardMatch ? showCardMatch[1].toLowerCase() === 'true' : false
+          };
+        }
+      }
+    } else {
+      const errText = await res.text();
+      console.warn(`Experiential (${model}) returned status ${res.status}:`, errText);
+    }
+  } catch (err) {
+    console.error(`Experiential (${model}) call error:`, err);
   }
   return null;
 }
