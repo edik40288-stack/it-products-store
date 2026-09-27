@@ -4,6 +4,7 @@
 export const siteConfig = {
   name: 'VORTICORE',
   tagline: 'A booster rocket for digital product teams',
+  url: 'https://vorticore.ai',
   email: 'edik40288@gmail.com',
   telegram: 'https://t.me/kraeved111',
 

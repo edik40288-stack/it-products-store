@@ -12,6 +12,7 @@ import '@/app/globals.css';
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   return {
+    metadataBase: new URL(siteConfig.url),
     title: {
       default: `${siteConfig.name} — AI Development Studio`,
       template: `%s | ${siteConfig.name}`,

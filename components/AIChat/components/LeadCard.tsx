@@ -39,6 +39,17 @@ export function LeadCard({
     }
   }, [initialQuery]);
 
+  // Ensure card and green submit button are smoothly visible in mobile/desktop viewports
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const cardEl = document.getElementById('vorticore-lead-card');
+      if (cardEl) {
+        cardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, 120);
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleCardSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!cardName.trim() || !cardContact.trim() || isSubmittingCard) return;
@@ -115,7 +126,7 @@ export function LeadCard({
   }
 
   return (
-    <div className={styles.leadCard}>
+    <div id="vorticore-lead-card" className={styles.leadCard}>
       <div className={styles.leadCardHeader}>
         <span className={styles.leadCardBadge}>{t('badge')}</span>
         <span className={styles.leadCardDot}>● {t('dot')}</span>
@@ -167,7 +178,9 @@ export function LeadCard({
             />
           </div>
           <input
-            type="text"
+            key={messenger}
+            type={messenger === 'tg' ? 'text' : 'tel'}
+            inputMode={messenger === 'tg' ? 'text' : 'tel'}
             required
             value={cardContact}
             onChange={(e) => {

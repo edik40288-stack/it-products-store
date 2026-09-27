@@ -47,6 +47,8 @@ export function isAllowedOrigin(request: NextRequest): boolean {
     /^http:\/\/127\.0\.0\.1(:\d+)?$/,
     /^https:\/\/.*\.vercel\.app$/,
     /^https:\/\/(www\.)?vorticore\.studio$/,
+    /^https:\/\/(www\.)?vorticore\.ai$/,
+    /^https:\/\/(www\.)?vorticore\.md$/,
   ];
 
   try {
