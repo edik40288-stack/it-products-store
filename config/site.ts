@@ -4,7 +4,7 @@
 export const siteConfig = {
   name: 'VORTICORE',
   tagline: 'A booster rocket for digital product teams',
-  url: 'https://vorticore.ai',
+  url: 'https://www.vorticore.site',
   email: 'edik40288@gmail.com',
   telegram: 'https://t.me/kraeved111',
 
@@ -14,8 +14,10 @@ export const siteConfig = {
     period: 'Q3',
   },
 
-  // Office locations shown in footer
+  // Office locations shown in footer & metadata
   offices: [
+    { city: 'București', country: 'România', timezone: 'EET (UTC+2)' },
+    { city: 'Chișinău', country: 'Moldova', timezone: 'EET (UTC+2)' },
     { city: 'Worldwide', country: 'Remote', timezone: 'Global' },
   ],
 
@@ -30,8 +32,8 @@ export const siteConfig = {
   },
 
   // Supported locales
-  locales: ['en', 'ru', 'ro'] as const,
-  defaultLocale: 'en' as const,
+  locales: ['ro', 'ru', 'en'] as const,
+  defaultLocale: 'ro' as const,
 };
 
 export type SiteLocale = (typeof siteConfig.locales)[number];
